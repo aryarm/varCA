@@ -1,0 +1,32 @@
+# This is the Snakemake configuration file that specifies paths and 
+# and options for the merge_callers pipeline. Anybody wishing to use
+# the provided snakemake pipeline should first fill out this file with paths to
+# their own data, as the Snakefile requires it.
+
+# The path to a text file specifying where to find read information for each sample
+# Each row in the sample file should represent a different sample.
+# The sample file should have 3 columns (each separated by a single tab):
+#       <unique_sample_name> <fastq1_path> <fastq2_path>
+"sample_file" : "/iblm/netapp/home/amassarat/breakCA/merge_callers/samples.tsv"
+
+# which samples should we execute the pipeline on?
+# comment out this line if you want to run all samples
+"SAMP_NAMES" : ["SRR891269"]
+
+# The path to a reference genome for BWA
+"genome" : "/iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sapiens_assembly19.fasta"
+
+# directory in which to output all of the output files
+# defined relative to whatever directory you execute the snakemake command in
+"output_dir" : "/iblm/netapp/home/amassarat/breakCA/merge_callers/out"
+
+# which callers do you want to run to find SNPs?
+# if you don't want to run the snp pipeline, set this to a falsey value or comment out the line
+"snp_callers" : ["gatk", "varscan"]
+
+# which callers do you want to run to find indels?
+# if you don't want to run the indel pipeline, set this to a falsey value or comment out the line
+"indel_callers" : ["gatk-indel", "varscan-indel", "delly"]
+
+# what are the maximum number of threads to use for the entire pipeline?
+"num_threads" : 8

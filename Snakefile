@@ -191,32 +191,18 @@ rule join_all_sites:
             ") - | paste -s"
         ") - > {output}"
 
-rule merge_snp_callers:
+rule merge_callers:
     """merge the columns of each snp caller into a single file"""
     input:
         all_sites = rules.prepare_all_sites.output,
         caller_output = lambda wildcards: expand(
             rules.join_all_sites.output,
-            caller=config['snp_callers'],
+            caller=config[wildcards.type+'_callers'],
             sample=wildcards.sample
         )
     output:
-        config['output_dir'] + "/merged_snp/{sample}.tsv.gz"
+        config['output_dir'] + "/merged_{type}/{sample}.tsv.gz"
     conda: "env.yml"
     shell:
         "paste <(echo -e 'CHROM\tPOS'; sed -e 's/,\+/\\t/' {input.all_sites}) "
         "{input.caller_output} | gzip > {output}"
-
-rule merge_indel_callers:
-    """merge the columns of each indel caller into a single file"""
-    input:
-        lambda wildcards: expand(
-            rules.join_all_sites.output,
-            caller=config['indel_callers'],
-            sample=wildcards.sample
-        )
-    output:
-        config['output_dir'] + "/merged_indel/{sample}.tsv.gz"
-    conda: "env.yml"
-    shell:
-        "paste {input} | sed -e 's/,\+/\\t/' | gzip > {output}"

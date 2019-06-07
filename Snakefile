@@ -3,7 +3,7 @@ import warnings
 from snakemake.utils import min_version
 
 ##### set minimum snakemake version #####
-min_version("5.5")
+min_version("5.5.0")
 
 configfile: "config.yaml"
 
@@ -32,13 +32,6 @@ else:
     config['SAMP_NAMES'] = list(set(SAMP.keys()).intersection(user_samps))
     if len(config['SAMP_NAMES']) != len(user_samps):
         warnings.warn("Not all of the samples requested have provided input. Proceeding with as many samples as is possible...")
-
-# which pipeline should we run?
-pipeline_type = []
-if 'snp_callers' in config and config['snp_callers']:
-    pipeline_type.append('snp')
-if 'indel_callers' in config and config['indel_callers']:
-    pipeline_type.append('indel')
 
 
 rule all:

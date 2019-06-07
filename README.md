@@ -6,7 +6,7 @@ A Snakemake pipeline for running multiple variant callers and merging their outp
 # files
 
 ### Snakefile
-A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline defining rules for every step of the analysis. It uses DNA and RNA FASTQ files to generate a summary of allelic imbalance for each gene.
+A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline defining rules for every step of the analysis. It uses ATAC-seq FASTQ files to generate a tab-delimited table containing variant caller output for every site in open chromatin regions of the genome.
 
 ### config.yaml
 Defines options and input for the Snakemake pipeline.
@@ -15,7 +15,7 @@ Defines options and input for the Snakemake pipeline.
 An example bash script for executing the entire pipeline on an SGE cluster using snakemake.
 
 # execution
-The pipeline is written as Snakefiles and so can be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the [run-all.bash](https://github.com/aryam7/as_analysis/blob/master/run-all.bash) script for an example. Make sure to provide required input and options in the [config file](https://github.com/aryam7/as_analysis/blob/master/config.yaml) before executing.
+The pipeline is written as Snakefiles and so can be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the [run.bash](https://github.com/aryam7/merge_callers/blob/master/run.bash) script for an example. Make sure to provide required input and options in the [config file](https://github.com/aryam7/merge_callers/blob/master/config.yaml) before executing.
 
 By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing the pipeline.
 

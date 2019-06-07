@@ -132,16 +132,6 @@ rule run_caller:
         "callers/{wildcards.caller}.bash {input.bam} {input.peaks} {params.genome} "
         "{output} {params.temp_dir} {wildcards.sample} {threads}"
 
-rule prepare_all_sites:
-    """prepare sites for output in the merged table"""
-    input:
-        rules.bed_peaks.output
-    output:
-        temp(config['output_dir'] + "/merged_snp/{sample}-all_sites.csv")
-    shell:
-        "awk -F '\\t' -v 'OFS=\\t' '{{for (i=$2;i<$3;i++) print $1\",\"i}}' "
-        "{input} > {output}"
-
 rule prepare_merge:
     """
         1) add the caller as a prefix of every column name
@@ -160,6 +150,16 @@ rule prepare_merge:
         "tail -n+2 {input} | sed -e 's/\\tNA\\t/\\t.\\t/g' | "
         "sort -k1,1V -k2,2n | sed -e 's/\\t\+/,/' > {output}"
 
+rule get_all_sites:
+    """retrieve all sites for output in the merged table"""
+    input:
+        rules.bed_peaks.output
+    output:
+        temp(config['output_dir'] + "/merged_snp/{sample}-all_sites.csv")
+    shell:
+        "awk -F '\\t' -v 'OFS=\\t' '{{for (i=$2;i<$3;i++) print $1\",\"i}}' "
+        "{input} > {output}"
+
 rule join_all_sites:
     """
         1) add all sites to the prepared caller output using an outer join
@@ -169,7 +169,7 @@ rule join_all_sites:
         (not necessarily in that order)
     """
     input:
-        sites = rules.prepare_all_sites.output,
+        sites = rules.get_all_sites.output,
         caller_output = rules.prepare_merge.input,
         prepared_caller_output = rules.prepare_merge.output
     output:
@@ -187,7 +187,7 @@ rule join_all_sites:
 rule merge_callers:
     """merge the columns of each snp caller into a single file"""
     input:
-        all_sites = rules.prepare_all_sites.output,
+        all_sites = rules.get_all_sites.output,
         caller_output = lambda wildcards: expand(
             rules.join_all_sites.output,
             caller=config[wildcards.type+'_callers'],

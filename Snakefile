@@ -116,21 +116,48 @@ rule bed_peaks:
         # to convert to BED, we must extract the first three columns (chr, start, stop)
         "cut -f -3 \"{input}\" | sort -k1,1V -k2,2n > \"{output}\""
 
+rule prepare_caller:
+    """Run any scripts that must be run before the caller scripts"""
+    input:
+        bam = rules.rm_dups.output.final_bam,
+        peaks = rules.bed_peaks.output,
+        genome = config['genome']
+    params:
+        caller_params = lambda wildcards: config[wildcards.caller+"_params"] if wildcards.caller+"_params" in config else ""
+    output:
+        directory(config['output_dir'] + "/callers/{sample}/{caller}")
+    wildcard_constraints:
+        sample="[^\/]*",
+        caller="[^\/]*"
+    shell:
+        "mkdir -p \"{output}\" && "
+        "callers/{wildcards.caller}.bash {input.bam} {input.peaks} "
+        "{input.genome} {output} {wildcards.sample} "
+        "{threads} {params.caller_params}"
+
 rule run_caller:
     """Run any callers that are needed"""
     input:
         bam = rules.rm_dups.output.final_bam,
-        peaks = rules.bed_peaks.output
-    params:
+        peaks = rules.bed_peaks.output,
         genome = config['genome'],
-        temp_dir = lambda wildcards, output: os.path.dirname(output[0])+"/"+wildcards.caller
+        shared = lambda wildcards: expand(
+            rules.prepare_caller.output[0],
+            sample=wildcards.sample,
+            caller=wildcards.caller[:-len("-"+wildcards.caller.split('-')[-1])]
+        ) if '-' in wildcards.caller else []
+    params:
+        caller_params = lambda wildcards: config[wildcards.caller+"_params"] if wildcards.caller+"_params" in config else "",
+        out_dir = config['output_dir'] + "/callers/{sample}/{caller}"
     output:
-        config['output_dir'] + "/callers/{sample}/{caller}.tsv"
+        tsv = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.tsv"
+    threads: config['num_threads']
     conda: "env.yml"
     shell:
-        "mkdir -p \"{params.temp_dir}\" && "
-        "callers/{wildcards.caller}.bash {input.bam} {input.peaks} {params.genome} "
-        "{output} {params.temp_dir} {wildcards.sample} {threads}"
+        "mkdir -p \"{params.out_dir}\" && "
+        "callers/{wildcards.caller}.bash {input.bam} {input.peaks} "
+        "{input.genome} {params.out_dir} {wildcards.sample} "
+        "{threads} {input.shared} {params.caller_params}"
 
 rule prepare_merge:
     """
@@ -142,13 +169,13 @@ rule prepare_merge:
         (not necessarily in that order)
     """
     input:
-        rules.run_caller.output
+        rules.run_caller.output.tsv
     output:
-        pipe(config['output_dir'] + "/callers/{sample}/{caller}.prepared.tsv")
+        pipe(config['output_dir'] + "/callers/{sample}/{caller}/prepared.tsv")
     conda: "env.yml"
     shell:
-        "tail -n+2 {input} | sed -e 's/\\tNA\\t/\\t.\\t/g' | "
-        "sort -k1,1V -k2,2n | sed -e 's/\\t\+/,/' > {output}"
+        "tail -n+2 {input} | awk -F '\\t' -v 'OFS=\\t' '{{for (i=1; i<=NF; i++) if ($i==\"NA\") $i==\".\"}}1' | "
+        "sort -k1,1V -k2,2n | sed 's/\\t\+/,/' > {output}"
 
 rule get_all_sites:
     """retrieve all sites for output in the merged table"""

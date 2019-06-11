@@ -16,13 +16,13 @@ gatk --java-options "-Xmx4g" SelectVariants \
   -L "$peaks" \
   -R "$genome" \
   -V "$gatk_dir/gatk.vcf.gz" \
-  --select-type INDEL --select-type NO_VARIATION \
-  -O "$output_dir/gatk-indels.vcf.gz"
+  --select-type SNP --select-type NO_VARIATION \
+  -O "$output_dir/gatk-snps.vcf.gz"
 
 # convert vcf to table
 gatk --java-options "-Xmx4g" VariantsToTable \
-  -V "$output_dir/gatk-indels.vcf.gz" \
-  -O "$output_dir/gatk-indel.tsv" \
+  -V "$output_dir/gatk-snps.vcf.gz" \
+  -O "$output_dir/gatk-snp.tsv" \
   -L "$peaks" \
   -F CHROM -F POS -F REF -F ALT -F QD -F FS \
   -F SOR -F MQ -F ReadPosRankSum -GF DP -GF GT;

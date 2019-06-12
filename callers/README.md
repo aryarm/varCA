@@ -26,6 +26,7 @@ A header must be present in the TSV file but the "CHROM", "POS", "REF", and "ALT
 
 ### Caller scripts that depend on other scripts
 Some caller scripts must depend on a different script for special input.
+
 For example, some callers produce files containing both indels and SNVs. The GATK is one such caller.
 Separate steps must be performed later to separate the two variant types into different TSV files. How is this achieved?
 
@@ -35,4 +36,4 @@ Note that `gatk.bash` is not a caller script (and should not be used as one) bec
 By providing a dash character `-` in the caller identifier, the caller script (ex: `gatk-snp.bash`) can communicate to the pipeline that it requires input(s) from another special script (ex: `gatk.bash`) with the same filename but without the characters after the final dash (ex: `gatk-snp.bash` => `gatk.bash`).
 The pipeline will run this separate script first but with the same parameters as the caller script, and the directory containing its output will be passed to the caller script.
 
-By providing multiple dashes in their caller identifiers using this scheme, the user may design complicated caller script heirarchies involving multiple levels of nesting.
+By providing multiple dashes in their caller identifiers using this scheme, the user may design complicated caller script heirarchies involving multiple levels of nesting. In a sense, the user may create pipelines within the pipeline.

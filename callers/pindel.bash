@@ -21,5 +21,5 @@ for file in _D _INV _SI _TD; do
 	bgzip -f "$output_dir/$file.vcf" && tabix -p vcf -f "$output_dir/$file.vcf.gz"
 done
 echo -e "CHROM\tPOS\tREF\tALT\tHOMLEN\tSVLEN\tSVTYPE\tNTLEN\tPL\tGT\tRD\tAD" > "$output_dir/pindel.tsv"
-bcftools concat "$output_dir/"{_D,_INV,_SI,_TD}.vcf.gz | \
-bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/HOMLEN\t%INFO/SVTYPE\t%INFO/NTLEN\t[%PL]\t[%GT]\t[%RD]\t[%AD]\n' - >> "$output_dir/pindel.tsv"
+bcftools concat -a -d all "$output_dir/"{_D,_INV,_SI,_TD}.vcf.gz | bgzip > "$output_dir/merged.vcf.gz" && tabix -p vcf -f "$output_dir/merged.vcf.gz"
+bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/HOMLEN\t%INFO/SVLEN\t%INFO/SVTYPE\t%INFO/NTLEN\t[%PL]\t[%GT]\t[%RD]\t[%AD]\n' "$output_dir/merged.vcf.gz" >> "$output_dir/pindel.tsv"

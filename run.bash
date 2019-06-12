@@ -19,10 +19,10 @@ mkdir -p "$out_path"
 
 # delete leftover log files
 if [ -f "${out_path}/log" ]; then
-	rm "${out_path}/log";
+	echo ""> "${out_path}/log";
 fi
 if [ -f "${out_path}/qlog" ]; then
-	rm "${out_path}/qlog";
+	echo ""> "${out_path}/qlog";
 fi
 
 # Before running this snakemake pipeline, remember to verify that the config.yaml
@@ -32,11 +32,10 @@ fi
 
 snakemake \
 --cluster "qsub -t 1 -V -q iblm.q -j y -o ${out_path}/qlog" \
--j 12 \
+-j 16 \
 --config output_dir="${out_path}" \
 --latency-wait 60 \
 --use-conda \
--U "/iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_snp/SRR891269.tsv.gz" \
 -k \
 --notemp \
 &>"${out_path}/log"

@@ -20,7 +20,7 @@ gatk --java-options "-Xmx4g" HaplotypeCaller \
 
 # correct the genotypes that come out of haplotype caller
 gatk --java-options "-Xmx4g" GenotypeGVCFs \
-  -all-sites \
+  --include-non-variant-sites \
   -L "$peaks" \
   -R "$genome" \
   -V "$output_dir/gatk.g.vcf.gz" \

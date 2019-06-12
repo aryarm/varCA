@@ -129,6 +129,8 @@ rule prepare_caller:
     wildcard_constraints:
         sample="[^\/]*",
         caller="[^\/]*"
+    threads: config['num_threads']
+    conda: "env.yml"
     shell:
         "mkdir -p \"{output}\" && "
         "callers/{wildcards.caller}.bash {input.bam} {input.peaks} "
@@ -174,7 +176,7 @@ rule prepare_merge:
         pipe(config['output_dir'] + "/callers/{sample}/{caller}/prepared.tsv")
     conda: "env.yml"
     shell:
-        "tail -n+2 {input} | awk -F '\\t' -v 'OFS=\\t' '{{for (i=1; i<=NF; i++) if ($i==\"NA\") $i==\".\"}}1' | "
+        "tail -n+2 {input} | awk -F '\\t' -v 'OFS=\\t' '{{for (i=1; i<=NF; i++) if ($i==\"NA\") $i=\".\"}}1' | "
         "sort -k1,1V -k2,2n | sed 's/\\t\+/,/' > {output}"
 
 rule get_all_sites:
@@ -182,10 +184,10 @@ rule get_all_sites:
     input:
         rules.bed_peaks.output
     output:
-        temp(config['output_dir'] + "/merged_snp/{sample}-all_sites.csv")
+        temp(config['output_dir'] + "/peaks/{sample}/all_sites.csv")
     shell:
-        "awk -F '\\t' -v 'OFS=\\t' '{{for (i=$2;i<$3;i++) print $1\",\"i}}' "
-        "{input} > {output}"
+        "awk '{{printf(\"%s\\t%d\\t%d\\n\",$1,int($2)-1,int($3));}}' {input} | "
+        "awk -F '\\t' -v 'OFS=\\t' '{{for (i=$2;i<$3;i++) print $1\",\"i}}' > {output}"
 
 rule join_all_sites:
     """
@@ -200,14 +202,14 @@ rule join_all_sites:
         caller_output = rules.prepare_merge.input,
         prepared_caller_output = rules.prepare_merge.output
     output:
-        pipe(config['output_dir'] + "/merged_snp/{sample}.{caller}.tsv")
+        pipe(config['output_dir'] + "/merged_{type}/{sample}.{caller}.tsv")
     conda: "env.yml"
     shell:
         "join -t $'\\t' -e. -a1 -a2 -o auto --nocheck-order "
         "{input.sites} {input.prepared_caller_output} | cut -f 2- | cat <("
             "head -n1 {input.caller_output} | cut -f 5- | tr '\\t' '\\n' | "
             "sed -e 's/^/{wildcards.caller}~/' | cat <("
-                "echo -e \'\\t{wildcards.caller}~REF\\t{wildcards.caller}~ALT\'"
+                "echo -e \'{wildcards.caller}~REF\\n{wildcards.caller}~ALT\'"
             ") - | paste -s"
         ") - > {output}"
 
@@ -218,11 +220,12 @@ rule merge_callers:
         caller_output = lambda wildcards: expand(
             rules.join_all_sites.output,
             caller=config[wildcards.type+'_callers'],
-            sample=wildcards.sample
+            sample=wildcards.sample,
+            type=wildcards.type
         )
     output:
         config['output_dir'] + "/merged_{type}/{sample}.tsv.gz"
     conda: "env.yml"
     shell:
-        "paste <(echo -e 'CHROM\tPOS'; sed -e 's/,\+/\\t/' {input.all_sites}) "
+        "paste <(echo -e 'CHROM\\tPOS'; sed -e 's/,\+/\\t/' {input.all_sites}) "
         "{input.caller_output} | gzip > {output}"

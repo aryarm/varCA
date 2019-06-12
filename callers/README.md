@@ -14,7 +14,7 @@ Each caller script is provided the following arguments respectively.
 - the path to a directory in which the script must place any of its output
 - the sample name
 - the number of threads to use
-- the path to the output directory of a script that prepares files for the caller script (only if it is relevant -- see below)
+- the path to the output directory of a script that prepares files for the caller script (only if it is relevant -- see [below](https://github.com/aryam7/merge_callers/tree/master/callers#caller-scripts-that-depend-on-other-scripts))
 - user provided parameters (passed via the [config file](https://github.com/aryam7/merge_callers/blob/master/config.yaml))
 
 ### Caller script outputs

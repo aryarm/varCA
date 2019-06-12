@@ -13,7 +13,7 @@ def read_samples():
     specified in the configuration. Input file is expected to have 3
     columns: <unique_sample_id> <fastq1_path> <fastq2_path>. Modify
     this function as needed to provide a dictionary of sample_id keys and
-    (fastq1, fastq1) values"""
+    (fastq1, fastq2) values"""
     f = open(config['sample_file'], "r")
     samp_dict = {}
     for line in f:
@@ -38,7 +38,6 @@ rule all:
     # if you'd like to run the pipeline on only a subset of the samples,
     # you should specify them in the config['SAMP_NAMES'] variable above
     input:
-        # expand(config['output_dir'] + "/peaks/{sample}/peaks.bed", sample=config['SAMP_NAMES'])
         expand(
             config['output_dir'] + "/merged_{type}/{sample}.tsv.gz", sample=config['SAMP_NAMES'],
             type=[
@@ -121,7 +120,12 @@ rule prepare_caller:
     input:
         bam = rules.rm_dups.output.final_bam,
         peaks = rules.bed_peaks.output,
-        genome = config['genome']
+        genome = config['genome'],
+        shared = lambda wildcards: expand(
+            rules.prepare_caller.output[0],
+            sample=wildcards.sample,
+            caller=wildcards.caller[:-len("-"+wildcards.caller.split('-')[-1])]
+        ) if '-' in wildcards.caller else []
     params:
         caller_params = lambda wildcards: config[wildcards.caller+"_params"] if wildcards.caller+"_params" in config else ""
     output:
@@ -135,7 +139,7 @@ rule prepare_caller:
         "mkdir -p \"{output}\" && "
         "callers/{wildcards.caller}.bash {input.bam} {input.peaks} "
         "{input.genome} {output} {wildcards.sample} "
-        "{threads} {params.caller_params}"
+        "{threads} {input.shared} {params.caller_params}"
 
 rule run_caller:
     """Run any callers that are needed"""

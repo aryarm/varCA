@@ -12,5 +12,4 @@ samp="$5"
 [[ -z "$5" ]] && { echo "Parameter 5 is empty" 1>&2; exit 1; }
 
 
-vardict-java -G "$genome" -N "$samp" -b "$bam" -z -c 1 -S 2 -E 3 "$peaks" | \
-# vardict teststrandbias
+vardict-java -G "$genome" -N "$samp" -b "$bam" -v -c 1 -S 2 -E 3 "$peaks" | var2vcf_valid.pl > "$output_dir/vardict.vcf"

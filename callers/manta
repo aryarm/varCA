@@ -33,7 +33,7 @@ echo "Using manta dir: $manta_dir" 1>&2
 bgzip -f "$peaks" -c > "$output_dir/peaks.bed.gz" && tabix -p bed -f "$output_dir/peaks.bed.gz"
 
 "$manta_dir"/bin/configManta.py --bam "$bam" --referenceFasta "$genome" --callRegions "$output_dir/peaks.bed.gz" --runDir "$output_dir" --config "$config"
-"$output_dir"/runWorkflow.py -m sge -j 36
+"$output_dir"/runWorkflow.py -m sge -j 24
 
 echo -e "CHROM\tPOS\tREF\tALT\tSVTYPE\tSVLEN\tCIPOS\tCIEND\tHOMLEN\tBND_DEPTH\tMATE_BND_DEPTH\tJUNCTION_QUAL\tGT\tGQ\tPL" > "$output_dir/manta.tsv"
 bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/SVTYPE\t%INFO/SVLEN\t%INFO/CIPOS\t%INFO/CIEND\t%INFO/HOMLEN\t%INFO/BND_DEPTH\t%INFO/MATE_BND_DEPTH\t%INFO/JUNCTION_QUAL\t[%GT]\t[%GQ]\t[%PL]\n' "$output_dir"/results/variants/diploidSV.vcf.gz >> "$output_dir/manta.tsv"

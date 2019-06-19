@@ -42,6 +42,10 @@
 # 2) path to the directory in which manta is stored or "" if manta is installed in the conda env (ex: if using --use-conda)
 "manta" : ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configManta.py.ini", ""]
 
+"delly_cols" : {"format":["RC", "CN", "GT", "GQ"]}
+
+"pindel_cols" : {"info":["HOMLEN", "SVLEN", "SVTYPE", "NTLEN"], "format":["PL", "GT", "RD", "AD"]}
+
 # strelka parameters
 # 1) path to strelka config file
 # 2) path to the directory in which strelka is stored or "" if strelka is installed in the conda env (ex: if using --use-conda)

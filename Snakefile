@@ -171,6 +171,48 @@ rule run_caller:
         "{input.genome} {params.out_dir} {wildcards.sample} "
         "{threads} {input.shared} {params.caller_params}"
 
+
+def sorted_cols(cols):
+    """ sort and flatten the cols """
+    return [
+        c
+        for col in ['other', 'info', 'format'] if col in cols
+        for c in cols[col]
+    ]
+
+
+def bcftools_query_str(wildcards):
+    """ return the bcftools query string for these caller's columns """
+    cols = config[wildcards.caller]['cols'].copy()
+    if 'info' in cols:
+        cols['info'] = ["INFO/"+c for c in cols['info']]
+    if 'other' not in cols:
+        cols['other'] = []
+    cols['other'] = ['CHROM', 'POS', 'ALT'] + cols['other']
+    for col in cols:
+        cols[col] = ["%"+c for c in cols[col]]
+    if 'format' in cols:
+        cols['format'] = ["["+c+"]" for c in cols['format']]
+    return "\t".join(sorted_cols(cols))+"\n"
+
+
+rule vcf2tsv:
+    """Convert from the vcf to tsv format, extracting relevant columns"""
+    input:
+        rules.run_caller.output.vcf
+    params:
+        cols = lambda wildcards: "\t".join(
+            ['CHROM', 'POS', 'ALT'] +
+            sorted_cols(config[wildcards.caller]['cols'])
+        ),
+        qstr = bcftools_query_str
+    output:
+        tsv = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.tsv"
+    shell:
+        "bgzip -f {input} && tabix -p vcf -f {input}.gz"
+        "echo -e '{params.cols}' > {output.tsv} && "
+        "bcftools query -f '{params.qstr}' {input}.gz >> {output.tsv}"
+
 rule prepare_merge:
     """
         1) add the caller as a prefix of every column name

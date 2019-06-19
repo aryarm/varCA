@@ -35,5 +35,5 @@ bgzip -f "$peaks" -c > "$output_dir/peaks.bed.gz" && tabix -p bed -f "$output_di
 "$strelka_dir"/bin/configureStrelkaGermlineWorkflow.py --bam "$bam" --referenceFasta "$genome" --callRegions "$output_dir/peaks.bed.gz" --runDir "$output_dir" --config "$config"
 "$output_dir"/runWorkflow.py -m sge -j 24
 
-echo -e "CHROM\tPOS\tALT\tSNVHPOL\tRU\tREFREP\tIDREP\tMQ\tGT\tGQ\tGQX\tDP\tDPF\tMIN_DP\tAD\tADF\tADR\tDPI\tPL\tPS\tSB" > "$output_dir/strelka.tsv"
-bcftools query -f '%CHROM\t%POS\t%ALT\t%INFO/SNVHPOL\t%INFO/RU\t%INFO/REFREP\t%INFO/IDREP\t%INFO/MQ\t[%GT]\t[%GQ\t[%GQX]\t[%DP]\t[%DPF]\t[%MIN_DP]\t[%AD]\t[%ADF]\t[%ADR]\t[%DPI]\t[%PL]\t[%PS]\t[%SB]\n' "$output_dir"/results/variants/genome.S1.vcf.gz >> "$output_dir/strelka.tsv"
+bgzip -d "$output_dir"/results/variants/genome.S1.vcf.gz && \
+ln -sf "$output_dir"/results/variants/genome.S1.vcf.gz "$output_dir/strelka.vcf"

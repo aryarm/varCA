@@ -13,6 +13,4 @@ pg_path="$7"
 [[ -z "$7" ]] && { echo "Parameter 7 is empty" 1>&2; exit 1; }
 
 
-echo -e "CHROM\tPOS\tALT\tGT" > "$output_dir/pg-snp.tsv"
-vcftools --gzvcf "$pg_path" --remove-indels --recode --recode-INFO-all -c --bed "$peaks" | bgzip > "$output_dir/pg-snp.vcf.gz" && tabix -p vcf -f "$output_dir/pg-snp.vcf.gz"
-bcftools query -f '%CHROM\t%POS\t%ALT\t[%GT]\n' "$output_dir/pg-snp.vcf.gz" >> "$output_dir/pg-snp.tsv"
+vcftools --gzvcf "$pg_path" --remove-indels --recode --recode-INFO-all -c --bed "$peaks" > "$output_dir/pg-snp.vcf"

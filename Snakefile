@@ -140,7 +140,7 @@ rule prepare_caller:
         genome = config['genome'],
         shared = get_special_script_path
     params:
-        caller_params = lambda wildcards: config[wildcards.caller] if wildcards.caller in config else ""
+        caller_params = lambda wildcards: config[wildcards.caller]['params'] if wildcards.caller in config and 'params' in config[wildcards.caller] else ""
     output:
         directory(config['output_dir'] + "/callers/{sample}/{caller}")
     wildcard_constraints:
@@ -162,10 +162,10 @@ rule run_caller:
         genome = config['genome'],
         shared = get_special_script_path
     params:
-        caller_params = lambda wildcards: config[wildcards.caller] if wildcards.caller in config else "",
+        caller_params = lambda wildcards: config[wildcards.caller]['params'] if wildcards.caller in config and 'params' in config[wildcards.caller] else "",
         out_dir = config['output_dir'] + "/callers/{sample}/{caller}"
     output:
-        tsv = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.tsv"
+        vcf = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.vcf"
     threads: config['num_threads']
     conda: "env.yml"
     shell:
@@ -185,8 +185,11 @@ def sorted_cols(cols):
 
 
 def bcftools_query_str(wildcards):
-    """ return the bcftools query string for these caller's columns """
-    cols = config[wildcards.caller]['cols'].copy()
+    """ return the bcftools query string for this caller's columns """
+    if wildcards.caller in config and config[wildcards.caller] and 'cols' in config[wildcards.caller]:
+        cols = config[wildcards.caller]['cols'].copy()
+    else:
+        cols = {}
     if 'info' in cols:
         cols['info'] = ["INFO/"+c for c in cols['info']]
     if 'other' not in cols:
@@ -196,25 +199,42 @@ def bcftools_query_str(wildcards):
         cols[col] = ["%"+c for c in cols[col]]
     if 'format' in cols:
         cols['format'] = ["["+c+"]" for c in cols['format']]
-    return "\t".join(sorted_cols(cols))+"\n"
+    return "\\t".join(sorted_cols(cols))+"\\n"
 
+
+rule prepare_vcf:
+    """ bgzip and index the vcf """
+    input:
+        vcf = rules.run_caller.output.vcf
+    output:
+        gzvcf = rules.run_caller.output.vcf+".gz",
+        index = rules.run_caller.output.vcf+".gz.tbi"
+    conda: "env.yml"
+    shell:
+        "bgzip -f {input.vcf} && tabix -p vcf -f {output.gzvcf}"
 
 rule vcf2tsv:
-    """Convert from the vcf to tsv format, extracting relevant columns"""
+    """Convert from vcf to tsv format, extracting relevant columns"""
     input:
-        rules.run_caller.output
+        gzvcf = rules.prepare_vcf.output.gzvcf,
+        index = rules.prepare_vcf.output.index
     params:
-        cols = lambda wildcards: "\t".join(
+        cols = lambda wildcards: "\\t".join(
             ['CHROM', 'POS', 'ALT'] +
-            sorted_cols(config[wildcards.caller]['cols'])
+            sorted_cols(
+                config[wildcards.caller]['cols']
+                if wildcards.caller in config and config[wildcards.caller]
+                and 'cols' in config[wildcards.caller]
+                else {}
+            )
         ),
         qstr = bcftools_query_str
     output:
         tsv = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.tsv"
+    conda: "bcftools.yml"
     shell:
-        "bgzip -f {input} && tabix -p vcf -f {input}.gz"
         "echo -e '{params.cols}' > {output.tsv} && "
-        "bcftools query -f '{params.qstr}' {input}.gz >> {output.tsv}"
+        "bcftools query -f '{params.qstr}' {input.gzvcf} >> {output.tsv}"
 
 rule prepare_merge:
     """
@@ -226,7 +246,7 @@ rule prepare_merge:
         (not necessarily in that order)
     """
     input:
-        rules.run_caller.output.tsv
+        rules.vcf2tsv.output.tsv
     output:
         pipe(config['output_dir'] + "/callers/{sample}/{caller}/prepared.tsv")
     conda: "env.yml"

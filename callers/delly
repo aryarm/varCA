@@ -11,8 +11,6 @@ output_dir="$4"
 [[ -z "$4" ]] && { echo "Parameter 4 is empty" 1>&2; exit 1; }
 
 
-echo -e "CHROM\tPOS\tALT\tRC\tCN\tGT\tGQ" > "$output_dir/delly.tsv"
 delly call -g "$genome" "$bam" -o "$output_dir"/delly.bcf && \
 bcftools convert "$output_dir"/delly.bcf -Ov | \
-vcftools --vcf - --recode --keep-INFO-all --bed "$peaks" -c | \
-bcftools query -f '%CHROM\t%POS\t%ALT\t[%RC]\t[%CN]\t[%GT]\t[%GQ]\n' - >> "$output_dir/delly.tsv"
+vcftools --vcf - --recode --keep-INFO-all --bed "$peaks" -c > "$output_dir/delly.vcf"

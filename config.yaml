@@ -12,7 +12,7 @@
 
 # which samples should we execute the pipeline on?
 # comment out this line if you want to run all samples
-"SAMP_NAMES" : ["SRR891269"]
+# "SAMP_NAMES" : ["SRR891269"]
 
 # The path to a reference genome for BWA
 "genome" : "/iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sapiens_assembly19.fasta"
@@ -33,25 +33,80 @@
 "num_threads" : 8
 
 
-# CALLER SPECIFIC PARAMETERS
-# specify any parameters that should be passed to each caller script here
-# key should be <caller_name>_params and value can be string or array of parameters
+# CALLER SPECIFIC PARAMETERS (optional)
+# you can specify:
+#   1) any other columns (besides CHROM, POS, and ALT) to extract from the VCFs output by each caller
+#   2) any parameters that should be passed to each caller script
+# key should be <caller_name> and value can be a dictionary where "cols" are the columns and "params" is a string or list of parameters
+# "cols" should be a dictionary of lists containing each category of column in the VCF (where categories can be 'info', 'format', and 'other' for all others)
 
-# manta parameters
-# 1) path to manta config file
-# 2) path to the directory in which manta is stored or "" if manta is installed in the conda env (ex: if using --use-conda)
-"manta" : ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configManta.py.ini", ""]
+"gatk-snp" : {
+  "cols": {
+    'info': ["QD","FS","SOR","MQ","ReadPosRankSum"],
+    'format': ["DP",GT]
+  }
+}
 
-"delly_cols" : {"format":["RC", "CN", "GT", "GQ"]}
+"varscan-snp" : {
+  "cols": {
+    'info': ["ADP"],
+    'format': ["SDP","DP","RD","AD","FREQ","PVAL","ABQ","GT","GQ"]
+  }
+}
 
-"pindel_cols" : {"info":["HOMLEN", "SVLEN", "SVTYPE", "NTLEN"], "format":["PL", "GT", "RD", "AD"]}
+"pg-snp" : {
+  "cols": {'format': ["GT"]},
+  # path to a bgzip, indexed VCF containing variants called in the platinum genomes project
+  "params": "/iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz"
+}
 
-# strelka parameters
-# 1) path to strelka config file
-# 2) path to the directory in which strelka is stored or "" if strelka is installed in the conda env (ex: if using --use-conda)
-"strelka" : ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configureStrelkaGermlineWorkflow.py.ini", ""]
+"gatk-indel" : {
+  "cols": {
+    'info': ["QD","FS","SOR","MQ","ReadPosRankSum"],
+    'format': ["DP",GT]
+  }
+}
 
-# platinum genomes parameters
-# path to a bgzip, indexed VCF containing variants called in the platinum genomes project
-"pg-snp" : "/iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz"
-"pg-indel" : "/iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz"
+"varscan-indel" : {
+  "cols": {
+    'info': ["ADP"],
+    'format': ["SDP","DP","RD","AD","FREQ","PVAL","ABQ","GT","GQ"]
+  }
+}
+
+"delly" : {
+  "cols": {'format': ["RC","CN","GT","GQ"]}
+}
+
+"pindel" : {
+  "cols": {
+    'info': ["HOMLEN","SVLEN","SVTYPE","NTLEN"],
+    'format': ["PL","GT","RD","AD"]
+  }
+}
+
+"manta" : {
+  "cols": {
+    'info': ['SVTYPE','SVLEN','CIPOS','CIEND','HOMLEN','BND_DEPTH','MATE_BND_DEPTH','JUNCTION_QUAL'],
+    'format': ['GT','GQ','PL']
+  },
+  # 1) path to manta config file
+  # 2) path to the directory in which manta is stored or "" if manta is installed in the conda env (ex: if using --use-conda)
+  "params": ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configManta.py.ini", ""]
+}
+
+"strelka" : {
+  "cols": {
+    'info': ["SNVHPOL","RU","REFREP","IDREP","MQ"],
+    'format': ["GT","GQ","GQX","DP","DPF","MIN_DP","AD","ADF","ADR","DPI","PL","PS","SB"]
+  },
+  # 1) path to strelka config file
+  # 2) path to the directory in which strelka is stored or "" if strelka is installed in the conda env (ex: if using --use-conda)
+  "params": ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configureStrelkaGermlineWorkflow.py.ini", ""]
+}
+
+"pg-indel" : {
+  "cols": {'format': ["GT"]},
+  # path to a bgzip, indexed VCF containing variants called in the platinum genomes project
+  "/iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz"
+}

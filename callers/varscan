@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 bam="$1"
 [[ -z "$1" ]] && { echo "Parameter 1 is empty" 1>&2; exit 1; }
 peaks="$2"

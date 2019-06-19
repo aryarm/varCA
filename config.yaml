@@ -40,9 +40,9 @@
 # manta parameters
 # 1) path to manta config file
 # 2) path to the directory in which manta is stored or "" if manta is installed in the conda env (ex: if using --use-conda)
-"manta_params" : ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configManta.py.ini", ""]
+"manta" : ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configManta.py.ini", ""]
 
 # strelka parameters
 # 1) path to strelka config file
 # 2) path to the directory in which strelka is stored or "" if strelka is installed in the conda env (ex: if using --use-conda)
-"strelka_params" : ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configureStrelkaGermlineWorkflow.py.ini", ""]
+"strelka" : ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configureStrelkaGermlineWorkflow.py.ini", ""]

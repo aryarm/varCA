@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# return cols from a file where the column names match a regex filter
+# specify the regex filter in arg1 and the file in arg2
+# input is read from stdin if arg2 is not specified
+# file is assumed to be delimited by tabs
+# output is written to stdout
+
+# example to retrieve CHROM, POS, and all ALT cols from a gzipped file:
+# ./get_cols.bash '^CHROM$|^POS$|.*~ALT$' <(zcat file.tsv.gz)
+
+if test -n "$2"; then # work with the file
+	head="$(head -n1 "$2")"
+	# get comma separated list of column indices
+	cols="$(echo "$head" | tr '\t' '\n' | grep -nE "$1" | cut -f1 -d: | tr '\n' ',' | sed 's/,$//')"
+	cut -f "$cols" "$2"
+elif test ! -t 0; then # work with stdin
+	read -r head
+	# get comma separated list of column indices
+	cols="$(echo "$head" | tr '\t' '\n' | grep -nE "$1" | cut -f1 -d: | tr '\n' ',' | sed 's/,$//')"
+	cat <(echo "$head") - | cut -f "$cols"
+else
+	echo "No data provided..." 2>&1
+	exit 1
+fi
+
+# awk -F $'\t' -v 'OFS=\t' '
+# NR==1
+# {
+# 	for(i=1; i<=NF; i++)
+# 	if ($i~/'"$1"'/) {
+# 		a[i]++;
+# 	}
+# 	print NR;
+# }
+# {
+# 	for (i=1; i<=NF; i++)
+# 	if (a[i]) {
+# 		printf $i""OFS;
+# 	}
+# 	print ""
+# }' "${@:2}" | sed 's/\t$//'

@@ -39,7 +39,8 @@ rule all:
     # you should specify them in the config['SAMP_NAMES'] variable above
     input:
         expand(
-            config['output_dir'] + "/merged_{type}/{sample}.tsv.gz", sample=config['SAMP_NAMES'],
+            config['output_dir'] + "/merged_{type}/{sample}.tsv.gz",
+            sample=config['SAMP_NAMES'],
             type=[
                 i for i in ["snp", "indel"]
                 if i+"_callers" in config and config[i+"_callers"]
@@ -115,19 +116,28 @@ rule bed_peaks:
         # to convert to BED, we must extract the first three columns (chr, start, stop)
         "cut -f -3 \"{input}\" | sort -k1,1V -k2,2n > \"{output}\""
 
+
+def get_special_script_path(wildcards):
+    """ retrieve the path to the output of a special script if needed """
+    if '-' in wildcards.caller:
+        special_caller = "-".join(wildcards.caller.split('-')[:-1])
+        if os.path.exists("callers/"+special_caller):
+            return rules.prepare_caller.output[0].format(
+                sample=wildcards.sample,
+                caller=special_caller
+            )
+    return []
+
+
 rule prepare_caller:
     """Run any scripts that must be run before the caller scripts"""
     input:
         bam = rules.rm_dups.output.final_bam,
         peaks = rules.bed_peaks.output,
         genome = config['genome'],
-        shared = lambda wildcards: expand(
-            rules.prepare_caller.output[0],
-            sample=wildcards.sample,
-            caller=wildcards.caller[:-len("-"+wildcards.caller.split('-')[-1])]
-        ) if '-' in wildcards.caller else []
+        shared = get_special_script_path
     params:
-        caller_params = lambda wildcards: config[wildcards.caller+"_params"] if wildcards.caller+"_params" in config else ""
+        caller_params = lambda wildcards: config[wildcards.caller] if wildcards.caller in config else ""
     output:
         directory(config['output_dir'] + "/callers/{sample}/{caller}")
     wildcard_constraints:
@@ -137,7 +147,7 @@ rule prepare_caller:
     conda: "env.yml"
     shell:
         "mkdir -p \"{output}\" && "
-        "callers/{wildcards.caller}.bash {input.bam} {input.peaks} "
+        "callers/{wildcards.caller} {input.bam} {input.peaks} "
         "{input.genome} {output} {wildcards.sample} "
         "{threads} {input.shared} {params.caller_params}"
 
@@ -147,13 +157,9 @@ rule run_caller:
         bam = rules.rm_dups.output.final_bam,
         peaks = rules.bed_peaks.output,
         genome = config['genome'],
-        shared = lambda wildcards: expand(
-            rules.prepare_caller.output[0],
-            sample=wildcards.sample,
-            caller=wildcards.caller[:-len("-"+wildcards.caller.split('-')[-1])]
-        ) if '-' in wildcards.caller else []
+        shared = get_special_script_path
     params:
-        caller_params = lambda wildcards: config[wildcards.caller+"_params"] if wildcards.caller+"_params" in config else "",
+        caller_params = lambda wildcards: config[wildcards.caller] if wildcards.caller in config else "",
         out_dir = config['output_dir'] + "/callers/{sample}/{caller}"
     output:
         tsv = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.tsv"

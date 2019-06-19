@@ -1,9 +1,9 @@
 ## Creating a caller script
 If you'd like to add another variant caller to the pipeline, you can specify a script to execute it in the [callers dir](https://github.com/aryam7/merge_callers/tree/master/callers).
-Caller scripts must have a ".bash" file extension but can be executed using any program by providing the appropriate shebang line. The script should run the caller on a single sample.
+Caller scripts will be executed with whatever program is specified in the shebang. The script should run the caller on a single sample.
 
 Each caller script is referred to in the pipeline by a unique identifier.
-Currently, the filename of the script (before the ".bash" extension) is used as the identifier.
+Currently, the filename of the script is used as the identifier.
 When writing your [config file](https://github.com/aryam7/merge_callers/blob/master/config.yaml) you must refer to callers by their identifier.
 
 ### Caller script inputs
@@ -30,10 +30,11 @@ Some caller scripts must depend on a different script for special input.
 For example, some callers produce files containing both indels and SNVs. The GATK is one such caller.
 Separate steps must be performed later to separate the two variant types into different TSV files. How is this achieved?
 
-Well, you can create two different caller scripts `gatk-snp.bash` and `gatk-indel.bash` that each take as input the output of GATK (which is generated using a different special script `gatk.bash`).
-Note that `gatk.bash` is not a caller script (and should not be used as one) because it is not expected to produce TSV output.
+Well, you can create two different caller scripts `gatk-snp` and `gatk-indel` that each take as input the output of GATK (which is generated using a different special script `gatk`).
+Then `gatk-snp` and `gatk-indel` can each extract SNVs and indels from the output of `gatk`, respectively.
+Note that in this example, `gatk` is not a caller script (and should not be used as one) because it will not produce TSV output.
 
-By providing a dash character `-` in the caller identifier, the caller script (ex: `gatk-snp.bash`) can communicate to the pipeline that it requires input(s) from another special script (ex: `gatk.bash`) with the same filename but without the characters after the final dash (ex: `gatk-snp.bash` => `gatk.bash`).
-The pipeline will run this separate script first but with the same parameters as the caller script, and the directory containing its output will be passed to the caller script.
+By providing a dash character `-` in the caller identifier, the caller script (ex: `gatk-snp`) can communicate to the pipeline that it requires input(s) from another special script with the same filename but without the characters after the final dash (ex: `gatk-snp` => `gatk`).
+The pipeline will run this separate script first but with the same parameters as the caller script, and the directory containing its output will be passed to the original caller script.
 
 By providing multiple dashes in your caller identifiers using this scheme, you may design complicated caller script heirarchies involving multiple levels of nesting. In a sense, you can create pipelines within the pipeline.

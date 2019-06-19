@@ -21,8 +21,8 @@ Each caller script is provided the following arguments respectively.
 Each caller script must use the provided output directory path for all of its output.
 
 Besides this requirement, there is only one other: that at the end of its execution, the script create a TSV file (containing tab-separated values) named by the caller identifier followed by a ".tsv" extension.
-The TSV file must include the "CHROM", "POS", "REF", and "ALT" columns first (in that order!).
-A header must be present in the TSV file but the "CHROM", "POS", "REF", and "ALT" columns do not need to be named as such.
+The TSV file must include the "CHROM", "POS", and "ALT" columns first (in that order!).
+A header must be present in the TSV file but the "CHROM", "POS", and "ALT" columns do not need to be named as such.
 
 ### Caller scripts that depend on other scripts
 Some caller scripts must depend on a different script for special input.

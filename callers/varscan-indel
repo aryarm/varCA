@@ -13,7 +13,7 @@ varscan_dir="$7"
 [[ -z "$7" ]] && { echo "Parameter 7 is empty" 1>&2; exit 1; }
 
 
-echo -e "CHROM\tPOS\tREF\tALT\tADP\tSDP\tDP\tRD\tAD\tFREQ\tPVAL\tABQ\tGT\tGQ" > "$output_dir/varscan-indel.tsv"
+echo -e "CHROM\tPOS\tALT\tADP\tSDP\tDP\tRD\tAD\tFREQ\tPVAL\tABQ\tGT\tGQ" > "$output_dir/varscan-indel.tsv"
 vcftools --vcf "$varscan_dir/varscan.vcf" --keep-only-indels --recode --recode-INFO-all -c | bgzip > "$output_dir/varscan-indel.vcf.gz" && \
 tabix -p vcf -f "$output_dir/varscan-indel.vcf.gz"
-bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/ADP\t[%SDP]\t[%DP]\t[%RD]\t[%AD]\t[%FREQ]\t[%PVAL]\t[%ABQ]\t[%GT]\t[%GQ]\n' "$output_dir/varscan-indel.vcf.gz" >> "$output_dir/varscan-indel.tsv"
+bcftools query -f '%CHROM\t%POS\t%ALT\t%INFO/ADP\t[%SDP]\t[%DP]\t[%RD]\t[%AD]\t[%FREQ]\t[%PVAL]\t[%ABQ]\t[%GT]\t[%GQ]\n' "$output_dir/varscan-indel.vcf.gz" >> "$output_dir/varscan-indel.tsv"

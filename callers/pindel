@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 bam="$1"
 [[ -z "$1" ]] && { echo "Parameter 1 is empty" 1>&2; exit 1; }
 peaks="$2"
@@ -20,6 +21,6 @@ for file in _D _INV _SI _TD; do
 	bcftools norm -d all "$output_dir/$file.raw.vcf" > "$output_dir/$file.vcf"
 	bgzip -f "$output_dir/$file.vcf" && tabix -p vcf -f "$output_dir/$file.vcf.gz"
 done
-echo -e "CHROM\tPOS\tREF\tALT\tHOMLEN\tSVLEN\tSVTYPE\tNTLEN\tPL\tGT\tRD\tAD" > "$output_dir/pindel.tsv"
+echo -e "CHROM\tPOS\tALT\tHOMLEN\tSVLEN\tSVTYPE\tNTLEN\tPL\tGT\tRD\tAD" > "$output_dir/pindel.tsv"
 bcftools concat -a -d all "$output_dir/"{_D,_INV,_SI,_TD}.vcf.gz | bgzip > "$output_dir/merged.vcf.gz" && tabix -p vcf -f "$output_dir/merged.vcf.gz"
-bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%INFO/HOMLEN\t%INFO/SVLEN\t%INFO/SVTYPE\t%INFO/NTLEN\t[%PL]\t[%GT]\t[%RD]\t[%AD]\n' "$output_dir/merged.vcf.gz" >> "$output_dir/pindel.tsv"
+bcftools query -f '%CHROM\t%POS\t%ALT\t%INFO/HOMLEN\t%INFO/SVLEN\t%INFO/SVTYPE\t%INFO/NTLEN\t[%PL]\t[%GT]\t[%RD]\t[%AD]\n' "$output_dir/merged.vcf.gz" >> "$output_dir/pindel.tsv"

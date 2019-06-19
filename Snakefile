@@ -106,15 +106,18 @@ rule call_peaks:
         "-g hs -f BAMPE -t {input} -n {wildcards.sample} --outdir {params.output_dir}"
 
 rule bed_peaks:
-    """Convert the BAMPE file to a sorted BED file"""
+    """Convert the BAMPE file to a sorted BED file (with the ref allele)"""
     input:
-        rules.call_peaks.output
+        ref = config['genome'],
+        peaks = rules.call_peaks.output
     output:
         config['output_dir'] + "/peaks/{sample}/peaks.bed"
     conda: "env.yml"
     shell:
         # to convert to BED, we must extract the first three columns (chr, start, stop)
-        "cut -f -3 \"{input}\" | sort -k1,1V -k2,2n > \"{output}\""
+        "cut -f -3 \"{input.peaks}\" | "
+        "bedtools getfasta -fi {input.ref} -bedOut -bed stdin | "
+        "sort -k1,1V -k2,2n > \"{output}\""
 
 
 def get_special_script_path(wildcards):
@@ -199,7 +202,7 @@ def bcftools_query_str(wildcards):
 rule vcf2tsv:
     """Convert from the vcf to tsv format, extracting relevant columns"""
     input:
-        rules.run_caller.output.vcf
+        rules.run_caller.output
     params:
         cols = lambda wildcards: "\t".join(
             ['CHROM', 'POS', 'ALT'] +
@@ -238,8 +241,8 @@ rule get_all_sites:
     output:
         temp(config['output_dir'] + "/peaks/{sample}/all_sites.csv")
     shell:
-        "awk '{{printf(\"%s\\t%d\\t%d\\n\",$1,int($2)-1,int($3));}}' {input} | "
-        "awk -F '\\t' -v 'OFS=\\t' '{{for (i=$2;i<$3;i++) print $1\",\"i}}' > {output}"
+        "awk '{{printf(\"%s\\t%d\\t%d\\t%s\\n\",$1,int($2)-1,int($3),$4);}}' {input} | "
+        "awk -F '\\t' -v 'OFS=\\t' '{{for (i=$2;i<$3;i++) print $1\",\"i,substr($4,i-$2+1,1)}}' > {output}"
 
 rule join_all_sites:
     """
@@ -258,10 +261,10 @@ rule join_all_sites:
     conda: "env.yml"
     shell:
         "join -t $'\\t' -e. -a1 -a2 -o auto --nocheck-order "
-        "{input.sites} {input.prepared_caller_output} | cut -f 2- | cat <("
-            "head -n1 {input.caller_output} | cut -f 5- | tr '\\t' '\\n' | "
-            "sed -e 's/^/{wildcards.caller}~/' | cat <("
-                "echo -e \'{wildcards.caller}~REF\\n{wildcards.caller}~ALT\'"
+        "<(cut -f 1 {input.sites}) {input.prepared_caller_output} | cut -f 2- | cat <("
+            "head -n1 {input.caller_output} | cut -f 4- | tr '\\t' '\\n' | "
+            "sed 's/^/{wildcards.caller}~/' | cat <("
+                "echo -e \'{wildcards.caller}~ALT\'"
             ") - | paste -s"
         ") - > {output}"
 
@@ -279,5 +282,5 @@ rule merge_callers:
         config['output_dir'] + "/merged_{type}/{sample}.tsv.gz"
     conda: "env.yml"
     shell:
-        "paste <(echo -e 'CHROM\\tPOS'; sed -e 's/,\+/\\t/' {input.all_sites}) "
+        "paste <(echo -e 'CHROM\\tPOS\\tREF'; sed 's/,/\\t/' {input.all_sites}) "
         "{input.caller_output} | gzip > {output}"

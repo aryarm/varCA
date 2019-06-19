@@ -167,7 +167,7 @@ rule run_caller:
     conda: "env.yml"
     shell:
         "mkdir -p \"{params.out_dir}\" && "
-        "callers/{wildcards.caller}.bash {input.bam} {input.peaks} "
+        "callers/{wildcards.caller} {input.bam} {input.peaks} "
         "{input.genome} {params.out_dir} {wildcards.sample} "
         "{threads} {input.shared} {params.caller_params}"
 

@@ -23,11 +23,11 @@
 
 # which callers do you want to run to find SNVs?
 # if you don't want to run the snp pipeline, set this to a falsey value or comment out the line
-"snp_callers" : ["gatk-snp", "varscan-snp"]
+"snp_callers" : ["gatk-snp", "varscan-snp", "pg-snp"]
 
 # which callers do you want to run to find indels?
 # if you don't want to run the indel pipeline, set this to a falsey value or comment out the line
-"indel_callers" : ["gatk-indel", "varscan-indel", "delly", "pindel", "manta", "strelka"]
+"indel_callers" : ["gatk-indel", "varscan-indel", "delly", "pindel", "manta", "strelka", "pg-indel"]
 
 # what are the maximum number of threads to use for the entire pipeline?
 "num_threads" : 8
@@ -46,3 +46,8 @@
 # 1) path to strelka config file
 # 2) path to the directory in which strelka is stored or "" if strelka is installed in the conda env (ex: if using --use-conda)
 "strelka" : ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configureStrelkaGermlineWorkflow.py.ini", ""]
+
+# platinum genomes parameters
+# path to a bgzip, indexed VCF containing variants called in the platinum genomes project
+"pg-snp" : "/iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz"
+"pg-indel" : "/iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz"

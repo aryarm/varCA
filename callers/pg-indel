@@ -1,0 +1,18 @@
+#!/bin/bash
+
+
+bam="$1"
+[[ -z "$1" ]] && { echo "Parameter 1 is empty" 1>&2; exit 1; }
+peaks="$2"
+[[ -z "$2" ]] && { echo "Parameter 2 is empty" 1>&2; exit 1; }
+genome="$3"
+[[ -z "$3" ]] && { echo "Parameter 3 is empty" 1>&2; exit 1; }
+output_dir="$4"
+[[ -z "$4" ]] && { echo "Parameter 4 is empty" 1>&2; exit 1; }
+pg_path="$7"
+[[ -z "$7" ]] && { echo "Parameter 7 is empty" 1>&2; exit 1; }
+
+
+echo -e "CHROM\tPOS\tALT\tGT" > "$output_dir/pg-indel.tsv"
+vcftools --gzvcf "$pg_path" --keep-only-indels --recode --recode-INFO-all -c --bed "$peaks" | bgzip > "$output_dir/pg-indel.vcf.gz" && tabix -p vcf -f "$output_dir/pg-indel.vcf.gz"
+bcftools query -f '%CHROM\t%POS\t%ALT\t[%GT]\n' "$output_dir/pg-indel.vcf.gz" >> "$output_dir/pg-indel.tsv"

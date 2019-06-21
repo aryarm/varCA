@@ -12,7 +12,7 @@
 
 # which samples should we execute the pipeline on?
 # comment out this line if you want to run all samples
-# "SAMP_NAMES" : ["SRR891269"]
+"SAMP_NAMES" : ["SRR891269"]
 
 # The path to a reference genome for BWA
 "genome" : "/iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sapiens_assembly19.fasta"
@@ -35,13 +35,14 @@
 
 # CALLER SPECIFIC PARAMETERS (optional)
 # you can specify:
-#   1) any other columns (besides CHROM, POS, and ALT) to extract from the VCFs output by each caller
+#   1) any other columns (besides CHROM, POS, REF, and ALT) to extract from the VCFs output by each caller
 #   2) any parameters that should be passed to each caller script
 # key should be <caller_name> and value can be a dictionary where "cols" are the columns and "params" is a string or list of parameters
 # "cols" should be a dictionary of lists containing each category of column in the VCF (where categories can be 'info', 'format', and 'other' for all others)
 
 "gatk-snp" : {
   "cols": {
+    'other': ["QUAL"],
     'info': ["QD","FS","SOR","MQ","ReadPosRankSum"],
     'format': ["DP",GT]
   }
@@ -87,6 +88,7 @@
 
 "manta" : {
   "cols": {
+    'other': ["QUAL"],
     'info': ['SVTYPE','SVLEN','CIPOS','CIEND','HOMLEN','BND_DEPTH','MATE_BND_DEPTH','JUNCTION_QUAL'],
     'format': ['GT','GQ','PL']
   },
@@ -97,6 +99,7 @@
 
 "strelka" : {
   "cols": {
+    'other': ["QUAL"],
     'info': ["SNVHPOL","RU","REFREP","IDREP","MQ"],
     'format': ["GT","GQ","GQX","DP","DPF","MIN_DP","AD","ADF","ADR","DPI","PL","PS","SB"]
   },

@@ -1,4 +1,5 @@
 import os
+import hashlib
 import warnings
 from snakemake.utils import min_version
 
@@ -32,6 +33,11 @@ else:
     config['SAMP_NAMES'] = list(set(SAMP.keys()).intersection(user_samps))
     if len(config['SAMP_NAMES']) != len(user_samps):
         warnings.warn("Not all of the samples requested have provided input. Proceeding with as many samples as is possible...")
+
+
+def hash_str(to_hash):
+    """ hash a str to get a unique value """
+    return hashlib.md5(to_hash.encode('utf-8')).hexdigest()[:8]
 
 
 rule all:
@@ -184,6 +190,18 @@ def sorted_cols(cols):
     ]
 
 
+rule prepare_vcf:
+    """ bgzip and index the vcf """
+    input:
+        vcf = rules.run_caller.output.vcf
+    output:
+        gzvcf = rules.run_caller.output.vcf+".gz",
+        index = rules.run_caller.output.vcf+".gz.tbi"
+    conda: "envs/default.yml"
+    shell:
+        "bgzip -f {input.vcf} && tabix -p vcf -f {output.gzvcf}"
+
+
 def bcftools_query_str(wildcards):
     """ return the bcftools query string for this caller's columns """
     if wildcards.caller in config and config[wildcards.caller] and 'cols' in config[wildcards.caller]:
@@ -194,7 +212,7 @@ def bcftools_query_str(wildcards):
         cols['info'] = ["INFO/"+c for c in cols['info']]
     if 'other' not in cols:
         cols['other'] = []
-    cols['other'] = ['CHROM', 'POS', 'ALT'] + cols['other']
+    cols['other'] = ['CHROM', 'POS', 'REF', 'ALT'] + cols['other']
     for col in cols:
         cols[col] = ["%"+c for c in cols[col]]
     if 'format' in cols:
@@ -202,16 +220,20 @@ def bcftools_query_str(wildcards):
     return "\\t".join(sorted_cols(cols))+"\\n"
 
 
-rule prepare_vcf:
-    """ bgzip and index the vcf """
-    input:
-        vcf = rules.run_caller.output.vcf
-    output:
-        gzvcf = rules.run_caller.output.vcf+".gz",
-        index = rules.run_caller.output.vcf+".gz.tbi"
-    conda: "env.yml"
-    shell:
-        "bgzip -f {input.vcf} && tabix -p vcf -f {output.gzvcf}"
+def cols_str(wildcards):
+    col_str = "\\t".join(
+        ['CHROM', 'POS', 'REF', 'ALT'] +
+        sorted_cols(
+            config[wildcards.caller]['cols']
+            if wildcards.caller in config and config[wildcards.caller]
+            and 'cols' in config[wildcards.caller]
+            else {}
+        )
+    )
+    if not hasattr(wildcards, 'hash'):
+        return hash_str(col_str)
+    return col_str
+
 
 rule vcf2tsv:
     """Convert from vcf to tsv format, extracting relevant columns"""
@@ -219,22 +241,15 @@ rule vcf2tsv:
         gzvcf = rules.prepare_vcf.output.gzvcf,
         index = rules.prepare_vcf.output.index
     params:
-        cols = lambda wildcards: "\\t".join(
-            ['CHROM', 'POS', 'ALT'] +
-            sorted_cols(
-                config[wildcards.caller]['cols']
-                if wildcards.caller in config and config[wildcards.caller]
-                and 'cols' in config[wildcards.caller]
-                else {}
-            )
-        ),
+        cols = cols_str,
         qstr = bcftools_query_str
     output:
-        tsv = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.tsv"
-    conda: "bcftools.yml"
+        tsv = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.{hash}.tsv"
+    conda: "envs/bcftools.yml"
     shell:
         "echo -e '{params.cols}' > {output.tsv} && "
         "bcftools query -f '{params.qstr}' {input.gzvcf} >> {output.tsv}"
+
 
 rule prepare_merge:
     """
@@ -246,10 +261,15 @@ rule prepare_merge:
         (not necessarily in that order)
     """
     input:
-        rules.vcf2tsv.output.tsv
+        tsv = lambda wildcards: expand(
+            rules.vcf2tsv.output.tsv,
+            hash=cols_str(wildcards),
+            sample=wildcards.sample,
+            caller=wildcards.caller
+        )
     output:
         pipe(config['output_dir'] + "/callers/{sample}/{caller}/prepared.tsv")
-    conda: "env.yml"
+    conda: "envs/default.yml"
     shell:
         "tail -n+2 {input} | awk -F '\\t' -v 'OFS=\\t' '{{for (i=1; i<=NF; i++) if ($i==\"NA\") $i=\".\"}}1' | "
         "sort -k1,1V -k2,2n | sed 's/\\t\+/,/' > {output}"
@@ -261,7 +281,7 @@ rule get_all_sites:
     output:
         temp(config['output_dir'] + "/peaks/{sample}/all_sites.csv")
     shell:
-        "awk '{{printf(\"%s\\t%d\\t%d\\t%s\\n\",$1,int($2)-1,int($3),$4);}}' {input} | "
+        "awk '{{printf(\"%s\\t%d\\t%d\\t%s\\n\",$1,int($2)+1,int($3),$4);}}' {input} | "
         "awk -F '\\t' -v 'OFS=\\t' '{{for (i=$2;i<$3;i++) print $1\",\"i,substr($4,i-$2+1,1)}}' > {output}"
 
 rule join_all_sites:
@@ -274,17 +294,22 @@ rule join_all_sites:
     """
     input:
         sites = rules.get_all_sites.output,
-        caller_output = rules.prepare_merge.input,
-        prepared_caller_output = rules.prepare_merge.output
+        tsv = lambda wildcards: expand(
+            rules.vcf2tsv.output.tsv,
+            hash=cols_str(wildcards),
+            sample=wildcards.sample,
+            caller=wildcards.caller
+        ),
+        prepared_tsv = rules.prepare_merge.output
     output:
         pipe(config['output_dir'] + "/merged_{type}/{sample}.{caller}.tsv")
     conda: "envs/default.yml"
     shell:
         "join -t $'\\t' -e. -a1 -a2 -o auto --nocheck-order "
-        "<(cut -f 1 {input.sites}) {input.prepared_caller_output} | cut -f 2- | cat <("
-            "head -n1 {input.caller_output} | cut -f 4- | tr '\\t' '\\n' | "
+        "<(cut -f 1 {input.sites}) {input.prepared_tsv} | cut -f 2- | cat <("
+            "head -n1 {input.tsv} | cut -f 5- | tr '\\t' '\\n' | "
             "sed 's/^/{wildcards.caller}~/' | cat <("
-                "echo -e \'{wildcards.caller}~ALT\'"
+                "echo -e \'{wildcards.caller}~REF\\n{wildcards.caller}~ALT\'"
             ") - | paste -s"
         ") - > {output}"
 

@@ -57,7 +57,7 @@ rule align:
     output:
         config['output_dir'] + "/align/{sample}/aln.bam"
     threads: config['num_threads']
-    conda: "env.yml"
+    conda: "envs/default.yml"
     shell:
         "bwa mem -t {threads} {input.ref} {input.fastq1} {input.fastq2} "
         "-R '@RG\\tID:{wildcards.sample}\\tLB:lib1\\tPL:Illumina\\tPU:unit1\\tSM:{wildcards.sample}' | "
@@ -72,7 +72,7 @@ rule add_mate_info:
     output:
         config['output_dir'] + "/align/{sample}/sorted.mated.bam"
     threads: config['num_threads']
-    conda: "env.yml"
+    conda: "envs/default.yml"
     shell:
         "samtools sort -n -@ {threads} {input} | "
         "samtools fixmate -m -@ {threads} -O bam - - | "
@@ -87,7 +87,7 @@ rule rm_dups:
         final_bam = config['output_dir'] + "/align/{sample}/rmdup.bam",
         final_bam_index = config['output_dir'] + "/align/{sample}/rmdup.bam.bai"
     threads: config['num_threads']
-    conda: "env.yml"
+    conda: "envs/default.yml"
     shell:
         "samtools markdup -@ {threads} {input} {output.final_bam} && "
         "samtools index -b -@ {threads} {output.final_bam}"
@@ -100,7 +100,7 @@ rule call_peaks:
         output_dir = lambda wildcards, output: os.path.dirname(output[0])
     output:
         config['output_dir'] + "/peaks/{sample}/{sample}_peaks.narrowPeak"
-    conda: "env.yml"
+    conda: "envs/default.yml"
     shell:
         "macs2 callpeak --nomodel --extsize 200 --slocal 1000 --qvalue 0.05 "
         "-g hs -f BAMPE -t {input} -n {wildcards.sample} --outdir {params.output_dir}"
@@ -112,7 +112,7 @@ rule bed_peaks:
         peaks = rules.call_peaks.output
     output:
         config['output_dir'] + "/peaks/{sample}/peaks.bed"
-    conda: "env.yml"
+    conda: "envs/default.yml"
     shell:
         # to convert to BED, we must extract the first three columns (chr, start, stop)
         "cut -f -3 \"{input.peaks}\" | "
@@ -147,7 +147,7 @@ rule prepare_caller:
         sample="[^\/]*",
         caller="[^\/]*"
     threads: config['num_threads']
-    conda: "env.yml"
+    conda: "envs/default.yml"
     shell:
         "mkdir -p \"{output}\" && "
         "callers/{wildcards.caller} {input.bam} {input.peaks} "
@@ -167,7 +167,7 @@ rule run_caller:
     output:
         vcf = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.vcf"
     threads: config['num_threads']
-    conda: "env.yml"
+    conda: "envs/default.yml"
     shell:
         "mkdir -p \"{params.out_dir}\" && "
         "callers/{wildcards.caller} {input.bam} {input.peaks} "
@@ -278,7 +278,7 @@ rule join_all_sites:
         prepared_caller_output = rules.prepare_merge.output
     output:
         pipe(config['output_dir'] + "/merged_{type}/{sample}.{caller}.tsv")
-    conda: "env.yml"
+    conda: "envs/default.yml"
     shell:
         "join -t $'\\t' -e. -a1 -a2 -o auto --nocheck-order "
         "<(cut -f 1 {input.sites}) {input.prepared_caller_output} | cut -f 2- | cat <("
@@ -300,7 +300,7 @@ rule merge_callers:
         )
     output:
         config['output_dir'] + "/merged_{type}/{sample}.tsv.gz"
-    conda: "env.yml"
+    conda: "envs/default.yml"
     shell:
         "paste <(echo -e 'CHROM\\tPOS\\tREF'; sed 's/,/\\t/' {input.all_sites}) "
         "{input.caller_output} | gzip > {output}"

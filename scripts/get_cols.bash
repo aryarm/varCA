@@ -9,15 +9,20 @@
 # example to retrieve CHROM, POS, and all ALT cols from a gzipped file:
 # ./get_cols.bash '^CHROM$|^POS$|.*~ALT$' <(zcat file.tsv.gz)
 
+col_idxs() {
+	# get comma separated list of column indices
+	echo "$2" | tr '\t' '\n' | grep -nE "$1" | cut -f1 -d: | tr '\n' ',' | sed 's/,$//'
+}
+
 if test -n "$2"; then # work with the file
 	head="$(head -n1 "$2")"
-	# get comma separated list of column indices
-	cols="$(echo "$head" | tr '\t' '\n' | grep -nE "$1" | cut -f1 -d: | tr '\n' ',' | sed 's/,$//')"
+	cols="$(col_idxs "$1" "$head")"
+	test -z "$cols" && exit 1
 	cut -f "$cols" "$2"
 elif test ! -t 0; then # work with stdin
 	read -r head
-	# get comma separated list of column indices
-	cols="$(echo "$head" | tr '\t' '\n' | grep -nE "$1" | cut -f1 -d: | tr '\n' ',' | sed 's/,$//')"
+	cols="$(col_idxs "$1" "$head")"
+	test -z "$cols" && exit 1
 	cat <(echo "$head") - | cut -f "$cols"
 else
 	echo "No data provided..." 2>&1

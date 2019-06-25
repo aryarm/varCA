@@ -38,4 +38,4 @@ snakemake \
 --use-conda \
 -k \
 --notemp \
-&>"${out_path}/log"
+"$@" &>"${out_path}/log"

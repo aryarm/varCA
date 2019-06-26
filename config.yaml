@@ -21,6 +21,17 @@
 # defined relative to whatever directory you execute the snakemake command in
 "output_dir" : "/iblm/netapp/home/amassarat/breakCA/merge_callers/out"
 
+# parameters to use when calling bcftools to filter the VCF output of every caller script
+# see http://www.htslib.org/doc/bcftools.html#view for all possible options
+# use an empty string or comment out this line if you'd like your VCFs unfiltered
+"bcftools_params" : "-M 2"
+
+# whether to "normalize" the VCF output of every caller script
+# normalization usually involves left-alignment and trimming of variants
+# see https://genome.sph.umich.edu/wiki/Variant_Normalization for more info
+# in our pipeline, the normalization step also reduces counts of variants that appear at the same position to 1
+"normalize" : true
+
 # which callers do you want to run to find SNVs?
 # if you don't want to run the snp pipeline, set this to a falsey value or comment out the line
 "snp_callers" : ["gatk-snp", "varscan-snp", "pg-snp"]

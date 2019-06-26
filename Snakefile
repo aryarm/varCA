@@ -190,16 +190,43 @@ def sorted_cols(cols):
     ]
 
 
+rule filter_vcf:
+    """ filter the vcf if needed """
+    input:
+        vcf = rules.run_caller.output.vcf
+    output:
+        vcf = pipe(rules.run_caller.output.vcf+".filter")
+    conda: "envs/bcftools.yml"
+    shell:
+        "bcftools view {config[bcftools_params]} {input.vcf} > {output.vcf}"
+
+rule normalize_vcf:
+    """ normalize the vcf and remove multiallelic sites if needed """
+    input:
+        vcf = rules.run_caller.output.vcf if 'bcftools_params' not in config \
+            or not config['bcftools_params'] else rules.filter_vcf.output.vcf,
+        ref = config['genome']
+    output:
+        vcf = pipe(rules.run_caller.output.vcf+".norm")
+    conda: "envs/bcftools.yml"
+    shell:
+        "bcftools norm --check-ref xw -d all -f {input.ref} "
+        "{input.vcf} > {output.vcf}"
+
+
 rule prepare_vcf:
     """ bgzip and index the vcf """
     input:
-        vcf = rules.run_caller.output.vcf
+        vcf = rules.run_caller.output.vcf if 'bcftools_params' not in config \
+            or not config['bcftools_params'] else rules.filter_vcf.output.vcf \
+            if 'normalize' not in config or not config['normalize'] else \
+            rules.normalize_vcf.output.vcf
     output:
         gzvcf = rules.run_caller.output.vcf+".gz",
         index = rules.run_caller.output.vcf+".gz.tbi"
     conda: "envs/default.yml"
     shell:
-        "bgzip -f {input.vcf} && tabix -p vcf -f {output.gzvcf}"
+        "bgzip <{input.vcf} >{output.gzvcf} && tabix -p vcf -f {output.gzvcf}"
 
 
 def bcftools_query_str(wildcards):

@@ -123,7 +123,7 @@ rule bed_peaks:
         # to convert to BED, we must extract the first three columns (chr, start, stop)
         "cut -f -3 \"{input.peaks}\" | "
         "bedtools getfasta -fi {input.ref} -bedOut -bed stdin | "
-        "sort -k1,1V -k2,2n > \"{output}\""
+        "sort -t $'\t' -k1,1V -k2,2n > \"{output}\""
 
 
 def get_special_script_path(wildcards):
@@ -272,7 +272,7 @@ rule prepare_merge:
     conda: "envs/default.yml"
     shell:
         "tail -n+2 {input} | awk -F '\\t' -v 'OFS=\\t' '{{for (i=1; i<=NF; i++) if ($i==\"NA\") $i=\".\"}}1' | "
-        "sort -k1,1V -k2,2n | sed 's/\\t\+/,/' > {output}"
+        "sed 's/\\t\+/,/' | LC_ALL=C sort -t $'\\t' -k1,1 > {output}"
 
 rule get_all_sites:
     """retrieve all sites for output in the merged table"""
@@ -282,7 +282,8 @@ rule get_all_sites:
         temp(config['output_dir'] + "/peaks/{sample}/all_sites.csv")
     shell:
         "awk '{{printf(\"%s\\t%d\\t%d\\t%s\\n\",$1,int($2)+1,int($3),$4);}}' {input} | "
-        "awk -F '\\t' -v 'OFS=\\t' '{{for (i=$2;i<$3;i++) print $1\",\"i,substr($4,i-$2+1,1)}}' > {output}"
+        "awk -F '\\t' -v 'OFS=\\t' '{{for (i=$2;i<$3;i++) print $1\",\"i,substr($4,i-$2+1,1)}}' | "
+        "LC_ALL=C sort -t $'\\t' -k1,1 > {output}"
 
 rule join_all_sites:
     """
@@ -305,13 +306,12 @@ rule join_all_sites:
         pipe(config['output_dir'] + "/merged_{type}/{sample}.{caller}.tsv")
     conda: "envs/default.yml"
     shell:
-        "join -t $'\\t' -e. -a1 -a2 -o auto --nocheck-order "
-        "<(cut -f 1 {input.sites}) {input.prepared_tsv} | cut -f 2- | cat <("
-            "head -n1 {input.tsv} | cut -f 5- | tr '\\t' '\\n' | "
-            "sed 's/^/{wildcards.caller}~/' | cat <("
-                "echo -e \'{wildcards.caller}~REF\\n{wildcards.caller}~ALT\'"
-            ") - | paste -s"
-        ") - > {output}"
+        "LC_ALL=C join -t $'\\t' -e. -a1 -j1 -o auto --nocheck-order "
+        "<(cut -f 1 {input.sites}) {input.prepared_tsv} | cut -f 2- | cat "
+        "<(head -n1 {input.tsv} | cut -f 5- | tr '\\t' '\\n' | "
+        "sed 's/^/{wildcards.caller}~/' | cat "
+        "<(echo -e \'{wildcards.caller}~REF\\n{wildcards.caller}~ALT\') - | "
+        "paste -s) - > {output}"
 
 rule merge_callers:
     """merge the columns of each snp caller into a single file"""
@@ -327,5 +327,6 @@ rule merge_callers:
         config['output_dir'] + "/merged_{type}/{sample}.tsv.gz"
     conda: "envs/default.yml"
     shell:
-        "paste <(echo -e 'CHROM\\tPOS\\tREF'; sed 's/,/\\t/' {input.all_sites}) "
-        "{input.caller_output} | gzip > {output}"
+        "paste <(echo -e 'CHROM\\tPOS\\tREF'; sed 's/,/\\t/' "
+        "{input.all_sites}) {input.caller_output} | "
+        "(read -r head; echo \"$head\"; sort -t $'\\t' -k1,1V -k2,2n) | gzip > {output}"

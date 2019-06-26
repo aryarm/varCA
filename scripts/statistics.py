@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
 import sys
-import math
 import pandas
 import argparse
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 parser = argparse.ArgumentParser()
@@ -37,6 +35,7 @@ rates = np.zeros(
     dtype='uint32'
 )
 
+
 thresh = 0
 curr_class = None
 for idx, line in df.iterrows():
@@ -54,23 +53,14 @@ for idx, line in df.iterrows():
         rates[category][thresh][statistic] += 1
     curr_class = tuple(line)
 
-# clear some memory
-del df
-# make sure to delete unused np rows now that we know the number of thresholds
-# hopefully python garbage collection will free this memory?
+
+# only output np rows that we used
 rates = rates[:, :thresh+1, :]
 
-# calculate precision recall by micro-averaging for each class (at each threshold)
-for i in range(thresh+1):
-    TP_sum = 0
-    FP_sum = 0
-    FN_sum = 0
-    for category in classes:
-        TP_sum += totals[category]['TP'][thresh]
-        FP_sum += totals[category]['FP'][thresh]
-        FN_sum += totals[category]['FN'][thresh]
-    rates['precision'].append(TP_sum/(TP_sum+FP_sum))
-    rates['recall'].append(TP_sum/(TP_sum+FN_sum))
-
-plt.scatter(rates['recall'], rates['precision'])
-plt.show()
+# write data to stdout
+print("## shape: {0[0]},{0[1]},{0[2]}".format(rates.shape))
+print("## classes: " + ",".join(classes))
+for category in rates:
+    print("# {0}".format(category))
+    np.savetxt(sys.stdout, category)
+    print("")

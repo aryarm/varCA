@@ -111,5 +111,10 @@
 "pg-indel" : {
   "cols": {'format': ["GT"]},
   # path to a bgzip, indexed VCF containing variants called in the platinum genomes project
-  "/iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz"
+  "params": "/iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz"
+}
+
+"pg" : {
+  # path to a bgzip, indexed VCF containing variants called in the platinum genomes project
+  "params": "/iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz"
 }

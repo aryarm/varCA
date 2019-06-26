@@ -10,23 +10,17 @@
 # make sure that the large tsv has columns in the order caller~REF, caller~ALT, caller~sort, truth~REF, truth~ALT
 
 
-zcat "$1" | \
-"$(dirname "$BASH_SOURCE")"/get_cols.bash "^$2~(REF|ALT|$3)$|^$4~(REF|ALT)$" | {
-	read -r head;
-	echo "$head";
-	sort -t $'\t' -k3,3n"$(test -z "$5" && echo "r")";
-} | {
- 	variants="$(cat)";
- 	paste -d, \
- 	<(
- 		echo "$variants" | \
- 		"$(dirname "$BASH_SOURCE")"/get_cols.bash "^$2~(REF|ALT)" | \
- 		tail -n+2 | "$(dirname "$BASH_SOURCE")"/classify.awk
- 	) \
- 	<(
- 		echo "$variants" | \
- 		"$(dirname "$BASH_SOURCE")"/get_cols.bash "^$4~(REF|ALT)" | \
- 		tail -n+2 | "$(dirname "$BASH_SOURCE")"/classify.awk
-	) | \
- 	python "$(dirname "$BASH_SOURCE")"/prc.py
-}
+script_dir="$(dirname "$BASH_SOURCE")"
+paste -d $'\t' <(
+	zcat "$1" | "$script_dir"/get_cols.bash "^$2~(REF|ALT)$" | \
+	tail -n+2 | "$script_dir"/classify.awk
+) <(
+	zcat "$1" | "$script_dir"/get_cols.bash "^$2~$3$" | \
+	tail -n+2
+) <(
+	zcat "$1" | "$script_dir"/get_cols.bash "^$4~(REF|ALT)$" | \
+	tail -n+2 | "$script_dir"/classify.awk
+) | \
+sort -t $'\t' -k2,2n"$(test -z "$5" && echo "r")" | \
+cut -f1,3 | \
+python "$script_dir"/prc.py

@@ -13,4 +13,11 @@ varscan_dir="$7"
 [[ -z "$7" ]] && { echo "Parameter 7 is empty" 1>&2; exit 1; }
 
 
-vcftools --vcf "$varscan_dir/varscan.vcf" --keep-only-indels --recode --recode-INFO-all -c > "$output_dir/varscan-indel.vcf"
+gatk --java-options "-Xmx4g" SelectVariants \
+  -L "$peaks" \
+  -R "$genome" \
+  -V "$varscan_dir/varscan.vcf.gz" \
+  --select-type INDEL --select-type NO_VARIATION \
+  --select-type-to-exclude SNP --select-type-to-exclude MIXED \
+  --select-type-to-exclude SYMBOLIC --select-type-to-exclude MNP \
+  -O "$output_dir/varscan-indel.vcf"

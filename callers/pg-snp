@@ -9,8 +9,17 @@ genome="$3"
 [[ -z "$3" ]] && { echo "Parameter 3 is empty" 1>&2; exit 1; }
 output_dir="$4"
 [[ -z "$4" ]] && { echo "Parameter 4 is empty" 1>&2; exit 1; }
-pg_path="$7"
+pg_dir="$7"
 [[ -z "$7" ]] && { echo "Parameter 7 is empty" 1>&2; exit 1; }
+pg_path="$8"
+[[ -z "$8" ]] && { echo "Parameter 8 is empty" 1>&2; exit 1; }
 
 
-vcftools --gzvcf "$pg_path" --remove-indels --recode --recode-INFO-all -c --bed "$peaks" > "$output_dir/pg-snp.vcf"
+gatk --java-options "-Xmx4g" SelectVariants \
+  -L "$pg_dir/peaks.bed" \
+  -R "$genome" \
+  -V "$pg_path" \
+  --select-type SNP --select-type NO_VARIATION \
+  --select-type-to-exclude INDEL --select-type-to-exclude MIXED \
+  --select-type-to-exclude SYMBOLIC --select-type-to-exclude MNP \
+  -O "$output_dir/pg-snp.vcf"

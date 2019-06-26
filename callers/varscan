@@ -12,4 +12,5 @@ output_dir="$4"
 
 
 samtools mpileup -l "$peaks" -f "$genome" -B "$bam" | \
-varscan mpileup2cns --p-value 1 --strand-filter 0 --output-vcf > "$output_dir/varscan.vcf"
+varscan mpileup2cns --p-value 1 --strand-filter 0 --output-vcf > "$output_dir/varscan.vcf" && \
+bgzip -f "$output_dir/varscan.vcf" && tabix -p vcf -f "$output_dir/varscan.vcf.gz"

@@ -18,4 +18,6 @@ gatk --java-options "-Xmx4g" SelectVariants \
   -R "$genome" \
   -V "$gatk_dir/gatk.vcf.gz" \
   --select-type SNP --select-type NO_VARIATION \
-  -O "$output_dir/gatk-snp.vcf.gz"
+  --select-type-to-exclude INDEL --select-type-to-exclude MIXED \
+  --select-type-to-exclude SYMBOLIC --select-type-to-exclude MNP \
+  -O "$output_dir/gatk-snp.vcf"

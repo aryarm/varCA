@@ -58,6 +58,8 @@ f==0{print "."}
 # A	<DUP>	DUP
 # A	<INV>	INV
 # A	.	.
+# .	.	.
+# .	A	.
 # AC	G	MNP
 # A	GC	MNP
 # AAG	AA	DEL

@@ -201,7 +201,7 @@ rule filter_vcf:
         "bcftools view {config[bcftools_params]} {input.vcf} > {output.vcf}"
 
 rule normalize_vcf:
-    """ normalize the vcf and remove multiallelic sites if needed """
+    """ normalize the vcf, split multiallelic sites, and remove duplicate sites if needed """
     input:
         vcf = rules.run_caller.output.vcf if 'bcftools_params' not in config \
             or not config['bcftools_params'] else rules.filter_vcf.output.vcf,
@@ -210,8 +210,8 @@ rule normalize_vcf:
         vcf = pipe(rules.run_caller.output.vcf+".norm")
     conda: "envs/bcftools.yml"
     shell:
-        "bcftools norm --check-ref xw -d all -f {input.ref} "
-        "{input.vcf} > {output.vcf}"
+        "bcftools norm -m -any | bcftools norm --check-ref xw -d all "
+        "-f {input.ref} {input.vcf} > {output.vcf}"
 
 
 rule prepare_vcf:

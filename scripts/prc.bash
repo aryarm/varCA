@@ -6,7 +6,7 @@
 # param 5: which type of variant to create plots for (ex: DEL, INS, SNP, .); separate each variant by commas if you'd like to micro average over multiple of them
 # param 6: the output file or '-' if stdout
 # param 7 (optional): whether to invert the threshold column (1) or leave it be (0) (default is 0)
-# param 8 (optional): whether to handle the sorting internally (1) or let python do it (0)
+# param 8 (optional): whether to handle the sorting internally (1) or let python do it (0) (default is 0)
 # make sure that the large tsv has columns in the order caller~REF, caller~ALT, caller~sort, truth~REF, truth~ALT
 
 

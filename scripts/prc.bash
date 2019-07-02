@@ -25,9 +25,10 @@ function binarize() {
 		# create an array of variant types called "$variants"
 		IFS=',' read -ra variants <<< "$1"
 		# call binarize on the same input with each variant type
-		for variant in "${variants[@]}"; do
-			echo "$col" | binarize "$variant"
+		for i in "${!variants[@]}"; do
+			variants[$i]="<(echo \"\$col\" | binarize "${variants[$i]}")"
 		done
+		eval "paste -d '\n' ${variants[@]}"
 	# if the user specified 'INS', 'DEL', or 'SNP' as the variant, label it as 1 and everything else as 0
 	else
 		awk '/'"$1"'/ {print 1} !/'"$1"'/ {print 0}'
@@ -48,23 +49,22 @@ paste <(
 		if [ "$3" == "(REF|ALT)" ]; then
 			"$script_dir"/classify.awk | binarize "$5"
 		else
-			# make sure to repeat the col n+1 times where n is the number of
-			# commas in the variant type string "$5"
-			col="$(cat)"
-			for (( i = 0; i < "$(awk -F, '{print NF}' <<< "$5")"; i++ )); do
-				echo "$col"
-			done
+			# make sure to repeat each line of the col n+1 times where n is the
+			# number of commas in the variant type string "$5"
+			n="$(awk -F, '{print NF}' <<< "$5")"
+			awk '{for(i=0;i<'$n';i++)print}'
 		fi
 	}
-) | {
-	# if "(REF|ALT)" is specified as the prediction column, the predictions
-	# must be sorted internally because sklearn will not perform a 'stable'
-	# sort (ie one in which ties are broken by using the original ordering)
-	# unstable sorts lead to very rectangular-ish curves
-	if [ "$8" == "1" ] || [ "$3" == "(REF|ALT)" ]; then
-		sort -s -t $'\t' -k2,2nr
-	else
-		cat
-	fi
-} | \
-python "$script_dir"/statistics.py -o "$6" "$([ "$7" == "1" ] && echo "--flip")$([ "$8" == "1" ] || [ "$3" == "(REF|ALT)" ] && echo "--sorted")";
+) | cat
+# {
+# 	# if "(REF|ALT)" is specified as the prediction column, the predictions
+# 	# must be sorted internally because sklearn will not perform a 'stable'
+# 	# sort (ie one in which ties are broken by using the original ordering)
+# 	# unstable sorts lead to very rectangular-ish curves
+# 	if [ "$8" == "1" ] || [ "$3" == "(REF|ALT)" ]; then
+# 		sort -s -t $'\t' -k2,2nr
+# 	else
+# 		cat
+# 	fi
+# } | \
+# python "$script_dir"/statistics.py -o "$6" "$([ "$7" == "1" ] && echo "--flip")$([ "$8" == "1" ] || [ "$3" == "(REF|ALT)" ] && echo "--sorted")";

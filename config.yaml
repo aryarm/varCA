@@ -54,15 +54,15 @@
 "gatk-snp" : {
   "cols": {
     'other': ["QUAL"],
-    'info': ["QD","FS","SOR","MQ","ReadPosRankSum"],
-    'format': ["DP","GT"]
+    'info': ["QD","FS","SOR","MQ","ReadPosRankSum","AC","ExcessHet"],
+    'format': ["AD","DP","GQ",GT"]
   }
 }
 
 "varscan-snp" : {
   "cols": {
     'info': ["ADP"],
-    'format': ["SDP","DP","RD","AD","FREQ","PVAL","ABQ","GT","GQ"]
+    'format': ["SDP","DP","RD","AD","FREQ","PVAL","ABQ","GT","GQ","RBQ","RDF","RDR","ADF","ADR"]
   }
 }
 
@@ -82,15 +82,15 @@
 
 "gatk-indel" : {
   "cols": {
-    'info': ["QD","FS","SOR","MQ","ReadPosRankSum"],
-    'format': ["DP","GT"]
+    'info': ["QD","FS","SOR","MQ","ReadPosRankSum","AC","ExcessHet"],
+    'format': ["AD","DP","GQ","GT"]
   }
 }
 
 "varscan-indel" : {
   "cols": {
     'info': ["ADP"],
-    'format': ["SDP","DP","RD","AD","FREQ","PVAL","ABQ","GT","GQ"]
+    'format': ["SDP","DP","RD","AD","FREQ","PVAL","ABQ","GT","GQ","RBQ","RDF","RDR","ADF","ADR"]
   }
 }
 

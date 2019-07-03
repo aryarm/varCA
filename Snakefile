@@ -144,7 +144,8 @@ rule prepare_caller:
         bam = rules.rm_dups.output.final_bam,
         peaks = rules.bed_peaks.output,
         genome = config['genome'],
-        shared = get_special_script_path
+        shared = get_special_script_path,
+        caller_script = "callers/{caller}"
     params:
         caller_params = lambda wildcards: config[wildcards.caller]['params'] if wildcards.caller in config and 'params' in config[wildcards.caller] else ""
     output:
@@ -156,7 +157,7 @@ rule prepare_caller:
     conda: "envs/default.yml"
     shell:
         "mkdir -p \"{output}\" && "
-        "callers/{wildcards.caller} {input.bam} {input.peaks} "
+        "{input.caller_script} {input.bam} {input.peaks} "
         "{input.genome} {output} {wildcards.sample} "
         "{threads} {input.shared} {params.caller_params}"
 
@@ -166,7 +167,8 @@ rule run_caller:
         bam = rules.rm_dups.output.final_bam,
         peaks = rules.bed_peaks.output,
         genome = config['genome'],
-        shared = get_special_script_path
+        shared = get_special_script_path,
+        caller_script = "callers/{caller}"
     params:
         caller_params = lambda wildcards: config[wildcards.caller]['params'] if wildcards.caller in config and 'params' in config[wildcards.caller] else "",
         out_dir = config['output_dir'] + "/callers/{sample}/{caller}"
@@ -176,7 +178,7 @@ rule run_caller:
     conda: "envs/default.yml"
     shell:
         "mkdir -p \"{params.out_dir}\" && "
-        "callers/{wildcards.caller} {input.bam} {input.peaks} "
+        "{input.caller_script} {input.bam} {input.peaks} "
         "{input.genome} {params.out_dir} {wildcards.sample} "
         "{threads} {input.shared} {params.caller_params}"
 

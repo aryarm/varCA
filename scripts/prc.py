@@ -19,13 +19,13 @@ for arg in unknown_args:
         parser.add_argument('--{}'.format(arg[2:]), type=argparse.FileType('r'))
         count += 1
 if count < 1:
-    parser.error("Specify the path to at least one two column (recall/precision) table (w/o a header) using options like --gatk-indel path/to/gatk-pr-file")
+    parser.error("Specify the path to at least one space separated table (w/o a header) with two rows (recall/precision) using options like --gatk-indel path/to/gatk-table")
 args = parser.parse_args()
 all_args = vars(args)
 
 
 # go through each table and get its name from all of the args
-for arg in all_args:
+for arg in sorted(all_args.keys()):
     if arg not in known_args:
         table = np.loadtxt(all_args[arg])
         # recall: 1st row, precision: 2nd row

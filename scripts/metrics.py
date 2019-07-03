@@ -9,10 +9,11 @@ import sklearn.metrics
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "-o", "--out", default=sys.stdout, help="the filename to save the data to"
+    "-o", "--out", type=argparse.FileType('w', encoding='UTF-8'),
+    default=sys.stdout, help="the filename to save the data to"
 )
 parser.add_argument(
-    "-m", "--metrics", default='p,r,f', help="a comma separated list of metrics to output; use 'p' for precision, 'r' for recall, and 'f' for the F-beta score"
+    "-m", "--metrics", default='r,p,f', help="a comma separated list of metrics to output; use 'p' for precision, 'r' for recall, and 'f' for the F-beta score"
 )
 parser.add_argument(
     "table", nargs="?", default=sys.stdin,
@@ -23,14 +24,16 @@ args = parser.parse_args()
 # read the file into a pandas data frame
 df = pd.read_csv(
     args.table, sep='\t', header=None, names=['truth', 'predict'],
-    index_col=False, dtype=str,
+    index_col=False, dtype={'probs': np.bool_, 'truth': np.bool_},
     low_memory=False, na_values='.'
 )
 
 to_idx = {'p': 0, 'r': 1, 'f': 2}
 metrics = [to_idx[metric] for metric in args.metrics.split(",")]
 scores = np.array(
-    sklearn.metrics.precision_recall_fscore_support(df['truth'], df['predict'])
+    sklearn.metrics.precision_recall_fscore_support(
+        df['truth'], df['predict'], average='binary'
+    )
 )
 
 np.savetxt(args.out, scores[metrics])

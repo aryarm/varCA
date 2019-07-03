@@ -29,8 +29,12 @@ for arg in all_args:
     if arg not in known_args:
         table = np.loadtxt(all_args[arg])
         # recall: 1st row, precision: 2nd row
-        area = auc(table[0], table[1])
-        plt.step(table[0], table[1], where='post', label=arg+": area={0:0.2f}".format(area))
+        if table.ndim != 1:
+            area = auc(table[0], table[1])
+            plt.step(table[0], table[1], where='post', label=arg+": area={0:0.2f}".format(area))
+        else:
+            area = table[1]
+            plt.plot(table[0], table[1], 'o', label=arg+": height={0:0.2f}".format(area))
 
 plt.legend()
 plt.xlabel('Recall')

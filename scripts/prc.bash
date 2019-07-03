@@ -1,5 +1,5 @@
 #!/bin/bash
-# param 1: the large tsv
+# param 1: the large tsv (gzipped)
 # param 2: the caller id
 # param 3: the column to threshold on or "(REF|ALT)" if the type of each variant should be used (note that using "(REF|ALT)" forces param 8 to be 1)
 # param 4: the truth set caller id
@@ -55,16 +55,15 @@ paste <(
 			awk '{for(i=0;i<'$n';i++)print}'
 		fi
 	}
-) | cat
-# {
-# 	# if "(REF|ALT)" is specified as the prediction column, the predictions
-# 	# must be sorted internally because sklearn will not perform a 'stable'
-# 	# sort (ie one in which ties are broken by using the original ordering)
-# 	# unstable sorts lead to very rectangular-ish curves
-# 	if [ "$8" == "1" ] || [ "$3" == "(REF|ALT)" ]; then
-# 		sort -s -t $'\t' -k2,2nr
-# 	else
-# 		cat
-# 	fi
-# } | \
-# python "$script_dir"/statistics.py -o "$6" "$([ "$7" == "1" ] && echo "--flip")$([ "$8" == "1" ] || [ "$3" == "(REF|ALT)" ] && echo "--sorted")";
+) | {
+	# if "(REF|ALT)" is specified as the prediction column, the predictions
+	# must be sorted internally because sklearn will not perform a 'stable'
+	# sort (ie one in which ties are broken by using the original ordering)
+	# unstable sorts lead to very rectangular-ish curves
+	if [ "$8" == "1" ] || [ "$3" == "(REF|ALT)" ]; then
+		sort -s -t $'\t' -k2,2nr
+	else
+		cat
+	fi
+} | \
+python "$script_dir"/statistics.py -o "$6" "$([ "$7" == "1" ] && echo "--flip")$([ "$8" == "1" ] || [ "$3" == "(REF|ALT)" ] && echo "--sorted")";

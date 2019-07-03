@@ -38,13 +38,13 @@
 
 # which callers do you want to run to find indels?
 # if you don't want to run the indel pipeline, set this to a falsey value or comment out the line
-"indel_callers" : ["gatk-indel", "varscan-indel", "delly", "pindel", "manta", "strelka", "pg-indel"]
+"indel_callers" : ["gatk-indel", "varscan-indel", "delly", "pindel", "illumina-manta", "illumina-strelka", "pg-indel"]
 
 # what are the maximum number of threads to use for the entire pipeline?
 "num_threads" : 8
 
 
-# CALLER SPECIFIC PARAMETERS (optional)
+# CALLER SPECIFIC PARAMETERS
 # you can specify:
 #   1) any other columns (besides CHROM, POS, REF, and ALT) to extract from the VCFs output by each caller
 #   2) any parameters that should be passed to each caller script
@@ -55,7 +55,7 @@
   "cols": {
     'other': ["QUAL"],
     'info': ["QD","FS","SOR","MQ","ReadPosRankSum"],
-    'format': ["DP",GT]
+    'format': ["DP","GT"]
   }
 }
 
@@ -75,7 +75,7 @@
 "gatk-indel" : {
   "cols": {
     'info': ["QD","FS","SOR","MQ","ReadPosRankSum"],
-    'format': ["DP",GT]
+    'format': ["DP","GT"]
   }
 }
 
@@ -97,25 +97,28 @@
   }
 }
 
-"manta" : {
+"illumina" : {
+  # 1) path to manta config file
+  # 2) path to the directory in which manta is stored or "" if manta is installed in your current conda env (ex: if using --use-conda)
+  "params": ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configManta.py.ini", ""]
+}
+
+"illumina-manta" : {
   "cols": {
     'other': ["QUAL"],
     'info': ['SVTYPE','SVLEN','CIPOS','CIEND','HOMLEN','BND_DEPTH','MATE_BND_DEPTH','JUNCTION_QUAL'],
     'format': ['GT','GQ','PL']
-  },
-  # 1) path to manta config file
-  # 2) path to the directory in which manta is stored or "" if manta is installed in the conda env (ex: if using --use-conda)
-  "params": ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configManta.py.ini", ""]
+  }
 }
 
-"strelka" : {
+"illumina-strelka" : {
   "cols": {
     'other': ["QUAL"],
     'info': ["SNVHPOL","RU","REFREP","IDREP","MQ"],
     'format': ["GT","GQ","GQX","DP","DPF","MIN_DP","AD","ADF","ADR","DPI","PL","PS","SB"]
   },
   # 1) path to strelka config file
-  # 2) path to the directory in which strelka is stored or "" if strelka is installed in the conda env (ex: if using --use-conda)
+  # 2) path to the directory in which strelka is stored or "" if strelka is installed in your current conda env (ex: if using --use-conda)
   "params": ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configureStrelkaGermlineWorkflow.py.ini", ""]
 }
 

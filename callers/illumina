@@ -35,5 +35,4 @@ bgzip -f "$peaks" -c > "$output_dir/peaks.bed.gz" && tabix -p bed -f "$output_di
 "$manta_dir"/bin/configManta.py --bam "$bam" --referenceFasta "$genome" --callRegions "$output_dir/peaks.bed.gz" --runDir "$output_dir" --config "$config"
 "$output_dir"/runWorkflow.py -m sge -j 24
 
-bgzip -d "$output_dir"/results/variants/diploidSV.vcf.gz && \
-ln -sf "$output_dir"/results/variants/diploidSV.vcf "$output_dir/manta.vcf"
+bgzip -d "$output_dir"/results/variants/diploidSV.vcf.gz

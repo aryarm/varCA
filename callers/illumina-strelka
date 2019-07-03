@@ -9,10 +9,12 @@ genome="$3"
 [[ -z "$3" ]] && { echo "Parameter 3 is empty" 1>&2; exit 1; }
 output_dir="$4"
 [[ -z "$4" ]] && { echo "Parameter 4 is empty" 1>&2; exit 1; }
-config="$7"
+illumina_dir="$7"
 [[ -z "$7" ]] && { echo "Parameter 7 is empty" 1>&2; exit 1; }
-strelka_dir="$8"
-if [[ -z "$8" ]]; then
+config="$8"
+[[ -z "$8" ]] && { echo "Parameter 8 is empty" 1>&2; exit 1; }
+strelka_dir="$9"
+if [[ -z "$9" ]]; then
 	echo "Strelka directory not specified. Attempting to retrieve from conda env..." 1>&2
 	if [[ -z "$CONDA_PREFIX" ]]; then
 		echo "Error: not running in conda env" 1>&2; exit 1;
@@ -24,7 +26,7 @@ if [[ -z "$8" ]]; then
 		strelka_dir="$CONDA_PREFIX"/share/"$strelka_dir"
 	fi
 else
-	strelka_dir="$8"
+	strelka_dir="$9"
 fi
 echo "Using strelka dir: $strelka_dir" 1>&2
 
@@ -32,7 +34,11 @@ echo "Using strelka dir: $strelka_dir" 1>&2
 # bgzip compress and index the bed file
 bgzip -f "$peaks" -c > "$output_dir/peaks.bed.gz" && tabix -p bed -f "$output_dir/peaks.bed.gz"
 
-"$strelka_dir"/bin/configureStrelkaGermlineWorkflow.py --bam "$bam" --referenceFasta "$genome" --callRegions "$output_dir/peaks.bed.gz" --runDir "$output_dir" --config "$config"
+"$strelka_dir"/bin/configureStrelkaGermlineWorkflow.py --bam "$bam" \
+--referenceFasta "$genome" --callRegions "$output_dir/peaks.bed.gz" \
+--runDir "$output_dir" --config "$config" \
+--indelCandidates "$illumina_dir"/results/variants/candidateSV.vcf.gz
+
 "$output_dir"/runWorkflow.py -m sge -j 24
 
 bgzip -d "$output_dir"/results/variants/genome.S1.vcf.gz && \

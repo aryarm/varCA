@@ -30,7 +30,7 @@ Separate steps must be performed later to separate the two variant types into di
 
 Well, you can create two different caller scripts `gatk-snp` and `gatk-indel` that each take as input the output of GATK (which is generated using a different special script `gatk`).
 Then `gatk-snp` and `gatk-indel` can each extract SNVs and indels from the output of `gatk`, respectively.
-Note that in this example, `gatk` is not a caller script (and should not be used as one) because it will not produce TSV output.
+Note that in this example, `gatk` is not a caller script (and cannot be used as one) because it will not produce TSV output. Even if it did, it would be ignored.
 
 By providing a dash character `-` in the caller identifier, the caller script (ex: `gatk-snp`) can communicate to the pipeline that it requires input(s) from another special script with the same filename but without the characters after the final dash (ex: `gatk-snp` => `gatk`).
 The pipeline will run this separate script first but with the same parameters as the caller script, and the directory containing its output will be passed to the original caller script.

@@ -212,8 +212,8 @@ rule normalize_vcf:
         vcf = pipe(rules.run_caller.output.vcf+".norm")
     conda: "envs/bcftools.yml"
     shell:
-        "bcftools norm -m -any | bcftools norm --check-ref xw -d all "
-        "-f {input.ref} {input.vcf} > {output.vcf}"
+        "bcftools norm -m -any {input.vcf} | bcftools norm --check-ref xw -d "
+	"all -f {input.ref} > {output.vcf}"
 
 
 rule prepare_vcf:

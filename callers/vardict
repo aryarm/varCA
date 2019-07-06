@@ -13,6 +13,6 @@ samp="$5"
 [[ -z "$5" ]] && { echo "Parameter 5 is empty" 1>&2; exit 1; }
 
 
-vardict-java -G "$genome" -N "$samp" -b "$bam" -v -c 1 -S 2 -E 3 "$peaks" | \
-var2vcf_valid.pl | bgzip > "$output_dir/vardict.vcf.gz" && \
-tabix -p vcf -f "$output_dir/varscan.vcf.gz"
+vardict-java -G "$genome" -N "$samp" -b "$bam" -v -c 1 -S 2 -E 3 "$peaks" -VS SILENT | \
+teststrandbias.R | var2vcf_valid.pl | bgzip > "$output_dir/vardict.vcf.gz" && \
+tabix -p vcf -f "$output_dir/vardict.vcf.gz"

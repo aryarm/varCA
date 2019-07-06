@@ -42,4 +42,4 @@ bgzip -f "$peaks" -c > "$output_dir/peaks.bed.gz" && tabix -p bed -f "$output_di
 "$output_dir"/runWorkflow.py -m sge -j 24
 
 bgzip -d "$output_dir"/results/variants/genome.S1.vcf.gz && \
-ln -sf "$output_dir"/results/variants/genome.S1.vcf "$output_dir/strelka.vcf"
+ln -sf "$output_dir"/results/variants/genome.S1.vcf "$output_dir/illumina-strelka.vcf"

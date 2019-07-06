@@ -68,7 +68,7 @@
 
 "vardict-snp" : {
   "cols": {
-    'other': ["QUAL"]
+    'other': ["QUAL"],
     'info': ["TYPE","DP","VD","AF","QSTD","MQ","SN","HIAF","ADJAF","NM","SVTYPE","SVLEN","DUPRATE"],
     'format': ["GT"]
   }
@@ -96,7 +96,7 @@
 
 "vardict-indel" : {
   "cols": {
-    'other': ["QUAL"]
+    'other': ["QUAL"],
     'info': ["TYPE","DP","VD","AF","QSTD","MQ","SN","HIAF","ADJAF","NM","SVTYPE","SVLEN","DUPRATE"],
     'format': ["GT"]
   }

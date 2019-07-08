@@ -28,20 +28,3 @@ else
 	echo "No data provided..." 2>&1
 	exit 1
 fi
-
-# awk -F $'\t' -v 'OFS=\t' '
-# NR==1
-# {
-# 	for(i=1; i<=NF; i++)
-# 	if ($i~/'"$1"'/) {
-# 		a[i]++;
-# 	}
-# 	print NR;
-# }
-# {
-# 	for (i=1; i<=NF; i++)
-# 	if (a[i]) {
-# 		printf $i""OFS;
-# 	}
-# 	print ""
-# }' "${@:2}" | sed 's/\t$//'

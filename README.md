@@ -20,4 +20,4 @@ The pipeline is written as Snakefiles and so can be executed via [Snakemake](htt
 By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing the pipeline.
 
 # dependencies
-If you have [conda](https://conda.io/docs/user-guide/install/index.html) installed (highly recommended), use the `--use-conda` flag when calling `snakemake` to let it automatically handle all dependencies of the pipeline. Otherwise, you must manually install the dependencies listed in the [env.yml](https://github.com/aryam7/merge_callers/blob/master/env.yml) file.
+If you have [conda](https://conda.io/docs/user-guide/install/index.html) installed (highly recommended), use the `--use-conda` flag when calling `snakemake` to let it automatically handle all dependencies of the pipeline. Otherwise, you must manually install the dependencies listed in the [env](https://github.com/aryam7/merge_callers/blob/master/envs) files.

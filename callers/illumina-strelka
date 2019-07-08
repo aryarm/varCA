@@ -31,11 +31,8 @@ fi
 echo "Using strelka dir: $strelka_dir" 1>&2
 
 
-# bgzip compress and index the bed file
-bgzip -f "$peaks" -c > "$output_dir/peaks.bed.gz" && tabix -p bed -f "$output_dir/peaks.bed.gz"
-
 "$strelka_dir"/bin/configureStrelkaGermlineWorkflow.py --bam "$bam" \
---referenceFasta "$genome" --callRegions "$output_dir/peaks.bed.gz" \
+--referenceFasta "$genome" --callRegions "$illumina_dir/peaks.bed.gz" \
 --runDir "$output_dir" --config "$config" \
 --indelCandidates "$illumina_dir"/results/variants/candidateSV.vcf.gz
 

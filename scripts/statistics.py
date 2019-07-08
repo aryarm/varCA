@@ -44,7 +44,7 @@ df.fillna(0, inplace=True)
 if args.sorted:
     print("Input already sorted.", file=sys.stderr)
     scores = df.index/df.index[-1]
-    # predictions are already technically already inverted
+    # predictions are already technically inverted
     if not args.flip:
         scores = 1-scores
     else:

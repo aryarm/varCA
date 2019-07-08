@@ -24,7 +24,7 @@
 # parameters to use when calling bcftools to filter the VCF output of every caller script
 # see http://www.htslib.org/doc/bcftools.html#view for all possible options
 # use an empty string or comment out this line if you'd like your VCFs unfiltered
-"bcftools_params" : "-M 2"
+# "bcftools_params" : "-M 2"
 
 # whether to "normalize" the VCF output of every caller script
 # normalization usually involves left-alignment and trimming of variants

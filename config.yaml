@@ -113,12 +113,6 @@
   }
 }
 
-"illumina" : {
-  # 1) path to manta config file
-  # 2) path to the directory in which manta is stored or "" if manta is installed in your current conda env (ex: if using --use-conda)
-  "params": ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configManta.py.ini", ""]
-}
-
 "illumina-manta" : {
   "cols": {
     'other': ["QUAL"],
@@ -138,10 +132,24 @@
   "params": ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configureStrelkaGermlineWorkflow.py.ini", ""]
 }
 
+"breakca" : {
+  # specify that breakca creates a tsv instead of a vcf
+  "ext": 'tsv'
+}
+
 "pg-indel" : {
   "cols": {'format': ["GT"]},
   # path to a bgzip, indexed VCF containing variants called in the platinum genomes project
   "params": "/iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz"
+}
+
+
+# Custom parameters can also be passed to special scripts that perform pre-caller steps
+
+"illumina" : {
+  # 1) path to manta config file
+  # 2) path to the directory in which manta is stored or "" if manta is installed in your current conda env (ex: if using --use-conda)
+  "params": ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configManta.py.ini", ""]
 }
 
 "pg" : {

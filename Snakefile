@@ -1,4 +1,5 @@
 import os
+import re
 import hashlib
 import warnings
 from snakemake.utils import min_version
@@ -151,8 +152,8 @@ rule prepare_caller:
     output:
         directory(config['output_dir'] + "/callers/{sample}/{caller}")
     wildcard_constraints:
-        sample="[^\/]*",
-        caller="[^\/]*"
+        sample = "[^\/]*",
+        caller = "[^\/]*"
     threads: config['num_threads']
     conda: "envs/default.yml"
     shell:
@@ -173,7 +174,9 @@ rule run_caller:
         caller_params = lambda wildcards: config[wildcards.caller]['params'] if wildcards.caller in config and 'params' in config[wildcards.caller] else "",
         out_dir = config['output_dir'] + "/callers/{sample}/{caller}"
     output:
-        vcf = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.vcf"
+        vcf = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.{ext}"
+    wildcard_constraints:
+        ext = "(tsv|vcf)"
     threads: config['num_threads']
     conda: "envs/default.yml"
     shell:
@@ -192,12 +195,19 @@ def sorted_cols(cols):
     ]
 
 
+def caller_out(ext):
+    # I'm embarassed by this code but it's the simplest way to achieve this
+    if not ext:
+        ext = 'vcf'
+    return re.sub("{ext}$", ext, rules.run_caller.output.vcf)
+
+
 rule filter_vcf:
     """ filter the vcf if needed """
     input:
-        vcf = rules.run_caller.output.vcf
+        vcf = caller_out('vcf')
     output:
-        vcf = pipe(rules.run_caller.output.vcf+".filter")
+        vcf = pipe(caller_out('vcf')+".filter")
     conda: "envs/bcftools.yml"
     shell:
         "bcftools view {config[bcftools_params]} {input.vcf} > {output.vcf}"
@@ -205,11 +215,11 @@ rule filter_vcf:
 rule normalize_vcf:
     """ normalize the vcf, split multiallelic sites, and remove duplicate sites if needed """
     input:
-        vcf = rules.run_caller.output.vcf if 'bcftools_params' not in config \
+        vcf = caller_out('vcf') if 'bcftools_params' not in config \
             or not config['bcftools_params'] else rules.filter_vcf.output.vcf,
         ref = config['genome']
     output:
-        vcf = pipe(rules.run_caller.output.vcf+".norm")
+        vcf = pipe(caller_out('vcf')+".norm")
     conda: "envs/bcftools.yml"
     shell:
         "bcftools norm -m -any {input.vcf} | bcftools norm --check-ref xw -d "
@@ -219,13 +229,13 @@ rule normalize_vcf:
 rule prepare_vcf:
     """ bgzip and index the vcf """
     input:
-        vcf = rules.run_caller.output.vcf if 'bcftools_params' not in config \
+        vcf = caller_out('vcf') if 'bcftools_params' not in config \
             or not config['bcftools_params'] else rules.filter_vcf.output.vcf \
             if 'normalize' not in config or not config['normalize'] else \
             rules.normalize_vcf.output.vcf
     output:
-        gzvcf = rules.run_caller.output.vcf+".gz",
-        index = rules.run_caller.output.vcf+".gz.tbi"
+        gzvcf = caller_out('vcf')+".gz",
+        index = caller_out('vcf')+".gz.tbi"
     conda: "envs/default.yml"
     shell:
         "bgzip <{input.vcf} >{output.gzvcf} && tabix -p vcf -f {output.gzvcf}"
@@ -280,6 +290,18 @@ rule vcf2tsv:
         "bcftools query -f '{params.qstr}' {input.gzvcf} >> {output.tsv}"
 
 
+def caller_tsv(wildcards):
+    if wildcards.caller in config and 'ext' in config[wildcards.caller] and config[wildcards.caller]['ext'] == 'tsv':
+        return expand(
+            caller_out('tsv'),
+            sample=wildcards.sample, caller=wildcards.caller
+        )[0]
+    return expand(
+        rules.vcf2tsv.output.tsv, hash=cols_str(wildcards),
+        sample=wildcards.sample, caller=wildcards.caller
+    )[0]
+
+
 rule prepare_merge:
     """
         1) add the caller as a prefix of every column name
@@ -290,12 +312,7 @@ rule prepare_merge:
         (not necessarily in that order)
     """
     input:
-        tsv = lambda wildcards: expand(
-            rules.vcf2tsv.output.tsv,
-            hash=cols_str(wildcards),
-            sample=wildcards.sample,
-            caller=wildcards.caller
-        )
+        tsv = caller_tsv
     output:
         pipe(config['output_dir'] + "/callers/{sample}/{caller}/prepared.tsv")
     conda: "envs/default.yml"
@@ -324,12 +341,7 @@ rule join_all_sites:
     """
     input:
         sites = rules.get_all_sites.output,
-        tsv = lambda wildcards: expand(
-            rules.vcf2tsv.output.tsv,
-            hash=cols_str(wildcards),
-            sample=wildcards.sample,
-            caller=wildcards.caller
-        ),
+        tsv = caller_tsv,
         prepared_tsv = rules.prepare_merge.output
     output:
         pipe(config['output_dir'] + "/merged_{type}/{sample}.{caller}.tsv")

@@ -22,6 +22,8 @@ Each caller script must use the provided output directory path for all of its ou
 
 Besides this requirement, there is only one other: that at the end of its execution, the script create a VCF file named by the caller identifier followed by a ".vcf" extension. The VCF file cannot be gzipped.
 
+You may optionally specify that the caller script outputs a TSV instead of a VCF by adding an 'ext' attribute with a value of 'tsv' to the caller's parameter dictionary in the [config file](https://github.com/aryam7/merge_callers/blob/master/config.yaml). The TSV file must be named similarly to the VCF, except that it must have a ".tsv" instead of a ".vcf" extension. The first four columns of the TSV must be "CHROM", "POS", "REF", and "ALT" in that order.
+
 ### Caller scripts that depend on other scripts
 Some caller scripts must depend on a different script for special input.
 
@@ -35,4 +37,4 @@ Note that in this example, `gatk` is not a caller script (and cannot be used as 
 By providing a dash character `-` in the caller identifier, the caller script (ex: `gatk-snp`) can communicate to the pipeline that it requires input(s) from another special script with the same filename but without the characters after the final dash (ex: `gatk-snp` => `gatk`).
 The pipeline will run this separate script first but with the same parameters as the caller script, and the directory containing its output will be passed to the original caller script.
 
-By providing multiple dashes in your caller identifiers using this scheme, you may design complicated caller script heirarchies involving multiple levels of nesting. In a sense, you can create pipelines within the pipeline.
+By providing multiple dashes in your caller identifiers using this scheme, you may design complicated caller script heirarchies involving multiple levels of nesting. In a sense, you can create small pipelines within the pipeline.

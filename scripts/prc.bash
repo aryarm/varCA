@@ -47,7 +47,7 @@ if [ ! -z "$6" ]; then
 	filter_cols="$(paste -s -d'|' <<< "$filter_col")"
 	# prepare a function for filtering the rows
 	function filter_cols() {
-		awk -F $"\t" -v 'OFS=\t' "$(paste -d'\0' <(seq 3 1 "$((2+$(wc -l <<< "$filter_col")))" | sed 's/^/$/') <(tr , '\n' <<< "$1" | sed -r 's/^('"$filter_cols"')//') | paste -s -d, | sed 's/,/ \&\& /g')"
+		awk -F $"\t" -v 'OFS=\t' "$(gawk -v'RS=,' -v'ORS= && ' '{split($0,a,"(>|<|==)",seps); print "$" ++i+2 seps[length(seps)] a[length(a)] }' <<< "$1" | head -n1)" | cut -f -2;
 	}
 fi
 
@@ -79,16 +79,15 @@ paste <(
 			binarize "$(sed 's/[^,]//g' <<< "$4"),"
 		)
 	fi
-} | filter_cols "$6" | cat
-# } | {
-# 	# if "(REF|ALT)" is specified as the prediction column, the predictions
-# 	# must be sorted internally because sklearn will not perform a 'stable'
-# 	# sort (ie one in which ties are broken by using the original ordering)
-# 	# unstable sorts lead to very rectangular-ish curves
-# 	if [ "$8" == "1" ] || [ "${3:(-9)}" == "(REF|ALT)" ]; then
-# 		sort -s -t $'\t' -k2,2nr
-# 	else
-# 		cat
-# 	fi
-# } | \
-# python "$script_dir"/statistics.py -o "$5" "$([ "$7" == "1" ] && echo "--flip")$([ "$8" == "1" ] || [ "${3:(-9)}" == "(REF|ALT)" ] && echo "--sorted")";
+} | filter_cols "$6" | {
+	# if "(REF|ALT)" is specified as the prediction column, the predictions
+	# must be sorted internally because sklearn will not perform a 'stable'
+	# sort (ie one in which ties are broken by using the original ordering)
+	# unstable sorts lead to very rectangular-ish curves
+	if [ "$8" == "1" ] || [ "${3:(-9)}" == "(REF|ALT)" ]; then
+		sort -s -t $'\t' -k2,2nr
+	else
+		cat
+	fi
+} | \
+python "$script_dir"/statistics.py -o "$5" "$([ "$7" == "1" ] && echo "--flip")$([ "$8" == "1" ] || [ "${3:(-9)}" == "(REF|ALT)" ] && echo "--sorted")";

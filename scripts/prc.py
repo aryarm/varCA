@@ -3,6 +3,8 @@
 import sys
 import argparse
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from sklearn.metrics import auc
 
@@ -24,6 +26,7 @@ args = parser.parse_args()
 all_args = vars(args)
 
 
+colors = {}
 # go through each table and get its name from all of the args
 for arg in sorted(all_args.keys()):
     if arg not in known_args:
@@ -31,10 +34,22 @@ for arg in sorted(all_args.keys()):
         # recall: 1st row, precision: 2nd row
         if table.ndim != 1:
             area = auc(table[0], table[1])
-            plt.step(table[0], table[1], where='post', label=arg+": area={0:0.2f}".format(area))
+            colors[arg] = plt.step(
+                table[0], table[1], where='post',
+                label=arg+": area={0:0.2f}".format(area)
+            )[0].get_color()
         else:
             area = table[1]
-            plt.plot(table[0], table[1], 'o', label=arg+": height={0:0.2f}".format(area))
+            # check if this pt has a curve of the same name
+            # to make sure they're the same color
+            if arg.endswith("_pt") and arg[:-3] in colors:
+                color = {'color': colors[arg[:-3]]}
+            else:
+                color = {}
+            plt.plot(
+                table[0], table[1], 'o',
+                label=arg+": height={0:0.2f}".format(area), **color
+            )
 
 plt.legend()
 plt.xlabel('Recall')

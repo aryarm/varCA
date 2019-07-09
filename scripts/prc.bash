@@ -77,15 +77,22 @@ paste <(
 		paste - <(
 			zcat "$1" | "$script_dir"/get_cols.bash '^('"$filter_cols"')$' | tail -n+2 | \
 			binarize "$(sed 's/[^,]//g' <<< "$4"),"
-		)
+		) | filter_cols "$6"
 	fi
-} | filter_cols "$6" | {
+} | {
+	if [ "$7" == "1" ]; then
+		# make sure NA is interpreted as a really large number instead of a small one
+		awk -F $'\t' -v 'OFS=\t' '$2 == "." {$2="inf"}1'
+	else
+		cat
+	fi
+} | {
 	# if "(REF|ALT)" is specified as the prediction column, the predictions
 	# must be sorted internally because sklearn will not perform a 'stable'
-	# sort (ie one in which ties are broken by using the original ordering)
+	# sort (ie one in which ties are broken by using the original ordering).
 	# unstable sorts lead to very rectangular-ish curves
 	if [ "$8" == "1" ] || [ "${3:(-9)}" == "(REF|ALT)" ]; then
-		sort -s -t $'\t' -k2,2nr
+		sort -s -t $'\t' -k2,2gr
 	else
 		cat
 	fi

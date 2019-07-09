@@ -66,7 +66,7 @@ paste <(
 		paste - <(
 			zcat "$1" | "$script_dir"/get_cols.bash '^('"$filter_cols"')$' | tail -n+2 | \
 			binarize "$(sed 's/[^,]//g' <<< "$4"),"
-		)
+		) | filter_cols "$6"
 	fi
-} | filter_cols "$6" | \
+} | \
 python "$script_dir"/metrics.py -o "$5";

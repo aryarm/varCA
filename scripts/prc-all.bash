@@ -31,7 +31,6 @@ for variant_type in '.'; do
 		elif [ "$caller" == "varscan-snp" ]; then
 			col="PVAL"
 			flip='1'
-			sort='0'
 		elif [ "$caller" == "vardict-snp" ]; then
 			col="QUAL"
 		else
@@ -55,7 +54,6 @@ for variant_type in '.' 'DEL' 'INS' 'DEL,INS'; do
 		elif [ "$caller" == "varscan-indel" ]; then
 			col="PVAL"
 			flip='1'
-			sort='0'
 		elif [ "$caller" == "vardict-indel" ]; then
 			col="QUAL"
 		elif [ "$caller" == 'pindel' ] || [ "$caller" == 'illumina-manta' ] || [ "$caller" == 'illumina-strelka' ]; then

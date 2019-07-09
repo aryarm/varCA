@@ -51,7 +51,7 @@ for arg in sorted(all_args.keys()):
                 label=arg+": height={0:0.2f}".format(area), **color
             )
 
-plt.legend()
+plt.legend(bbox_to_anchor=(1.02, 1), loc="upper left")
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.ylim([0.0, 1.0])

@@ -134,7 +134,10 @@
 
 "breakca" : {
   # specify that breakca creates a tsv instead of a vcf
-  "ext": 'tsv'
+  "ext": 'tsv',
+  # the (relative) path to the root of the breakCA git repository
+  # code is adapted from https://github.com/Arkosen/BreakCA
+  "params": "breakCA"
 }
 
 "pg-indel" : {

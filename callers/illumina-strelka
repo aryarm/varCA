@@ -31,9 +31,11 @@ fi
 echo "Using strelka dir: $strelka_dir" 1>&2
 
 
+rm -r "$output_dir"/results "$output_dir"/workspace "$output_dir"/workflow* "$output_dir"/runWorkflow* || true
+
 "$strelka_dir"/bin/configureStrelkaGermlineWorkflow.py --bam "$bam" \
 --referenceFasta "$genome" --callRegions "$illumina_dir/peaks.bed.gz" \
---runDir "$output_dir" --config "$config" \
+--runDir "$output_dir" --config "$config" --exome \
 --indelCandidates "$illumina_dir"/results/variants/candidateSV.vcf.gz
 
 "$output_dir"/runWorkflow.py -m sge -j 24

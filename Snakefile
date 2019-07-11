@@ -215,8 +215,8 @@ rule filter_vcf:
 rule normalize_vcf:
     """ normalize the vcf, split multiallelic sites, and remove duplicate sites if needed """
     input:
-        vcf = caller_out('vcf') if 'bcftools_params' not in config \
-            or not config['bcftools_params'] else rules.filter_vcf.output.vcf,
+        vcf = rules.filter_vcf.output.vcf if 'bcftools_params' in config \
+            and config['bcftools_params'] else caller_out('vcf'),
         ref = config['genome']
     output:
         vcf = pipe(caller_out('vcf')+".norm")
@@ -229,10 +229,10 @@ rule normalize_vcf:
 rule prepare_vcf:
     """ bgzip and index the vcf """
     input:
-        vcf = caller_out('vcf') if 'bcftools_params' not in config \
-            or not config['bcftools_params'] else rules.filter_vcf.output.vcf \
-            if 'normalize' not in config or not config['normalize'] else \
-            rules.normalize_vcf.output.vcf
+        vcf = rules.normalize_vcf.output.vcf if 'normalize' in config \
+            and config['normalize'] else rules.filter_vcf.output.vcf \
+            if 'bcftools_params' in config and config['bcftools_params'] else \
+            caller_out('vcf')
     output:
         gzvcf = caller_out('vcf')+".gz",
         index = caller_out('vcf')+".gz.tbi"

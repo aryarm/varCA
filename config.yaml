@@ -55,7 +55,7 @@
   "cols": {
     'other': ["QUAL"],
     'info': ["QD","FS","SOR","MQ","ReadPosRankSum","AC","ExcessHet"],
-    'format': ["AD","DP","GQ",GT"]
+    'format': ["AD","DP","GQ","GT"]
   }
 }
 
@@ -116,8 +116,8 @@
 "illumina-manta" : {
   "cols": {
     'other': ["QUAL"],
-    'info': ['SVTYPE','SVLEN','CIPOS','CIEND','HOMLEN','BND_DEPTH','MATE_BND_DEPTH','JUNCTION_QUAL'],
-    'format': ['GT','GQ','PL']
+    'info': ["SVTYPE","SVLEN","CIPOS","CIEND","HOMLEN","BND_DEPTH","MATE_BND_DEPTH","JUNCTION_QUAL"],
+    'format': ["GT","GQ","PL"]
   }
 }
 
@@ -128,16 +128,16 @@
     'format': ["GT","GQ","GQX","DP","DPF","MIN_DP","AD","ADF","ADR","DPI","PL","PS","SB"]
   },
   # 1) path to strelka config file
-  # 2) path to the directory in which strelka is stored or "" if strelka is installed in your current conda env (ex: if using --use-conda)
+  # 2) path to the directory in which strelka is stored or "" if strelka is installed in your current conda env (or if using --use-conda)
   "params": ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configureStrelkaGermlineWorkflow.py.ini", ""]
 }
 
 "breakca" : {
   # specify that breakca creates a tsv instead of a vcf
   "ext": 'tsv',
-  # the (relative) path to the root of the breakCA git repository
-  # code is adapted from https://github.com/Arkosen/BreakCA
-  "params": "breakCA"
+  # 1) the (relative) path to the root of the breakCA git repository
+  # 2) path to the directory in which the Rscript executable is held or "" if R is installed in your current conda env (or if using --use-conda)
+  "params": ["breakCA", ""]
 }
 
 "pg-indel" : {
@@ -151,7 +151,7 @@
 
 "illumina" : {
   # 1) path to manta config file
-  # 2) path to the directory in which manta is stored or "" if manta is installed in your current conda env (ex: if using --use-conda)
+  # 2) path to the directory in which manta is stored or "" if manta is installed in your current conda env (or if using --use-conda)
   "params": ["/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configManta.py.ini", ""]
 }
 

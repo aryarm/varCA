@@ -20,8 +20,8 @@ indel_truth="pg-indel"
 # what depths would we like to filter at?
 depths=('' 0 5 10 20)
 
-mkdir -p "$points_out"
-mkdir -p "$plots_out"
+mkdir -p "$out/points"
+mkdir -p "$out/plots"
 
 for depth in "${depths[@]}"; do
 	if [ -z "$depth" ]; then
@@ -29,7 +29,7 @@ for depth in "${depths[@]}"; do
 	else
 		depth_expr='gatk-snp~DP>'"$depth"
 	fi
-	out_dir="$points_out/d$depth"
+	out_dir="$out/points/d$depth"
 	mkdir -p "$out_dir"
 	mkdir -p "$out_dir/curves"
 	mkdir -p "$out_dir/singles"
@@ -67,7 +67,7 @@ for depth in "${depths[@]}"; do
 		depth_expr='gatk-indel~DP>'"$depth"
 		variant_types=('.')
 	fi
-	out_dir="$points_out/d$depth"
+	out_dir="$out/points/d$depth"
 	mkdir -p "$out_dir"
 	mkdir -p "$out_dir/curves"
 	mkdir -p "$out_dir/singles"

@@ -234,8 +234,8 @@ rule prepare_vcf:
             if 'bcftools_params' in config and config['bcftools_params'] else \
             caller_out('vcf')
     output:
-        gzvcf = caller_out('vcf')+".gz",
-        index = caller_out('vcf')+".gz.tbi"
+        gzvcf = temp(caller_out('vcf')+".gz"),
+        index = temp(caller_out('vcf')+".gz.tbi")
     conda: "envs/default.yml"
     shell:
         "bgzip <{input.vcf} >{output.gzvcf} && tabix -p vcf -f {output.gzvcf}"

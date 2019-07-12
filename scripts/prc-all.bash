@@ -105,8 +105,10 @@ done
 for depth in "${depths[@]}"; do
 	points_out="$out/points/d$depth"
 	plots_out="$out/plots/d$depth"
+	mkdir -p "$plots_out"
 
 	[ ! -f "$plots_out/all-callers.snv.png" ] && \
+	echo "all-callers.snv at d=$depth" 1>&2 && \
 	python "$script_dir"/prc.py "$plots_out/all-callers.snv.png" \
 	--gatk-snp "$points_out/curves/gatk-snp...txt" \
 	--gatk-snp-pt "$points_out/singles/gatk-snp...txt" \
@@ -116,6 +118,7 @@ for depth in "${depths[@]}"; do
 	--vardict-snp-pt "$points_out/singles/vardict-snp...txt"
 
 	[ ! -f "$plots_out/all-callers.indel.png" ] && \
+	echo "all-callers.indel at d=$depth" 1>&2 && \
 	python "$script_dir"/prc.py "$plots_out/all-callers.indel.png" \
 	--gatk-indel "$points_out/curves/gatk-indel...txt" \
 	--gatk-indel-pt "$points_out/singles/gatk-indel...txt" \
@@ -131,6 +134,7 @@ for depth in "${depths[@]}"; do
 
 	if [ -z "$depth" ]; then
 		[ ! -f "$plots_out/all-callers-micro.indel.png" ] && \
+		echo "all-callers-micro.indel" 1>&2 && \
 		python "$script_dir"/prc.py "$plots_out/all-callers-micro.indel.png" \
 		--gatk-indel "$points_out/curves/gatk-indel.DEL_INS.txt" \
 		--gatk-indel-pt "$points_out/singles/gatk-indel.DEL_INS.txt" \
@@ -147,6 +151,7 @@ for depth in "${depths[@]}"; do
 		--illumina-strelka-pt "$points_out/singles/illumina-strelka.DEL_INS.txt"
 
 		[ ! -f "$plots_out/all-callers-micro.indel.png" ] && \
+		echo "all-callers-micro.indel" 1>&2 && \
 		python "$script_dir"/prc.py "$plots_out/all-callers-micro.indel.png" \
 		--gatk-indel "$points_out/curves/gatk-indel.DEL_INS.txt" \
 		--varscan-indel "$points_out/curves/varscan-indel.DEL_INS.txt" \
@@ -155,30 +160,35 @@ for depth in "${depths[@]}"; do
 		--illumina-strelka "$points_out/curves/illumina-strelka.DEL_INS.txt"
 
 		[ ! -f "$plots_out/gatk-indel-multi.png" ] && \
+		echo "gatk-indel-multi" 1>&2 && \
 		python "$script_dir"/prc.py "$plots_out/gatk-indel-multi.png" \
 		--gatk-micro "$points_out/curves/gatk-indel.DEL_INS.txt" \
 		--gatk-ins "$points_out/curves/gatk-indel.INS.txt" \
 		--gatk-del "$points_out/curves/gatk-indel.DEL.txt"
 
 		[ ! -f "$plots_out/varscan-indel-multi.png" ] && \
+		echo "varscan-indel-multi" 1>&2 && \
 		python "$script_dir"/prc.py "$plots_out/varscan-indel-multi.png" \
 		--varscan-micro "$points_out/curves/varscan-indel.DEL_INS.txt" \
 		--varscan-ins "$points_out/curves/varscan-indel.INS.txt" \
 		--varscan-del "$points_out/curves/varscan-indel.DEL.txt"
 
 		[ ! -f "$plots_out/vardict-indel-multi.png" ] && \
+		echo "vardict-indel-multi" 1>&2 && \
 		python "$script_dir"/prc.py "$plots_out/vardict-indel-multi.png" \
 		--vardict-micro "$points_out/curves/vardict-indel.DEL_INS.txt" \
 		--vardict-ins "$points_out/curves/vardict-indel.INS.txt" \
 		--vardict-del "$points_out/curves/vardict-indel.DEL.txt"
 
 		[ ! -f "$plots_out/illumina-manta-multi.png" ] && \
+		echo "illumina-manta-multi" 1>&2 && \
 		python "$script_dir"/prc.py "$plots_out/illumina-manta-multi.png" \
 		--manta-micro "$points_out/curves/illumina-manta.DEL_INS.txt" \
 		--manta-ins "$points_out/curves/illumina-manta.INS.txt" \
 		--manta-del "$points_out/curves/illumina-manta.DEL.txt"
 
 		[ ! -f "$plots_out/illumina-strelka-multi.png" ] && \
+		echo "illumina-strelka-multi" 1>&2 && \
 		python "$script_dir"/prc.py "$plots_out/illumina-strelka-multi.png" \
 		--strelka-micro "$points_out/curves/illumina-strelka.DEL_INS.txt" \
 		--strelka-ins "$points_out/curves/illumina-strelka.INS.txt" \

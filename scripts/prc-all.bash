@@ -56,6 +56,13 @@ for depth in "${depths[@]}"; do
 			"$script_dir"/metrics.bash "$snp_table" "$caller" "$snp_truth" \
 			"$variant_type" "$out_dir/singles/$caller.${variant_type//,/_}.txt" "$depth_expr"
 		done
+		# create a summary table of all single point metrics
+		if [ "$variant_type" == "." ]; then
+			single_paths=( "${snp_callers[@]/#/$out_dir/singles/}" )
+			echo "snp_summary at d=$depth" 1>&2;
+			echo -e "recall\nprecision\nf-beta" | paste - "${single_paths[@]/%/...txt}" > "$out_dir/singles/snp_summary.tsv"
+			echo "$(echo 'metric' "${snp_callers[@]}" | tr ' ' '\t' | cat - "$out_dir/singles/snp_summary.tsv")" > "$out_dir/singles/snp_summary.tsv"
+		fi
 	done
 done
 
@@ -98,6 +105,17 @@ for depth in "${depths[@]}"; do
 			"$script_dir"/metrics.bash "$indel_table" "$caller" "$indel_truth" \
 			"$variant_type" "$out_dir/singles/$caller.${variant_type//,/_}.txt" "$depth_expr"
 		done
+		# create a summary table of all single point metrics
+		if [ "$variant_type" == "." ]; then
+			single_paths=( "${indel_callers[@]/#/$out_dir/singles/}" )
+			echo "indel_summary at d=$depth" 1>&2;
+			echo -e "recall\nprecision\nf-beta" | paste - "${single_paths[@]/%/...txt}" > "$out_dir/singles/indel_summary.tsv"
+			echo "$(echo 'metric' "${indel_callers[@]}" | tr ' ' '\t' | cat - "$out_dir/singles/indel_summary.tsv")" > "$out_dir/singles/indel_summary.tsv"
+			if [ -f "$out_dir/singles/snp_summary.tsv" ] && [ -f "$out_dir/singles/indel_summary.tsv" ]; then
+				echo "overall summary at d=$depth" 1>&2
+				cut -f 2- "$out_dir/singles/indel_summary.tsv" | paste "$out_dir/singles/snp_summary.tsv" - > "$out_dir/singles/summary.tsv"
+			fi
+		fi
 	done
 done
 
@@ -142,8 +160,6 @@ for depth in "${depths[@]}"; do
 		--varscan-indel-pt "$points_out/singles/varscan-indel.DEL_INS.txt" \
 		--vardict-indel "$points_out/curves/vardict-indel.DEL_INS.txt" \
 		--vardict-indel-pt "$points_out/singles/vardict-indel.DEL_INS.txt" \
-		--delly "$points_out/curves/delly.DEL_INS.txt" \
-		--delly-pt "$points_out/singles/delly.DEL_INS.txt" \
 		--pindel-pt "$points_out/singles/pindel.DEL_INS.txt" \
 		--illumina-manta "$points_out/curves/illumina-manta.DEL_INS.txt" \
 		--illumina-manta-pt "$points_out/singles/illumina-manta.DEL_INS.txt" \

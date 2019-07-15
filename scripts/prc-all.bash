@@ -18,7 +18,7 @@ IFS=',' read -ra indel_callers <<< "gatk-indel,varscan-indel,vardict-indel,pinde
 indel_truth="pg-indel"
 
 # what depths would we like to filter at?
-depths=('' 0 5 10 20)
+depths=('' 0 1 2 5 10 20)
 
 mkdir -p "$out/points"
 mkdir -p "$out/plots"

@@ -7,6 +7,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from sklearn.metrics import auc
+from itertools import product
 
 
 parser = argparse.ArgumentParser()
@@ -26,7 +27,17 @@ args = parser.parse_args()
 all_args = vars(args)
 
 
+def get_marker():
+    """ retrieve a unique marker in a deterministic order """
+    yield from product(range(2, 6), range(1, 3), [52])
+    # if that wasn't enough, create some more just at a different angle
+    yield from product(range(2, 8), range(1, 3), [0])
+    # if we ever get to this point, we need more than 20 markers
+    yield from product([2]+list(range(3, 6, 2)), range(1, 3), [90])
+
+
 colors = {}
+markers = get_marker()
 # go through each table and get its name from all of the args
 for arg in sorted(all_args.keys()):
     if arg not in known_args:
@@ -43,12 +54,12 @@ for arg in sorted(all_args.keys()):
             # check if this pt has a curve of the same name
             # to make sure they're the same color
             if arg.endswith("_pt") and arg[:-3] in colors:
-                color = {'color': colors[arg[:-3]]}
+                extra = {'color': colors[arg[:-3]]}
             else:
-                color = {}
+                extra = {}
             plt.plot(
-                table[0], table[1], 'o',
-                label=arg+": height={0:0.2f}".format(area), **color
+                table[0], table[1], marker=next(markers), ms=12,
+                label=arg+": height={0:0.2f}".format(area), **extra
             )
 
 plt.legend(bbox_to_anchor=(1.02, 1), loc="upper left", fontsize='small')
@@ -56,5 +67,4 @@ plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.ylim([0.0, 1.0])
 plt.xlim([0.0, 1.0])
-plt.title('Precision-Recall')
 plt.savefig(args.out, bbox_inches='tight', pad_inches=0.5)

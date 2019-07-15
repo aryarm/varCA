@@ -38,7 +38,7 @@
 
 # which callers do you want to run to find indels?
 # if you don't want to run the indel pipeline, set this to a falsey value or comment out the line
-"indel_callers" : ["gatk-indel", "varscan-indel", "vardict-indel", "delly", "pindel", "illumina-manta", "illumina-strelka", "pg-indel"]
+"indel_callers" : ["gatk-indel", "varscan-indel", "vardict-indel", "delly", "pindel", "illumina-manta", "illumina-strelka", "pg-indel", "breakca"]
 
 # what are the maximum number of threads to use for the entire pipeline?
 "num_threads" : 8
@@ -47,69 +47,68 @@
 # CALLER SPECIFIC PARAMETERS
 # you can specify:
 #   1) any other columns (besides CHROM, POS, REF, and ALT) to extract from the VCFs output by each caller
+#      (note that this feature is unavailable if your caller script outputs a TSV instead of a VCF)
 #   2) any parameters that should be passed to each caller script
-# key should be <caller_name> and value can be a dictionary where "cols" are the columns and "params" is a string or list of parameters
+#   3) whether your caller outputs a VCF (assumed if not specified) or a TSV
+# key should be <caller_name> and value can be a dictionary where "cols" are the columns, "params" is a string or list of parameters, and "ext" is either 'vcf' or 'tsv'
 # "cols" should be a dictionary of lists containing each category of column in the VCF (where categories can be 'info', 'format', and 'other' for all others)
 
 "gatk-snp" : {
   "cols": {
     'other': ["QUAL"],
-    'info': ["QD","FS","SOR","MQ","ReadPosRankSum","AC","ExcessHet"],
-    'format': ["AD","DP","GQ","GT"]
+    'info': ["QD","FS","MQ","AC","ExcessHet"],
+    'format': ["AD","DP","GQ"]
   }
 }
 
 "varscan-snp" : {
   "cols": {
     'info': ["ADP"],
-    'format': ["SDP","DP","RD","AD","FREQ","PVAL","ABQ","GT","GQ","RBQ","RDF","RDR","ADF","ADR"]
+    'format': ["SDP","DP","RD","AD","FREQ","PVAL","ABQ","GQ","RBQ","RDF","RDR","ADF","ADR"]
   }
 }
 
 "vardict-snp" : {
   "cols": {
     'other': ["QUAL"],
-    'info': ["TYPE","DP","VD","AF","QSTD","MQ","SN","HIAF","ADJAF","NM","SVTYPE","SVLEN","DUPRATE"],
-    'format': ["GT"]
+    'info': ["TYPE","DP","VD","AF","QSTD","MQ","SN","HIAF","ADJAF","NM","SVTYPE","SVLEN","DUPRATE"]
   }
 }
 
 "pg-snp" : {
-  "cols": {'format': ["GT"]},
   # path to a bgzip, indexed VCF containing variants called in the platinum genomes project
   "params": "/iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz"
 }
 
 "gatk-indel" : {
   "cols": {
-    'info': ["QD","FS","SOR","MQ","ReadPosRankSum","AC","ExcessHet"],
-    'format': ["AD","DP","GQ","GT"]
+    'info': ["QD","FS","MQ","AC","ExcessHet"],
+    'format': ["AD","DP","GQ"]
   }
 }
 
 "varscan-indel" : {
   "cols": {
     'info': ["ADP"],
-    'format': ["SDP","DP","RD","AD","FREQ","PVAL","ABQ","GT","GQ","RBQ","RDF","RDR","ADF","ADR"]
+    'format': ["SDP","DP","RD","AD","FREQ","PVAL","ABQ","GQ","RBQ","RDF","RDR","ADF","ADR"]
   }
 }
 
 "vardict-indel" : {
   "cols": {
     'other': ["QUAL"],
-    'info': ["TYPE","DP","VD","AF","QSTD","MQ","SN","HIAF","ADJAF","NM","SVTYPE","SVLEN","DUPRATE"],
-    'format': ["GT"]
+    'info': ["TYPE","DP","VD","AF","QSTD","MQ","SN","HIAF","ADJAF","NM","SVTYPE","SVLEN","DUPRATE"]
   }
 }
 
 "delly" : {
-  "cols": {'format': ["RC","CN","GT","GQ"]}
+  "cols": {'format': ["RC","GQ"]}
 }
 
 "pindel" : {
   "cols": {
     'info': ["HOMLEN","SVLEN","SVTYPE","NTLEN"],
-    'format': ["PL","GT","RD","AD"]
+    'format': ["PL","RD","AD"]
   }
 }
 
@@ -124,8 +123,8 @@
 "illumina-strelka" : {
   "cols": {
     'other': ["QUAL"],
-    'info': ["SNVHPOL","RU","REFREP","IDREP","MQ"],
-    'format': ["GT","GQ","GQX","DP","DPF","MIN_DP","AD","ADF","ADR","DPI","PL","PS","SB"]
+    'info': ["REFREP","IDREP","MQ"],
+    'format': ["GQX","DP","DPF","MIN_DP","ADF","ADR","DPI","PL","SB"]
   },
   # 1) path to strelka config file
   # 2) path to the directory in which strelka is stored or "" if strelka is installed in your current conda env (or if using --use-conda)
@@ -141,7 +140,6 @@
 }
 
 "pg-indel" : {
-  "cols": {'format': ["GT"]},
   # path to a bgzip, indexed VCF containing variants called in the platinum genomes project
   "params": "/iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz"
 }

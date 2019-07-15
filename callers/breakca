@@ -35,8 +35,8 @@ echo "Using Rscrpt dir: $Rscript" 1>&2
 # 6) counts reads at each bp position within peaks
 # 7) add clipping information including information content and clip length
 # 8) calculate posterior mean and standard deviation for clipped positions
-# 9) predefine regions
-# 10) prepare contigs for logistic, elas-net or randomForest
+# # 9) predefine regions
+# # 10) prepare contigs for logistic, elas-net or randomForest
 
 "$Rscript" --vanilla "$breakca_dir"/bin/get_reads_from_bam.R "$bam" "$peaks" "$output_dir"/read.tsv && \
 samtools mpileup -B -f "$genome" -l "$peaks" "$bam" | gzip > "$output_dir"/read.pileups.gz && \
@@ -44,6 +44,10 @@ zcat "$output_dir"/read.pileups.gz | awk -v OFS='\t' '{ if ($5 ~ /\+[0-9]+[ACGTN
 zcat "$output_dir"/read.pileups.gz | awk -v OFS='\t' '{ if ($5 ~ /-[0-9]+[ACGTNacgtn]+/) print $1,$2,$5}' > "$output_dir"/deletion.pileups && \
 zcat "$output_dir"/read.pileups.gz | awk -v OFS='\t' '{print $1,$2,$5}' > "$output_dir"/read.pileup && \
 "$Rscript" --vanilla "$breakca_dir"/bin/count_reads_per_base.R "$output_dir"/read.tsv "$output_dir"/insertion.pileups "$output_dir"/deletion.pileups "$output_dir"/read.pileup "$output_dir"/counts.tsv && \
-"$Rscript" --vanilla "$breakca_dir"/bin/calculate_posterior.R "$output_dir"/counts.tsv "$output_dir"/posteriors.tsv "$output_dir"/all.positions.tsv && \
-"$Rscript" --vanilla "$breakca_dir"/bin/predefine_windows.R "$peaks" "$output_dir"/windows.bed
+"$Rscript" --vanilla "$breakca_dir"/bin/calculate_posterior.R "$output_dir"/counts.tsv "$output_dir"/posteriors.tsv "$output_dir"/all.positions.tsv
+# "$Rscript" --vanilla "$breakca_dir"/bin/predefine_windows.R "$peaks" "$output_dir"/windows.bed
 # "$Rscript" --vanilla "$breakca_dir"/bin/prepare_dataset.R "$output_dir"/all.positions.tsv "$output_dir"/windows.bed "$output_dir"/classifier_id_frame.csv "$output_dir"/classifier_input.tsv
+
+# convert all.positions.tsv to desired output format
+tail -n+2 "$output_dir"/all.positions.tsv | cut -d: -f1- --output-delimiter $'\t' | \
+cat <(echo -e "CHROM\tPOS\t$(head -n1 "$output_dir"/all.positions.tsv | cut -f2-)") - > "$output_dir"/breakca.tsv

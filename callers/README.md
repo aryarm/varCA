@@ -22,7 +22,7 @@ Each caller script must use the provided output directory path for all of its ou
 
 Besides this requirement, there is only one other: that at the end of its execution, the script create a VCF file named by the caller identifier followed by a ".vcf" extension. The VCF file cannot be gzipped.
 
-You may optionally specify that the caller script outputs a TSV instead of a VCF by adding an 'ext' attribute with a value of 'tsv' to the caller's parameter dictionary in the [config file](https://github.com/aryam7/merge_callers/blob/master/config.yaml). The TSV file must be named similarly to the VCF, except that it must have a ".tsv" instead of a ".vcf" extension. The first four columns of the TSV must be "CHROM", "POS", "REF", and "ALT" in that order.
+You may optionally specify that the caller script outputs a TSV instead of a VCF by adding an 'ext' attribute with a value of 'tsv' to the caller's parameter dictionary in the [config file](https://github.com/aryam7/merge_callers/blob/master/config.yaml). The TSV file must be named similarly to the VCF, except that it must have a ".tsv" instead of a ".vcf" extension. The first two columns of the TSV must be "CHROM" and "POS", in that order.
 
 ### Caller scripts that depend on other scripts
 Some caller scripts must depend on a different script for special input.

@@ -349,10 +349,8 @@ rule join_all_sites:
     shell:
         "LC_ALL=C join -t $'\\t' -e. -a1 -j1 -o auto --nocheck-order "
         "<(cut -f 1 {input.sites}) {input.prepared_tsv} | cut -f 2- | cat "
-        "<(head -n1 {input.tsv} | cut -f 5- | tr '\\t' '\\n' | "
-        "sed 's/^/{wildcards.caller}~/' | cat "
-        "<(echo -e \'{wildcards.caller}~REF\\n{wildcards.caller}~ALT\') - | "
-        "paste -s) - > {output}"
+        "<(head -n1 {input.tsv} | cut -f 3- | tr '\\t' '\\n' | "
+        "sed 's/^/{wildcards.caller}~/' | paste -s) - > {output}"
 
 rule merge_callers:
     """merge the columns of each snp caller into a single file"""

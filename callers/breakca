@@ -44,7 +44,6 @@ zcat "$output_dir"/read.pileups.gz | awk -v OFS='\t' '{ if ($5 ~ /\+[0-9]+[ACGTN
 zcat "$output_dir"/read.pileups.gz | awk -v OFS='\t' '{ if ($5 ~ /-[0-9]+[ACGTNacgtn]+/) print $1,$2,$5}' > "$output_dir"/deletion.pileups && \
 zcat "$output_dir"/read.pileups.gz | awk -v OFS='\t' '{print $1,$2,$5}' > "$output_dir"/read.pileup && \
 "$Rscript" --vanilla "$breakca_dir"/bin/count_reads_per_base.R "$output_dir"/read.tsv "$output_dir"/insertion.pileups "$output_dir"/deletion.pileups "$output_dir"/read.pileup "$output_dir"/counts.tsv && \
-"$Rscript" --vanilla "$breakca_dir"/bin/get_clipping_information.R "$output_dir"/sc.tsv "$output_dir"/sc_w_seq.tsv "$output_dir"/clip.info.txt && \
-"$Rscript" --vanilla "$breakca_dir"/bin/calculate_posterior.R "$output_dir"/counts.tsv "$output_dir"/posteriors.tsv "$output_dir"/clip.info.txt "$output_dir"/all.positions.tsv && \
-"$Rscript" --vanilla "$breakca_dir"/bin/predefine_windows.R "$peaks" "$output_dir"/windows.bed && \
-"$Rscript" --vanilla "$breakca_dir"/bin/prepare_dataset.R "$output_dir"/all.positions.tsv "$output_dir"/windows.bed "$output_dir"/classifier_id_frame.csv "$output_dir"/classifier_input.tsv
+"$Rscript" --vanilla "$breakca_dir"/bin/calculate_posterior.R "$output_dir"/counts.tsv "$output_dir"/posteriors.tsv "$output_dir"/all.positions.tsv && \
+"$Rscript" --vanilla "$breakca_dir"/bin/predefine_windows.R "$peaks" "$output_dir"/windows.bed
+# "$Rscript" --vanilla "$breakca_dir"/bin/prepare_dataset.R "$output_dir"/all.positions.tsv "$output_dir"/windows.bed "$output_dir"/classifier_id_frame.csv "$output_dir"/classifier_input.tsv

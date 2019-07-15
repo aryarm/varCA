@@ -20,23 +20,21 @@ library(stringr)
 library(pbapply)
 library(readr)
 
-# function to get reads
-getreads= function(bam, peaks){
-   what = c("seq","qual")
-   if(is.null(peaks)=="TRUE"){param = ScanBamParam(what=what)
-   }else{
-      peaks= import.bed(peaks)
-      peaks=reduce(peaks)
-      param = ScanBamParam(which = peaks,what=what)}
-   msg=paste("reading bam",bam)
-   print(msg)
-   bam = readGAlignments(bam, param = param)
-   mat= as.data.frame(bam)
-   mat$Ncigar= gsub('[[:digit:]]+', '', mat$cigar)
-   mat$com= paste(str_sub(mat$Ncigar,1,1),str_sub(mat$Ncigar,-1,-1), sep=";")
-   return(mat)}
+
+what = c("seq","qual")
+if(is.null(peaks)=="TRUE"){
+   param = ScanBamParam(what=what)
+}else{
+   peaks= import.bed(peaks)
+   peaks=reduce(peaks)
+   param = ScanBamParam(which = peaks,what=what)
+}
+msg=paste("reading bam",bam)
+print(msg)
+reads = readGAlignments(bam, param = param)
+reads= as.data.frame(reads)
+reads$Ncigar= gsub('[[:digit:]]+', '', reads$cigar)
+reads$com= paste(str_sub(reads$Ncigar,1,1),str_sub(reads$Ncigar,-1,-1), sep=";")
 
 # write reads into a tsv file
-reads<- getreads(bam, peaks)
-reads<- reads[!duplicated(reads),]
-write_tsv(reads, filename)
+write_tsv(reads[!duplicated(reads),], filename)

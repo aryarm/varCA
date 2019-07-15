@@ -1,8 +1,8 @@
 args <- commandArgs(trailingOnly = TRUE)
 counts<-args[1]
 filename.posteriors<- args[2]
-clipping.info<- args[3]
-filename.all<- args[4]
+# clipping.info<- args[3]
+filename.all<- args[3]
 print(args)
 
 # load libraries
@@ -14,12 +14,12 @@ library(readr)
 library(rtracklayer)
 
 # read counts file
-counts<- as.data.frame(fread(counts, sep="\t"))
-print(paste("# of base positions=",nrow(counts), sep=""))
+df<- as.data.frame(fread(counts, sep="\t"))
+print(paste("# of base positions=",nrow(df), sep=""))
 
 # keep positions with minimum of 10 reads
-df= subset(counts, N >= 10)
-print(paste("# of base positions=",nrow(df), sep=""))
+df= subset(df, N >= 10)
+print(paste("# of base positions after filtering for >10 reads=",nrow(df), sep=""))
 
 # functions to calculate posterior mean and standard deviation
 #Mean
@@ -58,7 +58,8 @@ estBetaParams <- function(mu, var) {
    return(params = list(alpha = alpha, beta = beta))
 }
 
-features <- c("right", "left", "INS", "DEL")
+# features <- c("right", "left", "INS", "DEL")
+features <- c("INS", "DEL")
 
 # function to estimate posteriors
 my.func<- function(i){
@@ -104,38 +105,28 @@ non.df[is.na(non.df)]<- 0
 input<- rbind(posteriors, non.df)
 setDT(input, key="bpos")
 
-# load clipping info
-print("add clip information")
-if(!file.exists(clipping.info)){
+# # load clipping info
+# print("add clip information")
+# if(!file.exists(clipping.info)){
    
-   # create empty data frame when no clipping is present
-   setcol<- c("right_mean_length","right_sd_length","right_IC","left_mean_length",
-              "left_sd_length", "left_IC", "bpos")
-   clip_info<- as.data.frame(matrix(nrow= nrow(input), ncol= length(setcol),data = 0))
-   colnames(clip_info)<- setcol
-   clip_info$bpos<- input$bpos
-   setDT(clip_info, key = "bpos")
+#    # create empty data frame when no clipping is present
+#    setcol<- c("right_mean_length","right_sd_length","right_IC","left_mean_length",
+#               "left_sd_length", "left_IC", "bpos")
+#    clip_info<- as.data.frame(matrix(nrow= nrow(input), ncol= length(setcol),data = 0))
+#    colnames(clip_info)<- setcol
+#    clip_info$bpos<- input$bpos
    
-   # merge data.table
-   new.input<- merge(input, clip_info, by="bpos", all.x= T)
-   new.input<- as.data.frame(new.input)
-   new.input[is.na(new.input)]<- 0
-   write_tsv(new.input, filename.all)
+# }else{
    
-}else{
-   
-   # read clip info file
-   clip_info<- read.table(clipping.info)
-   setDT(clip_info, key = "bpos")
+#    # read clip info file
+#    clip_info<- read.table(clipping.info)   
+# }
 
-   # merge data.table
-   new.input<- merge(input, clip_info, by="bpos", all.x= T)
-   new.input<- as.data.frame(new.input)
-   new.input[is.na(new.input)]<- 0
-   write_tsv(new.input, filename.all)
-   
-}
+# setDT(clip_info, key = "bpos")
 
-
-
-
+# merge data.table
+# new.input<- merge(input, clip_info, by="bpos", all.x= T)
+# new.input<- as.data.frame(new.input)
+# new.input[is.na(new.input)]<- 0
+# write_tsv(new.input, filename.all)
+write_tsv(input, filename.all)

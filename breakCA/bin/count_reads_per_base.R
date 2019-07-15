@@ -3,8 +3,8 @@ reads<-args[1]
 insertion<- args[2]
 deletion<- args[3]
 pileup<- args[4]
-filename.reads<- args[5]
-filename.counts<-args[6]
+# filename.reads<- args[5]
+filename.counts<-args[5]
 print(args)
 
 #load dataset

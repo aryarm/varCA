@@ -12,7 +12,7 @@
 
 # which samples should we execute the pipeline on?
 # comment out this line if you want to run all samples
-"SAMP_NAMES" : ["SRR891269"]
+"SAMP_NAMES" : ["SRR891268","SRR891269"]
 
 # The path to a reference genome for BWA
 "genome" : "/iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sapiens_assembly19.fasta"
@@ -108,15 +108,15 @@
 "pindel" : {
   "cols": {
     'info': ["HOMLEN","SVLEN","SVTYPE","NTLEN"],
-    'format': ["PL","RD","AD"]
+    'format': ["PL","RD"]
   }
 }
 
 "illumina-manta" : {
   "cols": {
     'other': ["QUAL"],
-    'info': ["SVTYPE","SVLEN","CIPOS","CIEND","HOMLEN","BND_DEPTH","MATE_BND_DEPTH","JUNCTION_QUAL"],
-    'format': ["GT","GQ","PL"]
+    'info': ["SVTYPE","SVLEN","HOMLEN","BND_DEPTH","MATE_BND_DEPTH"],
+    'format': ["GQ"]
   }
 }
 
@@ -124,7 +124,7 @@
   "cols": {
     'other': ["QUAL"],
     'info': ["REFREP","IDREP","MQ"],
-    'format': ["GQX","DP","DPF","MIN_DP","ADF","ADR","DPI","PL","SB"]
+    'format': ["GQX","DP","DPF","MIN_DP","DPI","SB"]
   },
   # 1) path to strelka config file
   # 2) path to the directory in which strelka is stored or "" if strelka is installed in your current conda env (or if using --use-conda)

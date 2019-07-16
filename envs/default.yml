@@ -3,7 +3,7 @@ channels:
   - bioconda
   - r
   - conda-forge
-  - nodefaults
+  - davebx
 dependencies:
   - bwa
   - samtools=1.9=h8571acd_11
@@ -20,3 +20,20 @@ dependencies:
   - strelka
   - vardict-java
   - bedtools
+  - r-data.table>=1.10.0
+  - r-plyr=1.8.4
+  - r-dplyr>=0.7.4
+  - r-pbapply>=1.3_3
+  - r-readr=1.1.1
+  - r-reshape>=0.8.6
+  - r-rmutil>=1.1.0
+  - r-lattice>=0.20_33
+  - r-stringr>=1.3.1
+  - r-mlr>=2.12.1
+  - bioconductor-biovizbase>=1.22.0
+  - bioconductor-rtracklayer>=1.34.2
+  - bioconductor-rsamtools>=1.26.1
+  - bioconductor-bsgenome.hsapiens.ucsc.hg19=1.4.0
+  - bioconductor-genomicalignments>=1.10.0
+  - bioconductor-variantannotation>=1.20.2
+  - r-randomforest>=4.6_14

@@ -32,7 +32,7 @@ fi
 
 snakemake \
 --cluster "qsub -t 1 -V -q iblm.q -j y -o ${out_path}/qlog" \
--j 18 \
+-j 24 \
 --config output_dir="${out_path}" \
 --latency-wait 60 \
 --use-conda \

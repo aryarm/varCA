@@ -64,7 +64,7 @@ rule align:
     output:
         config['output_dir'] + "/align/{sample}/aln.bam"
     threads: config['num_threads']
-    conda: "envs/default.yml"
+    conda: "env.yml"
     shell:
         "bwa mem -t {threads} {input.ref} {input.fastq1} {input.fastq2} "
         "-R '@RG\\tID:{wildcards.sample}\\tLB:lib1\\tPL:Illumina\\tPU:unit1\\tSM:{wildcards.sample}' | "
@@ -79,7 +79,7 @@ rule add_mate_info:
     output:
         config['output_dir'] + "/align/{sample}/sorted.mated.bam"
     threads: config['num_threads']
-    conda: "envs/default.yml"
+    conda: "env.yml"
     shell:
         "samtools sort -n -@ {threads} {input} | "
         "samtools fixmate -m -@ {threads} -O bam - - | "
@@ -94,7 +94,7 @@ rule rm_dups:
         final_bam = config['output_dir'] + "/align/{sample}/rmdup.bam",
         final_bam_index = config['output_dir'] + "/align/{sample}/rmdup.bam.bai"
     threads: config['num_threads']
-    conda: "envs/default.yml"
+    conda: "env.yml"
     shell:
         "samtools markdup -@ {threads} {input} {output.final_bam} && "
         "samtools index -b -@ {threads} {output.final_bam}"
@@ -107,7 +107,7 @@ rule call_peaks:
         output_dir = lambda wildcards, output: os.path.dirname(output[0])
     output:
         config['output_dir'] + "/peaks/{sample}/{sample}_peaks.narrowPeak"
-    conda: "envs/default.yml"
+    conda: "env.yml"
     shell:
         "macs2 callpeak --nomodel --extsize 200 --slocal 1000 --qvalue 0.05 "
         "-g hs -f BAMPE -t {input} -n {wildcards.sample} --outdir {params.output_dir}"
@@ -119,7 +119,7 @@ rule bed_peaks:
         peaks = rules.call_peaks.output
     output:
         config['output_dir'] + "/peaks/{sample}/peaks.bed"
-    conda: "envs/default.yml"
+    conda: "env.yml"
     shell:
         # to convert to BED, we must extract the first three columns (chr, start, stop)
         "cut -f -3 \"{input.peaks}\" | "
@@ -155,7 +155,7 @@ rule prepare_caller:
         sample = "[^\/]*",
         caller = "[^\/]*"
     threads: config['num_threads']
-    conda: "envs/default.yml"
+    conda: "env.yml"
     shell:
         "mkdir -p \"{output}\" && "
         "{input.caller_script} {input.bam} {input.peaks} "
@@ -178,7 +178,7 @@ rule run_caller:
     wildcard_constraints:
         ext = "(tsv|vcf)"
     threads: config['num_threads']
-    conda: "envs/default.yml"
+    conda: "env.yml"
     shell:
         "mkdir -p \"{params.out_dir}\" && "
         "{input.caller_script} {input.bam} {input.peaks} "
@@ -208,7 +208,7 @@ rule filter_vcf:
         vcf = caller_out('vcf')
     output:
         vcf = pipe(caller_out('vcf')+".filter")
-    conda: "envs/bcftools.yml"
+    conda: "env.yml"
     shell:
         "bcftools view {config[bcftools_params]} {input.vcf} > {output.vcf}"
 
@@ -220,7 +220,7 @@ rule normalize_vcf:
         ref = config['genome']
     output:
         vcf = pipe(caller_out('vcf')+".norm")
-    conda: "envs/bcftools.yml"
+    conda: "env.yml"
     shell:
         "bcftools norm -m -any {input.vcf} | bcftools norm --check-ref xw -d "
         "all -f {input.ref} > {output.vcf}"
@@ -236,7 +236,7 @@ rule prepare_vcf:
     output:
         gzvcf = temp(caller_out('vcf')+".gz"),
         index = temp(caller_out('vcf')+".gz.tbi")
-    conda: "envs/default.yml"
+    conda: "env.yml"
     shell:
         "bgzip <{input.vcf} >{output.gzvcf} && tabix -p vcf -f {output.gzvcf}"
 
@@ -284,7 +284,7 @@ rule vcf2tsv:
         qstr = bcftools_query_str
     output:
         tsv = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.{hash}.tsv"
-    conda: "envs/bcftools.yml"
+    conda: "env.yml"
     shell:
         "echo -e '{params.cols}' > {output.tsv} && "
         "bcftools query -f '{params.qstr}' {input.gzvcf} >> {output.tsv}"
@@ -315,7 +315,7 @@ rule prepare_merge:
         tsv = caller_tsv
     output:
         pipe(config['output_dir'] + "/callers/{sample}/{caller}/prepared.tsv")
-    conda: "envs/default.yml"
+    conda: "env.yml"
     shell:
         "tail -n+2 {input} | awk -F '\\t' -v 'OFS=\\t' '{{for (i=1; i<=NF; i++) if ($i==\"NA\") $i=\".\"}}1' | "
         "sed 's/\\t\+/,/' | LC_ALL=C sort -t $'\\t' -k1,1 > {output}"
@@ -345,7 +345,7 @@ rule join_all_sites:
         prepared_tsv = rules.prepare_merge.output
     output:
         pipe(config['output_dir'] + "/merged_{type}/{sample}.{caller}.tsv")
-    conda: "envs/default.yml"
+    conda: "env.yml"
     shell:
         "LC_ALL=C join -t $'\\t' -e. -a1 -j1 -o auto --nocheck-order "
         "<(cut -f 1 {input.sites}) {input.prepared_tsv} | cut -f 2- | cat "
@@ -364,7 +364,7 @@ rule merge_callers:
         )
     output:
         config['output_dir'] + "/merged_{type}/{sample}.tsv.gz"
-    conda: "envs/default.yml"
+    conda: "env.yml"
     shell:
         "paste <(echo -e 'CHROM\\tPOS\\tREF'; sed 's/,/\\t/' "
         "{input.all_sites}) {input.caller_output} | "

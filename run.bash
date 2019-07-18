@@ -17,7 +17,7 @@
 out_path="$PWD/out"
 mkdir -p "$out_path"
 
-# delete leftover log files
+# clear leftover log files
 if [ -f "${out_path}/log" ]; then
 	echo ""> "${out_path}/log";
 fi

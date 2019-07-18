@@ -1,8 +1,0 @@
-channels:
-  - anaconda
-  - bioconda
-  - conda-forge
-  - nodefaults
-dependencies:
-  - bcftools
-  - openssl=1.0.*

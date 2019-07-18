@@ -12,7 +12,7 @@
 
 # which samples should we execute the pipeline on?
 # comment out this line if you want to run all samples
-"SAMP_NAMES" : ["SRR891268","SRR891269"]
+"SAMP_NAMES" : ["SRR891269","SRR891271"]
 
 # The path to a reference genome for BWA
 "genome" : "/iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sapiens_assembly19.fasta"
@@ -57,7 +57,7 @@
   "cols": {
     'other': ["QUAL"],
     'info': ["QD","FS","MQ","AC","ExcessHet"],
-    'format': ["AD","DP","GQ"]
+    'format': ["DP","GQ"]
   }
 }
 
@@ -83,7 +83,7 @@
 "gatk-indel" : {
   "cols": {
     'info': ["QD","FS","MQ","AC","ExcessHet"],
-    'format': ["AD","DP","GQ"]
+    'format': ["DP","GQ"]
   }
 }
 

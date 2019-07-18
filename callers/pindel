@@ -17,8 +17,9 @@ threads="$6"
 
 pindel -f "$genome" -i <(echo "$bam" 300 "$samp") -j "$peaks" -o "$output_dir/" -L "$output_dir/log" -T "$threads"
 for file in _D _INV _SI _TD; do
-	pindel2vcf -p "$output_dir/$file" -r "$genome" -R x -d 00000000 -v "$output_dir/$file.raw.vcf"
-	bcftools norm -d all "$output_dir/$file.raw.vcf" > "$output_dir/$file.vcf"
+	pindel2vcf -p "$output_dir/$file" -r "$genome" -R x -d 00000000 -v "$output_dir/$file.raw.vcf" && \
+	bgzip -f "$output_dir/$file.raw.vcf" && tabix -p vcf -f "$output_dir/$file.raw.vcf.gz" && \
+	bcftools norm -d all "$output_dir/$file.raw.vcf" > "$output_dir/$file.vcf" && \
 	bgzip -f "$output_dir/$file.vcf" && tabix -p vcf -f "$output_dir/$file.vcf.gz"
 done
 bcftools concat -a -d all "$output_dir/"{_D,_INV,_SI,_TD}.vcf.gz > "$output_dir/pindel.vcf"

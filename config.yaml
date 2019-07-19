@@ -1,0 +1,62 @@
+# This is the Snakemake configuration file that specifies paths and 
+# and options for the predict pipeline. Anybody wishing to use
+# the provided snakemake pipeline should first fill out this file with paths to
+# their own data, as the Snakefile requires it.
+
+
+# what should our classifier predict?
+# use "INS" if you want the classifier to predict insertions,
+# use "DEL" if you want it to predict deletions,
+# use "SNP" if you want it to predict SNVs, or
+# use "." if you want it to simply predict whether any variant exists at that site
+# you can also specify a multilabel classification by providing a list instead of a single string (ex: ["INS", "DEL"] to predict both ins and dels)
+label: "."
+
+# DATASETs
+# the dataset should be named by a unique id
+# for each dataset, you must provide
+#   1) path - The path to the dataset in .tsv.gz format
+#      Each row must represent a position in the genome, and each column a feature to train on
+#      The first two columns must be "CHROM" and "POS", in that order
+#      All REF and ALT columns in the table must be prefixed by the caller they belong to, followed by a tilde "~", and either "REF" or "ALT"
+#   2) truth - The truth caller id in the dataset
+#      This is only required if the dataset will be used for training data
+#      If this attribute is provided for a prediction dataset, it will be used as a test set
+#   3) na - Default values for every column
+#      You must specify an NA value for every column that you want to use in the classifier
+#      Specify a regex expression to match some column names as the key and a replacement for NA values in those columns as the value
+data:
+  SRR891269:
+    path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_indel/SRR891269.tsv.gz
+    truth: &truth
+      pg-indel
+    na: &na
+      '^gatk-indel~(QD|FS|MQ|AC|ExcessHet|DP|GQ)$': 0
+      '^varscan-indel~(ADP|GQ|SDP|DP|RD|AD|RBQ|ABQ|RDF|RDR|ADF|ADR)$': 0
+      '^varscan-indel~PVAL$': 1
+      '^vardict-indel~(QUAL|DP|VD|AF|QSTD|MQ|SN|HIAF|ADJAF|NM|SVLEN|DUPRATE)$': 0
+      '^(vardict-indel|pindel|illumina-manta)~(SV)?TYPE$': 'NC'
+      '^delly~(RC|GQ)$': 0
+      '^pindel~(HOMLEN|SVLEN|PL|RD)$': 0
+      '^illumina-manta~(QUAL|SVLEN|HOMLEN|BND_DEPTH|MATE_BND_DEPTH|GQ)$': 0
+      '^illumina-strelka~(QUAL|REFREP|IDREP|MQ|GQX|DP|DPF|MIN_DP|DPI|SB)$': 0
+      '^breakca~.*$': 0
+  SRR891271:
+    path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_indel/SRR891271.tsv.gz
+    truth: *truth # use the same truth column names as the SRR891269 data
+    na: *na # use the same na values as the SRR891269 data
+
+# The unique id of the training set to be used for training the classifier
+train: SRR891269
+
+# A list of samples for which to make predictions, identified by their unique sample id
+# You may optionally specify a truth set for each sample if you want it to serve as test data (see "data" above)
+predict: [SRR891271]
+
+# Whether your data contains pseudo-numerical values
+# ex: scientific notation or numbers followed by a percent sign
+norm_numerics: true
+
+# The path to the directory in which to place all of the output files
+# defined relative to whatever directory you execute the snakemake command in
+out: /iblm/netapp/home/amassarat/breakCA/predict/out

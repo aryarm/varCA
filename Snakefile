@@ -49,7 +49,7 @@ rule prepare:
         ],
     output: config['out']+"/{sample}/prepare.tsv.gz"
     shell:
-        "scripts/fillna.bash {input.tsv} {params.na_vals:q}) | gzip >{output}"
+        "scripts/fillna.bash {input.tsv} {params.na_vals:q} | gzip >{output}"
 
 rule add_truth:
     input:
@@ -67,7 +67,7 @@ rule train:
     output: config['out']+"/{sample}/model.rda"
     conda: "env.yml"
     shell:
-        "scripts/train_RF.R {input} {output}"
+        "Rscript scripts/train_RF.R {input} {output}"
 
 rule predict:
     """ predict variants using the classifier """
@@ -77,7 +77,7 @@ rule predict:
     conda: "env.yml"
     output: config['out']+"/{sample}/predictions.tsv"
     shell:
-        "scripts/predict_RF.R {input.predict} {input.model} {output}"
+        "Rscript scripts/predict_RF.R {input.predict} {input.model} {output}"
 
 rule join_results:
     """ join the predictions with the annotations """

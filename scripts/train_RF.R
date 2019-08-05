@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript
+#!/usr/bin/env RScript
 
 args <- commandArgs(trailingOnly = TRUE)
 training<- args[1]
@@ -22,13 +22,16 @@ traintask <- makeClassifTask(data = training, target = colnames(training)[ncol(t
 rf.lrn <- makeLearner("classif.randomForest", predict.type = "prob")
 
 # create par.vals
-rf.lrn$par.vals <- list(importance=TRUE)
+rf.lrn$par.vals <- list(importance=TRUE, proximity=FALSE, keep.forest=FALSE)
 
 # create params
 print("creating params to tune")
-params <- makeParamSet(makeIntegerParam("mtry",lower = 10,upper = 50),
-                       makeIntegerParam("nodesize",lower = 10,upper = 50),
-                       makeIntegerParam("ntree", lower = 100, upper=500))
+# mtry default: sqrt(number of features)
+# nodesize default: 5
+# ntree default: 500
+params <- makeParamSet(makeIntegerParam("mtry",lower = 4,upper = 10),
+                       makeIntegerParam("nodesize",lower = 10,upper = 20),
+                       makeIntegerParam("ntree", lower = 50, upper=75))
 
 #set validation strategy; 5-fold cross validation
 rdesc <- makeResampleDesc("CV",iters=3L)
@@ -48,10 +51,10 @@ tune <- tuneParams(learner = rf.lrn, task = traintask, resampling = rdesc,
 tune$x
 # stop parallel
 parallelStop()
-print("tuned params for randomForest is obtained")
+print("tuned params for randomForest have been obtained")
 
 # make model
-rf.lrn$par.vals<- c(list(importance=TRUE), tune$x)
+rf.lrn$par.vals<- c(rf.lrn$par.vals, tune$x)
 fit= mlr::train(rf.lrn, traintask)
 
 # save.data

@@ -9,7 +9,7 @@
 # use "DEL" if you want it to predict deletions,
 # use "SNP" if you want it to predict SNVs, or
 # use "." if you want it to simply predict whether any variant exists at that site
-# you can also specify a multilabel classification by providing a list instead of a single string (ex: ["INS", "DEL"] to predict both ins and dels)
+# __deprecated__: you can also specify a multilabel classification by providing a list instead of a single string (ex: ["INS", "DEL"] to predict both ins and dels)
 label: "."
 
 # DATASETs
@@ -21,7 +21,7 @@ label: "."
 #      All REF and ALT columns in the table must be prefixed by the caller they belong to, followed by a tilde "~", and either "REF" or "ALT"
 #   2) truth - The truth caller id in the dataset
 #      This is only required if the dataset will be used for training data
-#      If this attribute is provided for a prediction dataset, it will be used as a test set
+#      If you provide this attribute for a prediction dataset, the dataset will be used as a test set
 #   3) na - Default values for every column
 #      You must specify an NA value for every column that you want to use in the classifier
 #      Specify a regex expression to match some column names as the key and a replacement for NA values in those columns as the value
@@ -33,7 +33,7 @@ data:
     na: &na
       '^gatk-indel~(QD|FS|MQ|AC|ExcessHet|DP|GQ)$': 0
       '^varscan-indel~(ADP|GQ|SDP|DP|RD|AD|RBQ|ABQ|RDF|RDR|ADF|ADR)$': 0
-      '^varscan-indel~PVAL$': 1
+      '^varscan-indel~PVAL$': '1.01E0'
       '^vardict-indel~(QUAL|DP|VD|AF|QSTD|MQ|SN|HIAF|ADJAF|NM|SVLEN|DUPRATE)$': 0
       '^(vardict-indel|pindel|illumina-manta)~(SV)?TYPE$': 'NC'
       '^delly~(RC|GQ)$': 0

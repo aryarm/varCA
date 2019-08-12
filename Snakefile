@@ -9,29 +9,19 @@ configfile: "config.yaml"
 rule all:
     input:
         expand(
-            config['out']+"/{sample}/{chrom}/results.tsv.gz",
+            config['out']+"/{sample}/results.tsv.gz",
             sample=[
                 s for s in config['predict']
-            ],
-            chrom=config['chroms'] if 'chroms' in config and config['chroms'] else []
+            ]
         )
-
-rule chrom_split:
-    """ split the dataset by chromosome """
-    input: lambda wildcards: config['data'][wildcards.sample]['path']
-    output: config['out']+"/{sample}/{chrom}/original.tsv.gz"
-    conda: "env.yml"
-    shell:
-        "zcat {input} | {{ read -r head && echo \"$head\" && "
-        "awk -F $'\\t' -v 'OFS=\\t' '$1 == \"{chrom}\"' }} | gzip > {output}"
 
 rule norm_nums:
     """
         convert pseudo-numerical column values (like those in
         scientific notation or percent format) to simple numerics
     """
-    input: rules.chrom_split.output
-    output: config['out']+"/{sample}/{chrom}/norm.tsv.gz"
+    input: lambda wildcards: config['data'][wildcards.sample]['path']
+    output: config['out']+"/{sample}/norm.tsv.gz"
     conda: "env.yml"
     shell:
         "zcat {input} | scripts/norm_nums.awk -F $'\\t' -v 'OFS=\\t' | "
@@ -42,7 +32,7 @@ rule apply_filters:
     input: rules.norm_nums.output if 'norm_numerics' in config and \
         config['norm_numerics'] else rules.norm_nums.input
     params: lambda wildcards: "\t".join(config['data'][wildcards.sample]['filter'])
-    output: config['out']+"/{sample}/{chrom}/filter.tsv.gz"
+    output: config['out']+"/{sample}/filter.tsv.gz"
     conda: "env.yml"
     shell:
         "zcat {input} | scripts/filter.bash {params:q} | gzip > {output}"
@@ -53,7 +43,7 @@ rule annotate:
         if 'filter' in config['data'][wildcards.sample] and \
         config['data'][wildcards.sample]['filter'] else \
         rules.apply_filters.input,
-    output: config['out']+"/{sample}/{chrom}/annot.tsv.gz"
+    output: temp(config['out']+"/{sample}/annot.tsv.gz")
     conda: "env.yml"
     shell:
         "paste <(zcat {input} | cut -f -2) <(scripts/classify.bash {input} {config[label]}) | gzip > {output}"
@@ -65,42 +55,48 @@ rule prepare:
         2) filling NA values with the defaults provided
     """
     input:
-        tsv = lambda wildcards: rules.annotate.input
+        tsv = lambda wildcards: rules.apply_filters.output \
+        if 'filter' in config['data'][wildcards.sample] and \
+        config['data'][wildcards.sample]['filter'] else \
+        rules.apply_filters.input
     params:
         na_vals = lambda wildcards: [
             j for i in config['data'][wildcards.sample]['na'].items()
             for j in i
         ],
-    output: config['out']+"/{sample}/{chrom}/prepare.tsv.gz"
+    output: config['out']+"/{sample}/prepare.tsv.gz"
     shell:
         "scripts/fillna.bash {input.tsv} {params.na_vals:q} | gzip >{output}"
 
 rule add_truth:
-    """ add true labels after the last column in the training data """
+    """ add true labels as the last column in the training data """
     input:
         tsv = rules.prepare.output,
         annot = rules.annotate.output
     params:
         truth = lambda wildcards: '^'+config['data'][wildcards.sample]['truth']+"~" if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else ""
-    output: config['out']+"/{sample}/{chrom}/prepare.truth.tsv.gz"
+    output: config['out']+"/{sample}/prepare.truth.tsv.gz"
     shell:
         "paste <(zcat {input.tsv}) <(zcat {input.annot} | scripts/get_cols.bash {params.truth:q}) | gzip > {output}"
 
 rule train:
     """ train the classifier """
     input: rules.add_truth.output
-    output: config['out']+"/{sample}/{chrom}/model.rda"
+    params:
+        balance = int(config['balance']) if 'balance' in config else 0,
+        importance = config['out']+"/{sample}/variable_importance.tsv"
+    output: config['out']+"/{sample}/model.rda"
     conda: "env.yml"
     shell:
-        "Rscript scripts/train_RF.R {input} {output}"
+        "Rscript scripts/train_RF.R {input} {output} {params.balance} {params.importance}"
 
 rule predict:
     """ predict variants using the classifier """
     input:
-        model = lambda wildcards: expand(rules.train.output, sample=config['train'], chrom=wildcards.chrom),
-        predict = lambda wildcards: expand(rules.prepare.output, sample=wildcards.sample, chrom=wildcards.chrom)
+        model = lambda wildcards: expand(rules.train.output, sample=config['train']),
+        predict = lambda wildcards: expand(rules.prepare.output, sample=wildcards.sample)
     conda: "env.yml"
-    output: config['out']+"/{sample}/{chrom}/predictions.tsv"
+    output: temp(config['out']+"/{sample}/predictions.tsv")
     shell:
         "Rscript scripts/predict_RF.R {input.predict} {input.model} {output}"
 
@@ -109,6 +105,6 @@ rule join_results:
     input:
         predict = rules.predict.output,
         annot = rules.annotate.output
-    output: config['out']+"/{sample}/{chrom}/results.tsv.gz"
+    output: config['out']+"/{sample}/results.tsv.gz"
     shell:
         "paste <(zcat {input.annot}) {input.predict} | gzip > {output}"

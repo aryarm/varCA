@@ -107,7 +107,7 @@
 
 "pindel" : {
   "cols": {
-    'info': ["HOMLEN","SVLEN","SVTYPE","NTLEN"],
+    'info': ["HOMLEN","SVLEN","SVTYPE"],
     'format': ["PL","RD"]
   }
 }

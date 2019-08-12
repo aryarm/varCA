@@ -3,6 +3,8 @@
 args <- commandArgs(trailingOnly = TRUE)
 training<- args[1]
 model<- args[2]
+balance<- args[3] # an integer (0 or 1) indicating whether to balance the data
+importance<- args[4] # if specified, importance for each of the variables is saved here
 
 # load libraries
 library(plyr)
@@ -22,10 +24,26 @@ print("creating training task and making RF learner")
 traintask <- makeClassifTask(data = training, target = colnames(training)[ncol(training)], positive = 1)
 
 # create learner
-rf.lrn <- makeLearner("classif.randomForest", predict.type = "prob")
+rf.lrn <- makeLearner("classif.ranger", predict.type = "prob")
 
-# create par.vals
-rf.lrn$par.vals <- list(importance=TRUE, proximity=FALSE, do.trace=TRUE)
+if (as.integer(balance)) {
+	print("calculating class weights in order to ensure data is balanced when sampled")
+	# first, retrieve the inverse of the counts of each of the labels
+	w <- 1/table(training[,ncol(training)])
+	# calculate probabilities for each label
+	w <- w/sum(w)
+	# create a vector containing weights instead of labels
+	weights <- rep(0, nrow(training))
+	for (val in names(w)) {
+		weights[training[,ncol(training)] == val] <- w[val]
+	}
+
+	# create par.vals
+	rf.lrn$par.vals <- list(importance='impurity', verbose=TRUE, case.weights=weights)
+} else {
+	# create par.vals
+	rf.lrn$par.vals <- list(importance='impurity', verbose=TRUE)
+}
 
 # # create params
 # print("creating params to tune")
@@ -60,6 +78,15 @@ rf.lrn$par.vals <- list(importance=TRUE, proximity=FALSE, do.trace=TRUE)
 # rf.lrn$par.vals<- c(rf.lrn$par.vals, tune$x)
 print("training model")
 fit= mlr::train(rf.lrn, traintask)
+
+# print out variable importance
+if (importance != "") {
+	print("recording variable importance:")
+	importance_df = as.data.frame(sort(fit$learner.model$variable.importance, decreasing=TRUE))
+	print(importance_df)
+	names(importance_df) <- c("variable\timportance")
+	write.table(importance_df, sep="\t", file=importance, quote=FALSE)
+}
 
 # save.data
 save.image( model )

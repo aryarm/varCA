@@ -47,7 +47,7 @@ f==0{print "."}
 
 
 # EXAMPLES / TEST CASES
-# you check whether the code passes the test cases with the following command:
+# you can check whether the code passes the test cases with the following command:
 # tac classify.awk | awk '{if(/^## /)exit;else print}' | sed 's/^# //' | { test="$(tac)"; diff -ys <(echo "$test" | cut -f 3) <(echo "$test" | cut -f 1,2 | ./classify.awk); }
 ## REF	ALT	TYPE
 # A	G	SNP

@@ -9,10 +9,12 @@ configfile: "config.yaml"
 rule all:
     input:
         expand(
+            config['out']+"/{sample}/prc/results.png",
+            sample=config['predict']
+        ) if 'prcols' in config and isinstance(config['prcols'], dict) else
+        expand(
             config['out']+"/{sample}/results.tsv.gz",
-            sample=[
-                s for s in config['predict']
-            ]
+            sample=config['predict']
         )
 
 rule norm_nums:
@@ -123,3 +125,73 @@ rule results:
         "<(read -r head && echo \"$head\" | tr '\\t' '\\n' | "
         "sed 's/response/CLASS:{params.label}/' | sed 's/^/breakca~/' | "
         "paste -s && cat) | gzip > {output}"
+
+rule prc_pts:
+    """ generate single point precision recall metrics """
+    input:
+        annot = rules.annotate.output,
+        predicts = rules.results.output
+    params:
+        truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else ""
+    output: config['out']+"/{sample}/prc/pts/{caller}.txt"
+    conda: "envs/prc.yml"
+    shell:
+        "paste "
+        "<(zcat {input.annot} | scripts/cgrep.bash - -E '{params.truth}' | sed 's/\./0/') "
+        "<(zcat {input.predicts} | scripts/cgrep.bash - '{wildcards.caller}~CLASS:') | "
+        "tail -n+2 | scripts/metrics.py -o {output}"
+
+
+def sort_col(caller):
+    if caller in config['prcols']:
+        return config['prcols'][caller], False
+    elif "*"+caller in config['prcols']:
+        return config['prcols']["*"+caller], True
+    else:
+        return "", False
+
+
+rule prc_curves:
+    """ generate the points for a precision recall curve """
+    input:
+        annot = rules.annotate.output,
+        predicts = lambda wildcards: rules.results.output if wildcards.caller == 'breakca' else rules.add_truth.input.tsv
+    params:
+        truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else "",
+        predict_col = lambda wildcards: 'prob.1' if wildcards.caller == 'breakca' else sort_col(wildcards.caller)[0],
+        flip = lambda wildcards: ["", "-f"][sort_col(wildcards.caller)[1]]
+    output: config['out']+"/{sample}/prc/curves/{caller}.txt"
+    conda: "envs/prc.yml"
+    shell:
+        "paste "
+        "<(zcat {input.annot} | scripts/cgrep.bash - -E '{params.truth}' | sed 's/\./0/') "
+        "<(zcat {input.predicts} | scripts/cgrep.bash - -F '{wildcards.caller}~{params.predict_col}') | "
+        "tail -n+2 | scripts/statistics.py -o {output} {params.flip}"
+
+
+def sort_cols(strict=False):
+    return [
+        caller[caller.startswith("*") and len("*"):]
+        for caller in config['prcols'].keys()
+        if not strict or config['prcols'][caller]
+    ]
+
+
+rule prc:
+    """ create plot containing precision recall curves """
+    input:
+        pts = lambda wildcards: expand(
+            rules.prc_pts.output, sample=wildcards.sample,
+            caller=['breakca']+sort_cols()
+        ),
+        curves = lambda wildcards: expand(
+            rules.prc_curves.output, sample=wildcards.sample,
+            caller=['breakca']+sort_cols(True)
+        )
+    params:
+        pts = lambda _, input: [k for j in zip(['--'+i+"_pt" for i in ['breakca']+sort_cols()], input.pts) for k in j],
+        curves = lambda _, input: [k for j in zip(['--'+i for i in ['breakca']+sort_cols(True)], input.curves) for k in j]
+    output: config['out']+"/{sample}/prc/results.png"
+    conda: "envs/prc.yml"
+    shell:
+        "scripts/prc.py {output} {params.pts} {params.curves}"

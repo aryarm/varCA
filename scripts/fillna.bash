@@ -13,7 +13,7 @@ for (( i=2; i<$#; i+=2 )); do
 	j=$((i+1))
 	reg="${!i}"
 	val="${!j}"
-	pfiles+=("<(zcat \"\$1\" | \"\$script_dir\"/get_cols.bash '$reg' | awk -F '\t' -v 'OFS=\t' '{{for (i=1; i<=NF; i++) if (\$i==\".\") \$i=\"$val\"}}1')")
+	pfiles+=("<(zcat \"\$1\" | \"\$script_dir\"/cgrep.bash - -E '$reg' | awk -F '\t' -v 'OFS=\t' '{{for (i=1; i<=NF; i++) if (\$i==\".\") \$i=\"$val\"}}1')")
 done
 
 eval "paste ${pfiles[@]}"

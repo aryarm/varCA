@@ -79,7 +79,7 @@ rule add_truth:
     output: config['out']+"/{sample}/fillna.truth.tsv.gz"
     conda: "env.yml"
     shell:
-        "paste <(zcat {input.tsv}) <(zcat {input.annot} | scripts/get_cols.bash {params.truth:q}) | gzip > {output}"
+        "paste <(zcat {input.tsv}) <(zcat {input.annot} | scripts/cgrep.bash - -E {params.truth:q}) | gzip > {output}"
 
 rule train:
     """ train the classifier """
@@ -104,11 +104,26 @@ rule predict:
         "Rscript scripts/predict_RF.R {input.predict} {input.model} {output}"
 
 rule join_results:
-    """ join the predictions with the annotations """
+    """
+        join the predictions with the annotations
+        also prefix the colnames of our method before merging
+        joining is such that the order of columns is:
+            1) CHROM and POS
+            2) the truth set
+            3) all callers
+            4) output from our method
+    """
     input:
         predict = rules.predict.output,
         annot = rules.annotate.output
+    params:
+        truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else ""
     output: config['out']+"/{sample}/results.tsv.gz"
     conda: "env.yml"
     shell:
-        "paste <(zcat {input.annot}) {input.predict} | gzip > {output}"
+        "cat {input.predict} | paste "
+        "<(zcat {input.annot} | scripts/cgrep - -E 'CHROM|POS|{params.truth}') "
+        "<(zcat {input.annot} | scripts/cgrep - -Ev 'CHROM|POS|{params.truth}') "
+        "<(read -r head && echo \"$head\" | tr '\\t' '\\n' | "
+        "sed 's/response/CLASS:{config[label]}/' | sed 's/^/breakca~/' | "
+        "paste -s && cat) | gzip > {output}"

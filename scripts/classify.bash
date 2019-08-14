@@ -2,7 +2,7 @@
 
 # param1: the .tsv.gz file containing the large table we want to classify
 # param2: which type of variant to use as the positive label (ex: DEL, INS, SNP, .); separate each variant by commas if you'd like to output multiple labels or pass the empty string '' if you want all labels
-# return (to stdout): the same table, where all REF and ALT columns have been transformed into categorical classification columns (not in the original order)
+# return (to stdout): the REF and ALT columns from the original table, transformed into categorical classification columns
 
 
 script_dir="$(dirname "$BASH_SOURCE")";
@@ -11,13 +11,11 @@ script_dir="$(dirname "$BASH_SOURCE")";
 # ex: if gatk-indel's REF and ALT columns appear in columns 4 and 5 respectively, the following would be an entry in the array: "gatk-indel:4,5"
 callers=($(
 	zcat "$1" | head -n1 | tr '\t' '\n' | \
-	grep -Pno '^.*~(REF|ALT)$' | tr : '\t' | tr '~' '\t' | \
-	sort -k2,2 -k3,3r | cut -f -2 | \
-	awk -F '\t' -v 'ORS= ' 'NR%2{printf "%s:%s,",$2,$1;next;} {print $1}'
+	grep -Pno '^.*~(REF|ALT)$' | tr :'~' '\t' | \
+	nl | sort -k3,3 -k4,4r | cut -f -3 | \
+	awk -F $'\t' 'NR%2{printf "%d\t%s:%s,",$1,$3,$2;next;} {print $2}' | \
+	sort -k1,1n | cut -f 2- | paste -s -d' '
 ))
-
-# retrieve a comma separated string of all the REF/ALT col indices
-all_idx="$(echo "${callers[@]}" | tr ' ' '\n' | sed 's/.*://' | paste -s -d,)"
 
 function binarize() {
 	# use awk to convert each column to binary 1s or 0s based on what type of

@@ -304,12 +304,10 @@ def caller_tsv(wildcards):
 
 rule prepare_merge:
     """
-        1) add the caller as a prefix of every column name
-        2) sort the file by CHROM and POS
+        1) remove the header
+        2) replace NA with .
         3) separate chrom and pos cols by comma instead of tab
-        4) replace NA with .
-        5) remove the header
-        (not necessarily in that order)
+        4) sort the file by CHROM and POS
     """
     input:
         tsv = caller_tsv
@@ -334,9 +332,8 @@ rule get_all_sites:
 rule join_all_sites:
     """
         1) add all sites to the prepared caller output using an outer join
-        2) rename the column headers so we know which caller they came from
-        3) get rid of the CHROM and POS cols so we can merge later
-        4) rename the ref and alt columns as REF and ALT (to standardize them)
+        2) get rid of the CHROM and POS cols so we can merge later
+        3) add the caller as a prefix of every column name
         (not necessarily in that order)
     """
     input:

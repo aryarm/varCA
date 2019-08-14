@@ -25,6 +25,8 @@ if [ -f "${out_path}/qlog" ]; then
 	echo ""> "${out_path}/qlog";
 fi
 
+# make sure that snakemake is executed from the directory containing the Snakefile!
+
 # Before running this snakemake pipeline, remember to verify that the config.yaml
 # file has been appropriately completed with the required input info. In
 # particular, make sure that you have created a samples.tsv file specifying
@@ -37,4 +39,5 @@ snakemake \
 --latency-wait 60 \
 --use-conda \
 -k \
+--notemp \
 "$@" &>"${out_path}/log"

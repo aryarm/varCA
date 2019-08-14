@@ -15,7 +15,7 @@ library(parallel)
 
 # load data.frame
 print("loading training data into R")
-training<- read.table(training, header=TRUE, sep="\t",, na.strings=c("NA",".","na","N/A"), skipNul=FALSE, row.names=NULL)
+training<- read.table(training, header=TRUE, sep="\t", na.strings=c("NA",".","na","N/A"), skipNul=FALSE, row.names=NULL)
 
 print("creating training task and making RF learner")
 

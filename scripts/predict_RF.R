@@ -24,3 +24,4 @@ test<- read.table(test.data, header=TRUE, sep="\t",, na.strings=c("NA",".","na",
 print("making predictions and outputting results")
 pred= predict(fit, newdata= test, type="prob")
 write.table(pred$data, sep='\t', quote=FALSE, row.names=FALSE, na=".", output)
+quit()

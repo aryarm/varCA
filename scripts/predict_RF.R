@@ -14,14 +14,12 @@ library(mlr)
 # load model
 print("loading appropriate model")
 load(model)
-print(fit)
 
 # load test
 print("loading and formatting test data")
-test<- read.table(test.data, header=TRUE, sep="\t",, na.strings=c("NA",".","na","N/A"), skipNul=FALSE, row.names=NULL)
+test<- read.table(test.data, header=TRUE, sep="\t", na.strings=c("NA",".","na","N/A"), skipNul=FALSE, row.names=NULL)
 
 # making predictions
 print("making predictions and outputting results")
 pred= predict(fit, newdata= test, type="prob")
 write.table(pred$data, sep='\t', quote=FALSE, row.names=FALSE, na=".", output)
-quit()

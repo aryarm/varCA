@@ -34,7 +34,7 @@ label: "."
 #      The order of the filtering expressions must match the order of the cols in the TSV.
 data:
   SRR891269_odd:
-    path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_indel/SRR891269_odd-chrom.tsv.gz
+    path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_snp/SRR891269_odd-chrom.tsv.gz
     truth: &truth
       pg-indel
     na: &na
@@ -49,11 +49,12 @@ data:
       '^illumina-strelka~(QUAL|REFREP|IDREP|MQ|GQX|DP|DPF|MIN_DP|DPI|SB)$': 0
       '^breakca~.*$': 0
     # filter: &filter
-    #   ['gatk-indel~DP>10']
+    #   - 'gatk-indel~DP>0'
   SRR891269_even:
-    path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_indel/SRR891269_even-chrom.tsv.gz
+    path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_snp/SRR891269_even-chrom.tsv.gz
     truth: *truth # use the same truth column names as the SRR891269 data
     na: *na # use the same na values as the SRR891269 data
+    # filter: *filter
   # SRR891271:
   #   path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_indel/SRR891271.tsv.gz
   #   truth: *truth # use the same truth column names as the SRR891269 data

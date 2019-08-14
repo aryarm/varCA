@@ -1,0 +1,9 @@
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - coreutils>=8.31
+  - gawk

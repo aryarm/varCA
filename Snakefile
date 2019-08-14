@@ -22,7 +22,7 @@ rule norm_nums:
     """
     input: lambda wildcards: config['data'][wildcards.sample]['path']
     output: config['out']+"/{sample}/norm.tsv.gz"
-    conda: "env.yml"
+    conda: "envs/env.yml"
     shell:
         "zcat {input} | scripts/norm_nums.awk -F $'\\t' -v 'OFS=\\t' | "
         "gzip >{output}"
@@ -33,20 +33,9 @@ rule apply_filters:
         config['norm_numerics'] else rules.norm_nums.input
     params: lambda wildcards: "\t".join(config['data'][wildcards.sample]['filter'])
     output: config['out']+"/{sample}/filter.tsv.gz"
-    conda: "env.yml"
+    conda: "envs/env.yml"
     shell:
         "zcat {input} | scripts/filter.bash {params:q} | gzip > {output}"
-
-rule annotate:
-    """ create a table of annotations at each site """
-    input: lambda wildcards: rules.apply_filters.output \
-        if 'filter' in config['data'][wildcards.sample] and \
-        config['data'][wildcards.sample]['filter'] else \
-        rules.apply_filters.input,
-    output: temp(config['out']+"/{sample}/annot.tsv.gz")
-    conda: "env.yml"
-    shell:
-        "paste <(zcat {input} | cut -f -2) <(scripts/classify.bash {input} {config[label]}) | gzip > {output}"
 
 rule fillna:
     """
@@ -64,10 +53,23 @@ rule fillna:
             j for i in config['data'][wildcards.sample]['na'].items()
             for j in i
         ],
-    output: config['out']+"/{sample}/fillna.tsv.gz"
-    conda: "env.yml"
+    output: temp(config['out']+"/{sample}/fillna.tsv.gz")
+    conda: "envs/env.yml"
     shell:
         "scripts/fillna.bash {input.tsv} {params.na_vals:q} | gzip >{output}"
+
+rule annotate:
+    """ create a table of annotations at each site """
+    input: lambda wildcards: rules.apply_filters.output \
+        if 'filter' in config['data'][wildcards.sample] and \
+        config['data'][wildcards.sample]['filter'] else \
+        rules.apply_filters.input
+    params:
+        label = config['label'] if 'label' in config else "."
+    output: temp(config['out']+"/{sample}/annot.tsv.gz")
+    conda: "envs/env.yml"
+    shell:
+        "paste <(zcat {input} | cut -f -2) <(scripts/classify.bash {input} {params.label:q}) | gzip > {output}"
 
 rule add_truth:
     """ add true labels as the last column in the training data """
@@ -77,7 +79,7 @@ rule add_truth:
     params:
         truth = lambda wildcards: '^'+config['data'][wildcards.sample]['truth']+"~" if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else ""
     output: config['out']+"/{sample}/fillna.truth.tsv.gz"
-    conda: "env.yml"
+    conda: "envs/env.yml"
     shell:
         "paste <(zcat {input.tsv}) <(zcat {input.annot} | scripts/cgrep.bash - -E {params.truth:q}) | gzip > {output}"
 
@@ -89,41 +91,35 @@ rule train:
     output:
         model = config['out']+"/{sample}/model.rda",
         importance = config['out']+"/{sample}/variable_importance.tsv"
-    conda: "env.yml"
+    conda: "envs/env.yml"
     shell:
         "Rscript scripts/train_RF.R {input} {output.model} {params.balance} {output.importance}"
 
 rule predict:
     """ predict variants using the classifier """
     input:
-        model = lambda wildcards: expand(rules.train.output, sample=config['train']),
+        model = lambda wildcards: expand(rules.train.output.model, sample=config['train']),
         predict = lambda wildcards: expand(rules.fillna.output, sample=wildcards.sample)
-    conda: "env.yml"
+    conda: "envs/env.yml"
     output: temp(config['out']+"/{sample}/predictions.tsv")
     shell:
         "Rscript scripts/predict_RF.R {input.predict} {input.model} {output}"
 
-rule join_results:
+rule results:
     """
         join the predictions with the annotations
         also prefix the colnames of our method before merging
-        joining is such that the order of columns is:
-            1) CHROM and POS
-            2) the truth set
-            3) all callers
-            4) output from our method
     """
     input:
         predict = rules.predict.output,
         annot = rules.annotate.output
     params:
-        truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else ""
+        truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else "",
+        label = config['label'] if 'label' in config else "."
     output: config['out']+"/{sample}/results.tsv.gz"
-    conda: "env.yml"
+    conda: "envs/env.yml"
     shell:
-        "cat {input.predict} | paste "
-        "<(zcat {input.annot} | scripts/cgrep - -E 'CHROM|POS|{params.truth}') "
-        "<(zcat {input.annot} | scripts/cgrep - -Ev 'CHROM|POS|{params.truth}') "
+        "cat {input.predict} | paste <(zcat {input.annot}) "
         "<(read -r head && echo \"$head\" | tr '\\t' '\\n' | "
-        "sed 's/response/CLASS:{config[label]}/' | sed 's/^/breakca~/' | "
+        "sed 's/response/CLASS:{params.label}/' | sed 's/^/breakca~/' | "
         "paste -s && cat) | gzip > {output}"

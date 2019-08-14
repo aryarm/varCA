@@ -48,7 +48,7 @@ rule annotate:
     shell:
         "paste <(zcat {input} | cut -f -2) <(scripts/classify.bash {input} {config[label]}) | gzip > {output}"
 
-rule prepare:
+rule fillna:
     """
         prepare the caller for use by the classifier by
         1) extracting the columns desired by the user
@@ -64,18 +64,20 @@ rule prepare:
             j for i in config['data'][wildcards.sample]['na'].items()
             for j in i
         ],
-    output: config['out']+"/{sample}/prepare.tsv.gz"
+    output: config['out']+"/{sample}/fillna.tsv.gz"
+    conda: "env.yml"
     shell:
         "scripts/fillna.bash {input.tsv} {params.na_vals:q} | gzip >{output}"
 
 rule add_truth:
     """ add true labels as the last column in the training data """
     input:
-        tsv = rules.prepare.output,
+        tsv = rules.fillna.output,
         annot = rules.annotate.output
     params:
         truth = lambda wildcards: '^'+config['data'][wildcards.sample]['truth']+"~" if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else ""
-    output: config['out']+"/{sample}/prepare.truth.tsv.gz"
+    output: config['out']+"/{sample}/fillna.truth.tsv.gz"
+    conda: "env.yml"
     shell:
         "paste <(zcat {input.tsv}) <(zcat {input.annot} | scripts/get_cols.bash {params.truth:q}) | gzip > {output}"
 
@@ -94,7 +96,7 @@ rule predict:
     """ predict variants using the classifier """
     input:
         model = lambda wildcards: expand(rules.train.output, sample=config['train']),
-        predict = lambda wildcards: expand(rules.prepare.output, sample=wildcards.sample)
+        predict = lambda wildcards: expand(rules.fillna.output, sample=wildcards.sample)
     conda: "env.yml"
     output: temp(config['out']+"/{sample}/predictions.tsv")
     shell:
@@ -106,5 +108,6 @@ rule join_results:
         predict = rules.predict.output,
         annot = rules.annotate.output
     output: config['out']+"/{sample}/results.tsv.gz"
+    conda: "env.yml"
     shell:
         "paste <(zcat {input.annot}) {input.predict} | gzip > {output}"

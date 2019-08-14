@@ -36,18 +36,18 @@ data:
   SRR891269_odd:
     path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_snp/SRR891269_odd-chrom.tsv.gz
     truth: &truth
-      pg-indel
+      pg-snp
     na: &na
-      '^gatk-indel~(QD|FS|MQ|AC|ExcessHet|DP|GQ)$': 0
-      '^varscan-indel~(ADP|GQ|SDP|DP|RD|AD|RBQ|ABQ|RDF|RDR|ADF|ADR)$': 0
-      '^varscan-indel~PVAL$': '1.01E0'
-      '^vardict-indel~(QUAL|DP|VD|AF|QSTD|MQ|SN|HIAF|ADJAF|NM|SVLEN|DUPRATE)$': 0
-      # '^(vardict-indel|pindel|illumina-manta)~(SV)?TYPE$': 'NC'
-      '^delly~(RC|GQ)$': 0
-      '^pindel~(HOMLEN|SVLEN|PL|RD)$': 0
-      '^illumina-manta~(QUAL|SVLEN|HOMLEN|BND_DEPTH|MATE_BND_DEPTH|GQ)$': 0
-      '^illumina-strelka~(QUAL|REFREP|IDREP|MQ|GQX|DP|DPF|MIN_DP|DPI|SB)$': 0
-      '^breakca~.*$': 0
+      '^gatk-snp~(QD|FS|MQ|AC|ExcessHet|DP|GQ)$': 0
+      '^varscan-snp~(ADP|GQ|SDP|DP|RD|AD|RBQ|ABQ|RDF|RDR|ADF|ADR)$': 0
+      '^varscan-snp~PVAL$': '1.01E0'
+      '^vardict-snp~(QUAL|DP|VD|AF|QSTD|MQ|SN|HIAF|ADJAF|NM|SVLEN|DUPRATE)$': 0
+      # # '^(vardict-indel|pindel|illumina-manta)~(SV)?TYPE$': 'NC'
+      # '^delly~(RC|GQ)$': 0
+      # '^pindel~(HOMLEN|SVLEN|PL|RD)$': 0
+      # '^illumina-manta~(QUAL|SVLEN|HOMLEN|BND_DEPTH|MATE_BND_DEPTH|GQ)$': 0
+      # '^illumina-strelka~(QUAL|REFREP|IDREP|MQ|GQX|DP|DPF|MIN_DP|DPI|SB)$': 0
+      # '^breakca~.*$': 0
     # filter: &filter
     #   - 'gatk-indel~DP>0'
   SRR891269_even:

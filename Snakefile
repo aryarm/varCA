@@ -85,12 +85,13 @@ rule train:
     """ train the classifier """
     input: rules.add_truth.output
     params:
-        balance = int(config['balance']) if 'balance' in config else 0,
+        balance = int(config['balance']) if 'balance' in config else 0
+    output:
+        model = config['out']+"/{sample}/model.rda",
         importance = config['out']+"/{sample}/variable_importance.tsv"
-    output: config['out']+"/{sample}/model.rda"
     conda: "env.yml"
     shell:
-        "Rscript scripts/train_RF.R {input} {output} {params.balance} {params.importance}"
+        "Rscript scripts/train_RF.R {input} {output.model} {params.balance} {output.importance}"
 
 rule predict:
     """ predict variants using the classifier """

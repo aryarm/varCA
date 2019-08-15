@@ -9,12 +9,14 @@ configfile: "config.yaml"
 rule all:
     input:
         expand(
-            config['out']+"/{sample}/prc/results.png",
-            sample=config['predict']
-        ) if 'prcols' in config and isinstance(config['prcols'], dict) else
-        expand(
             config['out']+"/{sample}/results.tsv.gz",
             sample=config['predict']
+        ) + expand(
+            config['out']+"/{sample}/prc/results.png",
+            sample=[
+                s for s in config['predict']
+                if 'truth' in config['data'][s] and config['data'][s]['truth']
+            ] if 'prcols' in config and isinstance(config['prcols'], dict) else []
         )
 
 rule norm_nums:
@@ -71,19 +73,26 @@ rule annotate:
     output: temp(config['out']+"/{sample}/annot.tsv.gz")
     conda: "envs/env.yml"
     shell:
-        "paste <(zcat {input} | cut -f -2) <(scripts/classify.bash {input} {params.label:q}) | gzip > {output}"
+        "paste <(zcat {input} | cut -f -2) <(scripts/classify.bash {input} '{params.label:q}') | gzip > {output}"
 
 rule add_truth:
-    """ add true labels as the last column in the training data """
+    """
+        Add true labels as the last columns in the training data
+        Also ensure that if a label is available for this dataset, it appears
+        as the very last column
+    """
     input:
         tsv = rules.fillna.output,
         annot = rules.annotate.output
     params:
         truth = lambda wildcards: '^'+config['data'][wildcards.sample]['truth']+"~" if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else ""
-    output: config['out']+"/{sample}/fillna.truth.tsv.gz"
+    output: config['out']+"/{sample}/prepared.tsv.gz"
     conda: "envs/env.yml"
     shell:
-        "paste <(zcat {input.tsv}) <(zcat {input.annot} | scripts/cgrep.bash - -E {params.truth:q}) | gzip > {output}"
+        "paste "
+        "<(zcat {input.annot} | cut -f 3- | scripts/cgrep.bash - -v '{params.truth:q}') "
+        "<(zcat {input.annot} | cut -f 3- | scripts/cgrep.bash - '{params.truth:q}') | "
+        "sed 's/^\t//' | paste <(zcat {input.tsv}) - | gzip > {output}"
 
 rule train:
     """ train the classifier """
@@ -101,7 +110,7 @@ rule predict:
     """ predict variants using the classifier """
     input:
         model = lambda wildcards: expand(rules.train.output.model, sample=config['train']),
-        predict = lambda wildcards: expand(rules.fillna.output, sample=wildcards.sample)
+        predict = lambda wildcards: expand(rules.add_truth.output, sample=wildcards.sample)
     conda: "envs/env.yml"
     output: temp(config['out']+"/{sample}/predictions.tsv")
     shell:

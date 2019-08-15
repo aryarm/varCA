@@ -34,24 +34,24 @@ label: "."
 #      The order of the filtering expressions must match the order of the cols in the TSV.
 data:
   SRR891269_odd:
-    path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_snp/SRR891269_odd-chrom.tsv.gz
+    path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_indel/SRR891269_odd-chrom.tsv.gz
     truth: &truth
-      pg-snp
+      pg-indel
     na: &na
-      '^gatk-snp~(QD|FS|MQ|AC|ExcessHet|DP|GQ)$': 0
-      '^varscan-snp~(ADP|GQ|SDP|DP|RD|AD|RBQ|ABQ|RDF|RDR|ADF|ADR)$': 0
-      '^varscan-snp~PVAL$': '1.01E0'
-      '^vardict-snp~(QUAL|DP|VD|AF|QSTD|MQ|SN|HIAF|ADJAF|NM|SVLEN|DUPRATE)$': 0
-      # # '^(vardict-indel|pindel|illumina-manta)~(SV)?TYPE$': 'NC'
-      # '^delly~(RC|GQ)$': 0
-      # '^pindel~(HOMLEN|SVLEN|PL|RD)$': 0
-      # '^illumina-manta~(QUAL|SVLEN|HOMLEN|BND_DEPTH|MATE_BND_DEPTH|GQ)$': 0
-      # '^illumina-strelka~(QUAL|REFREP|IDREP|MQ|GQX|DP|DPF|MIN_DP|DPI|SB)$': 0
-      # '^breakca~.*$': 0
+      '^gatk-indel~(QD|FS|MQ|AC|ExcessHet|DP|GQ)$': 0
+      '^varscan-indel~(ADP|GQ|SDP|DP|RD|AD|RBQ|ABQ|RDF|RDR|ADF|ADR)$': 0
+      '^varscan-indel~PVAL$': '1.01E0'
+      '^vardict-indel~(QUAL|DP|VD|AF|QSTD|MQ|SN|HIAF|ADJAF|NM|SVLEN|DUPRATE)$': 0
+      '^(vardict-indel|pindel|illumina-manta)~(SV)?TYPE$': 'NC'
+      '^delly~(RC|GQ)$': 0
+      '^pindel~(HOMLEN|SVLEN|PL|RD)$': 0
+      '^illumina-manta~(QUAL|SVLEN|HOMLEN|BND_DEPTH|MATE_BND_DEPTH|GQ)$': 0
+      '^illumina-strelka~(QUAL|REFREP|IDREP|MQ|GQX|DP|DPF|MIN_DP|DPI|SB)$': 0
+      '^breakca~.*$': 0
     filter: &filter
       - 'gatk-indel~DP>0'
   SRR891269_even:
-    path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_snp/SRR891269_even-chrom.tsv.gz
+    path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_indel/SRR891269_even-chrom.tsv.gz
     truth: *truth # use the same truth column names as the SRR891269 data
     na: *na # use the same na values as the SRR891269 data
     filter: *filter
@@ -81,12 +81,12 @@ norm_numerics: true
 # column names that don't have a value
 # Prefix the column name with a * if it should be sorted in reverse order
 prcols:
-  'gatk-snp': QD
-  '*varscan-snp': PVAL
-  'vardict-snp': QUAL
-  # 'pindel':
-  # 'illumina-manta': QUAL
-  # 'illumina-strelka': QUAL
+  'gatk-indel': QD
+  '*varscan-indel': PVAL
+  'vardict-indel': QUAL
+  'pindel':
+  'illumina-manta': QUAL
+  'illumina-strelka': QUAL
 
 # The path to the directory in which to place all of the output files
 # defined relative to whatever directory you execute the snakemake command in

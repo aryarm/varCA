@@ -3,7 +3,7 @@ from snakemake.utils import min_version
 ##### set minimum snakemake version #####
 min_version("5.5.0")
 
-configfile: "config.yaml"
+configfile: "configs/classify.yaml"
 
 
 rule all:
@@ -26,7 +26,7 @@ rule norm_nums:
     """
     input: lambda wildcards: config['data'][wildcards.sample]['path']
     output: config['out']+"/{sample}/norm.tsv.gz"
-    conda: "envs/env.yml"
+    conda: "envs/classify.yml"
     shell:
         "zcat {input} | scripts/norm_nums.awk -F $'\\t' -v 'OFS=\\t' | "
         "gzip >{output}"
@@ -37,7 +37,7 @@ rule apply_filters:
         config['norm_numerics'] else rules.norm_nums.input
     params: lambda wildcards: "\t".join(config['data'][wildcards.sample]['filter'])
     output: config['out']+"/{sample}/filter.tsv.gz"
-    conda: "envs/env.yml"
+    conda: "envs/classify.yml"
     shell:
         "zcat {input} | scripts/filter.bash {params:q} | gzip > {output}"
 
@@ -58,7 +58,7 @@ rule fillna:
             for j in i
         ],
     output: temp(config['out']+"/{sample}/fillna.tsv.gz")
-    conda: "envs/env.yml"
+    conda: "envs/classify.yml"
     shell:
         "scripts/fillna.bash {input.tsv} {params.na_vals:q} | gzip >{output}"
 
@@ -71,7 +71,7 @@ rule annotate:
     params:
         label = config['label'] if 'label' in config else "."
     output: temp(config['out']+"/{sample}/annot.tsv.gz")
-    conda: "envs/env.yml"
+    conda: "envs/classify.yml"
     shell:
         "paste <(zcat {input} | cut -f -2) <(scripts/classify.bash {input} '{params.label:q}') | gzip > {output}"
 
@@ -87,7 +87,7 @@ rule add_truth:
     params:
         truth = lambda wildcards: '^'+config['data'][wildcards.sample]['truth']+"~" if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else ""
     output: config['out']+"/{sample}/prepared.tsv.gz"
-    conda: "envs/env.yml"
+    conda: "envs/classify.yml"
     shell:
         "paste "
         "<(zcat {input.annot} | cut -f 3- | scripts/cgrep.bash - -v '{params.truth:q}') "
@@ -102,7 +102,7 @@ rule train:
     output:
         model = config['out']+"/{sample}/model.rda",
         importance = config['out']+"/{sample}/variable_importance.tsv"
-    conda: "envs/env.yml"
+    conda: "envs/classify.yml"
     shell:
         "Rscript scripts/train_RF.R {input} {output.model} {params.balance} {output.importance}"
 
@@ -111,7 +111,7 @@ rule predict:
     input:
         model = lambda wildcards: expand(rules.train.output.model, sample=config['train']),
         predict = lambda wildcards: expand(rules.add_truth.output, sample=wildcards.sample)
-    conda: "envs/env.yml"
+    conda: "envs/classify.yml"
     output: temp(config['out']+"/{sample}/predictions.tsv")
     shell:
         "Rscript scripts/predict_RF.R {input.predict} {input.model} {output}"
@@ -128,7 +128,7 @@ rule results:
         truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else "",
         label = config['label'] if 'label' in config else "."
     output: config['out']+"/{sample}/results.tsv.gz"
-    conda: "envs/env.yml"
+    conda: "envs/classify.yml"
     shell:
         "cat {input.predict} | paste <(zcat {input.annot}) "
         "<(read -r head && echo \"$head\" | tr '\\t' '\\n' | "

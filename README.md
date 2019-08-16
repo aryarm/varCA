@@ -20,10 +20,10 @@ Config files that define options and input for the `prepare` and `classify` pipe
 Scripts for executing each of the variant callers. Small pipelines can be written for each caller by using a special naming convention. See the [caller README](https://github.com/aryam7/breakCA/blob/master/callers/README.md) for more information.
 
 ### breakCA/
-Scripts for calculating posterior probabilities for the existence of an insertion or deletion, which can be used when prearing data for the classifier. These scripts are an adaptation from [@Arkosen](https://github.com/Arkosen)'s [breakCA code](https://github.com/Arkosen/BreakCA/tree/master/bin).
+Scripts for calculating posterior probabilities for the existence of an insertion or deletion, which can be used when preparing data for the classifier. These scripts are an adaptation from [@Arkosen](https://github.com/Arkosen)'s [breakCA code](https://github.com/Arkosen/BreakCA/tree/master/bin).
 
 ### scripts/
-Various scripts used by the pipeline. See the [script README](https://github.com/aryam7/breakCA/blob/master/callers/README.md) for more information.
+Various scripts used by the pipeline. See the [script README](https://github.com/aryam7/breakCA/blob/master/scripts/README.md) for more information.
 
 ### run-prepare.bash
 An example bash script for executing the `prepare` pipeline on an SGE cluster using snakemake.

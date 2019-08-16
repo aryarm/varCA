@@ -1,5 +1,13 @@
 #!/usr/bin/env Rscript
 
+# This R script makes predictions on a dataset using a trained classifier
+
+# param1: The path to a TSV containing the data for which to make predictions.
+#         Columns must be named the same as the training data. We recommend using the Snakefile-prepare pipeline to obtain this data.
+# param2: An RDA file containing the trained classifier. This is output by train_RF.R
+# param3: The path to a TSV in which to write the predictions. It will be created if it doesn't exist.
+
+
 args <- commandArgs(trailingOnly = TRUE)
 test.data<- args[1]
 model <- args[2]

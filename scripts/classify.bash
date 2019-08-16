@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# this bash script extracts REF and ALT columns from a TSV and transforms them
+# into categorical classification columns using classify.awk
+
 # param1: the .tsv.gz file containing the large table we want to classify
 # param2: which type of variant to use as the positive label (ex: DEL, INS, SNP, .); separate each variant by commas if you'd like to output multiple labels or pass the empty string '' if you want all labels
 # return (to stdout): the REF and ALT columns from the original table, transformed into categorical classification columns

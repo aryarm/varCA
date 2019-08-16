@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# this script replaces NA values in a large TSV with the provided replacements
+
 # param1: the .tsv.gz file containing the large table for which we want to fill NA values
 # param2+: a regex pattern for a column followed by the NA value replacement for those cols (separated by a space)
 # 		   you can specify multiple column-value pairs

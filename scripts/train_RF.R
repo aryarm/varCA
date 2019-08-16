@@ -1,5 +1,13 @@
 #!/usr/bin/env RScript
 
+# This R script trains a random forest classifier. We recommend using the Snakefile-classify pipeline to run this script.
+
+# param1: The path to a TSV containing the data on which to train the classifier.
+#         The last column must contain binarized, true labels. Note that NA's should be removed and numerical columns should be normalized (via norm_numerics.awk)
+# param2: The path to an RDA file in which to store the trained classifier. This file is required input to predict_RF.R
+# param3: An integer (0 or 1) indicating whether to attempt to balance the data
+# param4 (optional): The path a TSV in which to store information about how important the random forest deems each column in the data you provided.
+
 args <- commandArgs(trailingOnly = TRUE)
 training<- args[1]
 model<- args[2]

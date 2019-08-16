@@ -1,0 +1,43 @@
+#!/bin/bash
+
+
+bam="$1"
+[[ -z "$1" ]] && { echo "Parameter 1 is empty" 1>&2; exit 1; }
+peaks="$2"
+[[ -z "$2" ]] && { echo "Parameter 2 is empty" 1>&2; exit 1; }
+genome="$3"
+[[ -z "$3" ]] && { echo "Parameter 3 is empty" 1>&2; exit 1; }
+output_dir="$4"
+[[ -z "$4" ]] && { echo "Parameter 4 is empty" 1>&2; exit 1; }
+illumina_dir="$7"
+[[ -z "$7" ]] && { echo "Parameter 7 is empty" 1>&2; exit 1; }
+config="$8"
+[[ -z "$8" ]] && { echo "Parameter 8 is empty" 1>&2; exit 1; }
+strelka_dir="$9"
+if [[ -z "$9" ]]; then
+	echo "Strelka directory not specified. Attempting to retrieve from conda env..." 1>&2
+	if [[ -z "$CONDA_PREFIX" ]]; then
+		echo "Error: not running in conda env" 1>&2; exit 1;
+	else
+		strelka_dir="$(ls "$CONDA_PREFIX"/share | grep 'strelka' | head -n1)"
+		if [[ -z "$strelka_dir" ]]; then
+			echo "Error: coudn't find strelka in conda env" 1>&2; exit 1;
+		fi
+		strelka_dir="$CONDA_PREFIX"/share/"$strelka_dir"
+	fi
+else
+	strelka_dir="$9"
+fi
+echo "Using strelka dir: $strelka_dir" 1>&2
+
+
+rm -rf "$output_dir"/results "$output_dir"/workspace "$output_dir"/workflow* "$output_dir"/runWorkflow*
+
+"$strelka_dir"/bin/configureStrelkaGermlineWorkflow.py --bam "$bam" \
+--referenceFasta "$genome" --callRegions "$illumina_dir/peaks.bed.gz" \
+--runDir "$output_dir" --config "$config" --exome \
+--indelCandidates "$illumina_dir"/results/variants/candidateSV.vcf.gz
+
+"$output_dir"/runWorkflow.py -m sge -j 24 && \
+bgzip -d "$output_dir"/results/variants/genome.S1.vcf.gz && \
+ln -sf "$output_dir"/results/variants/genome.S1.vcf "$output_dir/illumina-strelka.vcf"

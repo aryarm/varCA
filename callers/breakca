@@ -1,0 +1,47 @@
+#!/bin/bash
+
+
+bam="$1"
+[[ -z "$1" ]] && { echo "Parameter 1 is empty" 1>&2; exit 1; }
+peaks="$2"
+[[ -z "$2" ]] && { echo "Parameter 2 is empty" 1>&2; exit 1; }
+genome="$3"
+[[ -z "$3" ]] && { echo "Parameter 3 is empty" 1>&2; exit 1; }
+output_dir="$4"
+[[ -z "$4" ]] && { echo "Parameter 4 is empty" 1>&2; exit 1; }
+breakca_dir="$7"
+[[ -z "$7" ]] && { echo "Parameter 7 is empty" 1>&2; exit 1; }
+Rscript="$8"
+if [[ -z "$8" ]]; then
+	echo "Rscript path not specified. Attempting to retrieve from conda env..." 1>&2
+	if [[ -z "$CONDA_PREFIX" ]]; then
+		echo "Error: not running in conda env" 1>&2; exit 1;
+	else
+		Rscript="$(ls "$CONDA_PREFIX"/bin | grep 'Rscript' | head -n1)"
+		if [[ -z "$Rscript" ]]; then
+			echo "Error: coudn't find Rscript in conda env" 1>&2; exit 1;
+		fi
+		Rscript="$CONDA_PREFIX"/bin/"$Rscript"
+	fi
+fi
+echo "Using Rscrpt dir: $Rscript" 1>&2
+
+
+# 1) get reads as a tsv file
+# 2) get read pileups; allow for correction for mis-alignments
+# 3) get insertion containing positions
+# 4) get deletion containing positions
+# 5) get bases written into a file to use during counting
+# 6) counts reads at each bp position within peaks
+# 7) calculate posterior mean and standard deviation for clipped positions
+# 8) convert all.positions.tsv to desired output format
+
+"$Rscript" --vanilla "$breakca_dir"/get_reads_from_bam.R "$bam" "$peaks" "$output_dir"/read.tsv && \
+samtools mpileup -B -f "$genome" -l "$peaks" "$bam" | gzip > "$output_dir"/read.pileups.gz && \
+zcat "$output_dir"/read.pileups.gz | awk -v OFS='\t' '{ if ($5 ~ /\+[0-9]+[ACGTNacgtn]+/) print $1,$2,$5}' > "$output_dir"/insertion.pileups && \
+zcat "$output_dir"/read.pileups.gz | awk -v OFS='\t' '{ if ($5 ~ /-[0-9]+[ACGTNacgtn]+/) print $1,$2,$5}' > "$output_dir"/deletion.pileups && \
+zcat "$output_dir"/read.pileups.gz | awk -v OFS='\t' '{print $1,$2,$5}' > "$output_dir"/read.pileup && \
+"$Rscript" --vanilla "$breakca_dir"/count_reads_per_base.R "$output_dir"/read.tsv "$output_dir"/insertion.pileups "$output_dir"/deletion.pileups "$output_dir"/read.pileup "$output_dir"/counts.tsv && \
+"$Rscript" --vanilla "$breakca_dir"/calculate_posterior.R "$output_dir"/counts.tsv "$output_dir"/posteriors.tsv "$output_dir"/all.positions.tsv && \
+tail -n+2 "$output_dir"/all.positions.tsv | cut -d: -f1- --output-delimiter $'\t' | \
+cat <(echo -e "CHROM\tPOS\t$(head -n1 "$output_dir"/all.positions.tsv | cut -f2-)") - > "$output_dir"/breakca.tsv

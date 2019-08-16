@@ -46,7 +46,7 @@ rule all:
     # you should specify them in the config['SAMP_NAMES'] variable above
     input:
         expand(
-            config['output_dir'] + "/merged_{type}/{sample}.tsv.gz",
+            config['out'] + "/merged_{type}/{sample}.tsv.gz",
             sample=config['SAMP_NAMES'],
             type=[
                 i for i in ["snp", "indel"]
@@ -62,7 +62,7 @@ rule align:
         fastq1 = lambda wildcards: SAMP[wildcards.sample][0],
         fastq2 = lambda wildcards: SAMP[wildcards.sample][1]
     output:
-        config['output_dir'] + "/align/{sample}/aln.bam"
+        config['out'] + "/align/{sample}/aln.bam"
     threads: config['num_threads']
     conda: "env.yml"
     shell:
@@ -77,7 +77,7 @@ rule add_mate_info:
     input:
         rules.align.output
     output:
-        config['output_dir'] + "/align/{sample}/sorted.mated.bam"
+        config['out'] + "/align/{sample}/sorted.mated.bam"
     threads: config['num_threads']
     conda: "env.yml"
     shell:
@@ -91,8 +91,8 @@ rule rm_dups:
     input:
         rules.add_mate_info.output
     output:
-        final_bam = config['output_dir'] + "/align/{sample}/rmdup.bam",
-        final_bam_index = config['output_dir'] + "/align/{sample}/rmdup.bam.bai"
+        final_bam = config['out'] + "/align/{sample}/rmdup.bam",
+        final_bam_index = config['out'] + "/align/{sample}/rmdup.bam.bai"
     threads: config['num_threads']
     conda: "env.yml"
     shell:
@@ -106,7 +106,7 @@ rule call_peaks:
     params:
         output_dir = lambda wildcards, output: os.path.dirname(output[0])
     output:
-        config['output_dir'] + "/peaks/{sample}/{sample}_peaks.narrowPeak"
+        config['out'] + "/peaks/{sample}/{sample}_peaks.narrowPeak"
     conda: "env.yml"
     shell:
         "macs2 callpeak --nomodel --extsize 200 --slocal 1000 --qvalue 0.05 "
@@ -118,7 +118,7 @@ rule bed_peaks:
         ref = config['genome'],
         peaks = rules.call_peaks.output
     output:
-        config['output_dir'] + "/peaks/{sample}/peaks.bed"
+        config['out'] + "/peaks/{sample}/peaks.bed"
     conda: "env.yml"
     shell:
         # to convert to BED, we must extract the first three columns (chr, start, stop)
@@ -150,7 +150,7 @@ rule prepare_caller:
     params:
         caller_params = lambda wildcards: config[wildcards.caller]['params'] if wildcards.caller in config and 'params' in config[wildcards.caller] else ""
     output:
-        directory(config['output_dir'] + "/callers/{sample}/{caller}")
+        directory(config['out'] + "/callers/{sample}/{caller}")
     wildcard_constraints:
         sample = "[^\/]*",
         caller = "[^\/]*"
@@ -172,9 +172,9 @@ rule run_caller:
         caller_script = "callers/{caller}"
     params:
         caller_params = lambda wildcards: config[wildcards.caller]['params'] if wildcards.caller in config and 'params' in config[wildcards.caller] else "",
-        out_dir = config['output_dir'] + "/callers/{sample}/{caller}"
+        out_dir = config['out'] + "/callers/{sample}/{caller}"
     output:
-        vcf = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.{ext}"
+        vcf = config['out'] + "/callers/{sample}/{caller}/{caller}.{ext}"
     wildcard_constraints:
         ext = "(tsv|vcf)"
     threads: config['num_threads']
@@ -283,7 +283,7 @@ rule vcf2tsv:
         cols = cols_str,
         qstr = bcftools_query_str
     output:
-        tsv = config['output_dir'] + "/callers/{sample}/{caller}/{caller}.{hash}.tsv"
+        tsv = config['out'] + "/callers/{sample}/{caller}/{caller}.{hash}.tsv"
     conda: "env.yml"
     shell:
         "echo -e '{params.cols}' > {output.tsv} && "
@@ -312,7 +312,7 @@ rule prepare_merge:
     input:
         tsv = caller_tsv
     output:
-        pipe(config['output_dir'] + "/callers/{sample}/{caller}/prepared.tsv")
+        pipe(config['out'] + "/callers/{sample}/{caller}/prepared.tsv")
     conda: "env.yml"
     shell:
         "tail -n+2 {input} | awk -F '\\t' -v 'OFS=\\t' '{{for (i=1; i<=NF; i++) if ($i==\"NA\") $i=\".\"}}1' | "
@@ -323,7 +323,7 @@ rule get_all_sites:
     input:
         rules.bed_peaks.output
     output:
-        temp(config['output_dir'] + "/peaks/{sample}/all_sites.csv")
+        temp(config['out'] + "/peaks/{sample}/all_sites.csv")
     shell:
         "awk '{{printf(\"%s\\t%d\\t%d\\t%s\\n\",$1,int($2)+1,int($3),$4);}}' {input} | "
         "awk -F '\\t' -v 'OFS=\\t' '{{for (i=$2;i<$3;i++) print $1\",\"i,substr($4,i-$2+1,1)}}' | "
@@ -341,7 +341,7 @@ rule join_all_sites:
         tsv = caller_tsv,
         prepared_tsv = rules.prepare_merge.output
     output:
-        pipe(config['output_dir'] + "/merged_{type}/{sample}.{caller}.tsv")
+        pipe(config['out'] + "/merged_{type}/{sample}.{caller}.tsv")
     conda: "env.yml"
     shell:
         "LC_ALL=C join -t $'\\t' -e. -a1 -j1 -o auto --nocheck-order "
@@ -360,7 +360,7 @@ rule merge_callers:
             type=wildcards.type
         )
     output:
-        config['output_dir'] + "/merged_{type}/{sample}.tsv.gz"
+        config['out'] + "/merged_{type}/{sample}.tsv.gz"
     conda: "env.yml"
     shell:
         "paste <(echo -e 'CHROM\\tPOS\\tREF'; sed 's/,/\\t/' "

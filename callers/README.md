@@ -10,7 +10,7 @@ Currently, the filename of the script is used as the identifier.
 When writing the [config file](https://github.com/aryam7/breakCA/blob/master/configs/prepare.yaml) for the `prepare` pipeline, you must refer to callers by their identifier.
 
 ### Caller script inputs
-Each caller script is provided the following arguments respectively:
+Each caller script is provided the following arguments respectively (any of which can be ignored):
 - a sorted BAM file containing reads for a single sample
 - a sorted BED file containing ATAC-seq peaks for a single sample
 - a reference genome
@@ -35,7 +35,7 @@ Separate steps must be performed later to separate the two variant types into di
 
 Well, you can create two different caller scripts `gatk-snp` and `gatk-indel` that each take as input the output of GATK (which is generated using a different special script `gatk`).
 Then `gatk-snp` and `gatk-indel` can each extract SNVs and indels from the output of `gatk`, respectively.
-Note that in this example, `gatk` is not a caller script (and cannot be used as one) because it will not produce TSV output. Even if it did, it would be ignored.
+Note that in this example, `gatk` is not a caller script (and cannot be used as one) because it will not produce the correct output. Even if it did, it would be ignored.
 
 By providing a dash character `-` in the caller identifier, the caller script (ex: `gatk-snp`) can communicate to the pipeline that it requires input(s) from another special script with the same filename but without the characters after the final dash (ex: `gatk-snp` => `gatk`).
 The pipeline will run this separate script first but with the same parameters as the caller script, and the directory containing its output will be passed to the original caller script.

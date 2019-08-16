@@ -3,7 +3,7 @@
 # breakCA
 A pipeline for running an ensemble of variant callers to predict variants in ATAC-seq reads.
 
-This project is based on [@Arkosen](https://github.com/Arkosen)'s [project of the same name](https://github.com/Arkosen/BreakCA).
+This project is based on [@Arkosen](https://github.com/Arkosen)'s [project](https://github.com/Arkosen/BreakCA) of the same name.
 
 # files and directories
 
@@ -14,13 +14,13 @@ A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for preparin
 A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for training and testing the classifier. It uses the output of `Snakefiles/Snakefile-prepare`.
 
 ### configs/
-Config files that define options and input for the `prepare` and `classify` pipelines.
+Config files that define options and input for the `prepare` and `classify` pipelines. You should start by filling these out.
 
 ### callers/
-Scripts for executing each of the variant callers. Small pipelines can be written for each caller by using a special naming convention. See the [caller README](https://github.com/aryam7/breakCA/blob/master/callers/README.md) for more information.
+Scripts for executing each of the variant callers which are used by the `prepare` pipeline. Small pipelines can be written for each caller by using a special naming convention. See the [caller README](https://github.com/aryam7/breakCA/blob/master/callers/README.md) for more information.
 
 ### breakCA/
-Scripts for calculating posterior probabilities for the existence of an insertion or deletion, which can be used when preparing data for the classifier. These scripts are an adaptation from [@Arkosen](https://github.com/Arkosen)'s [breakCA code](https://github.com/Arkosen/BreakCA/tree/master/bin).
+Scripts for calculating posterior probabilities for the existence of an insertion or deletion, which can be used when running the classifier. These scripts are an adaptation from [@Arkosen](https://github.com/Arkosen)'s [breakCA code](https://github.com/Arkosen/BreakCA/tree/master/bin).
 
 ### scripts/
 Various scripts used by the pipeline. See the [script README](https://github.com/aryam7/breakCA/blob/master/scripts/README.md) for more information.
@@ -32,7 +32,7 @@ An example bash script for executing the `prepare` pipeline on an SGE cluster us
 An example bash script for executing the `classify` pipeline on an SGE cluster using snakemake.
 
 # execution
-The pipeline is written as Snakefiles and so can be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the `run-<pipeline>.bash` scripts for an example. Make sure to provide required input and options in the `config files` before executing.
+The pipeline is written as Snakefiles and so can be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the `run-<pipeline>.bash` scripts for an example. Make sure to provide required input and options in the [config files](https://github.com/aryam7/breakCA/blob/master/configs) before executing.
 
 By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing the pipeline.
 

@@ -1,0 +1,40 @@
+#!/bin/bash
+
+
+bam="$1"
+[[ -z "$1" ]] && { echo "Parameter 1 is empty" 1>&2; exit 1; }
+peaks="$2"
+[[ -z "$2" ]] && { echo "Parameter 2 is empty" 1>&2; exit 1; }
+genome="$3"
+[[ -z "$3" ]] && { echo "Parameter 3 is empty" 1>&2; exit 1; }
+output_dir="$4"
+[[ -z "$4" ]] && { echo "Parameter 4 is empty" 1>&2; exit 1; }
+config="$7"
+[[ -z "$7" ]] && { echo "Parameter 7 is empty" 1>&2; exit 1; }
+manta_dir="$8"
+if [[ -z "$8" ]]; then
+	echo "Manta directory not specified. Attempting to retrieve from conda env..." 1>&2
+	if [[ -z "$CONDA_PREFIX" ]]; then
+		echo "Error: not running in conda env" 1>&2; exit 1;
+	else
+		manta_dir="$(ls "$CONDA_PREFIX"/share | grep 'manta' | head -n1)"
+		if [[ -z "$manta_dir" ]]; then
+			echo "Error: coudn't find manta in conda env" 1>&2; exit 1;
+		fi
+		manta_dir="$CONDA_PREFIX"/share/"$manta_dir"
+	fi
+else
+	manta_dir="$8"
+fi
+echo "Using manta dir: $manta_dir" 1>&2
+
+
+rm -rf "$output_dir"/results "$output_dir"/workspace "$output_dir"/workflow* "$output_dir"/runWorkflow*
+
+# bgzip compress and index the bed file
+bgzip -f "$peaks" -c > "$output_dir/peaks.bed.gz" && tabix -p bed -f "$output_dir/peaks.bed.gz"
+
+"$manta_dir"/bin/configManta.py --exome --bam "$bam" --referenceFasta "$genome" --callRegions "$output_dir/peaks.bed.gz" --runDir "$output_dir" --config "$config"
+
+"$output_dir"/runWorkflow.py -j 24 && \
+bgzip -d "$output_dir"/results/variants/diploidSV.vcf.gz

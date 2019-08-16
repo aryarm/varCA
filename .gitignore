@@ -1,6 +1,2 @@
 out
 .snakemake
-samples.tsv
-temp
-.snakemake
-log

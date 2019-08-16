@@ -1,0 +1,28 @@
+#!/bin/bash
+
+
+bam="$1"
+[[ -z "$1" ]] && { echo "Parameter 1 is empty" 1>&2; exit 1; }
+peaks="$2"
+[[ -z "$2" ]] && { echo "Parameter 2 is empty" 1>&2; exit 1; }
+genome="$3"
+[[ -z "$3" ]] && { echo "Parameter 3 is empty" 1>&2; exit 1; }
+output_dir="$4"
+[[ -z "$4" ]] && { echo "Parameter 4 is empty" 1>&2; exit 1; }
+
+
+# run gatk haplotype caller
+gatk --java-options "-Xmx4g" HaplotypeCaller \
+  -L "$peaks" \
+  -R "$genome" \
+  -I "$bam" \
+  -O "$output_dir/gatk.g.vcf.gz" \
+  -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation -G StandardHCAnnotation
+
+# correct the genotypes that come out of haplotype caller
+gatk --java-options "-Xmx4g" GenotypeGVCFs \
+  --include-non-variant-sites \
+  -L "$peaks" \
+  -R "$genome" \
+  -V "$output_dir/gatk.g.vcf.gz" \
+  -O "$output_dir/gatk.vcf.gz"

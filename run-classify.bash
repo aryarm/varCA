@@ -14,7 +14,7 @@
 # 	2) qlog - a more detailed log of the progress of each rule and any errors
 
 # you can specify a directory for all output here:
-out_path="$PWD/out/classify"
+out_path="$PWD/out"
 mkdir -p "$out_path"
 
 # clear leftover log files
@@ -36,7 +36,7 @@ snakemake \
 -s Snakefiles/Snakefile-classify \
 --cluster "qsub -t 1 -V -q iblm.q -j y -o ${out_path}/qlog" \
 -j 12 \
---config out="${out_path}" \
+--config out="${out_path}/classify" \
 --latency-wait 60 \
 --use-conda \
 -k \

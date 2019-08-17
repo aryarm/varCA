@@ -25,12 +25,15 @@ if [ -f "${out_path}/qlog" ]; then
 	echo ""> "${out_path}/qlog";
 fi
 
+# make sure that this script is executed from the directory that it lives in!
+
 # Before running this snakemake pipeline, remember to verify that the config.yaml
 # file has been appropriately completed with the required input info. In
 # particular, make sure that you have created a samples.tsv file specifying
 # paths to the fastq files for each of your samples.
 
 snakemake \
+-s Snakefiles/Snakefile-prepare \
 --cluster "qsub -t 1 -V -q iblm.q -j y -o ${out_path}/qlog" \
 -j 24 \
 --config output_dir="${out_path}" \

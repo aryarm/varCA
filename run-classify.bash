@@ -14,7 +14,7 @@
 # 	2) qlog - a more detailed log of the progress of each rule and any errors
 
 # you can specify a directory for all output here:
-out_path="$PWD/out"
+out_path="$PWD/out/classify"
 mkdir -p "$out_path"
 
 # clear leftover log files

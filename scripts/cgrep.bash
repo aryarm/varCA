@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # return cols from a file where the column names match a regex PATTERN
 # usage: ./cgrep.bash FILE [...] PATTERN (where FILE can be - for stdin)

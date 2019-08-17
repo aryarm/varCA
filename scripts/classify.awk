@@ -1,4 +1,4 @@
-#!/bin/awk -f
+#!/usr/bin/env awk -f
 
 # This awk script reads a two column table containing REF and ALT columns and outputs a single column classifying each variant
 # It is assumed that the REF and ALT alleles have been normalized (ie trimmed and left-aligned), that breakends have been removed, and that multiallelics have been split

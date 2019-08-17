@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # param1+ (the filtering expression): specify the column name, a comparison operator (>, <, ==), and the value to compare against (ex: 'gatk-indel~DP>20')
 # The tab delimited table you want filtered must be passed via stdin and is output via stdout

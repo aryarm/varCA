@@ -1,4 +1,4 @@
-#!/bin/awk -f
+#!/usr/bin/env awk -f
 
 # This awk script attempts to normalize numerical values in tabular data. Here are some examples:
 # 1.75e-1  ==>  0.1750000000

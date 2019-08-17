@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # this bash script extracts REF and ALT columns from a TSV and transforms them
 # into categorical classification columns using classify.awk

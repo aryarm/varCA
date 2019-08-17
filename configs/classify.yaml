@@ -1,17 +1,9 @@
 # This is the Snakemake configuration file that specifies paths and 
-# and options for the predict pipeline. Anybody wishing to use
+# and options for the classify pipeline. Anybody wishing to use
 # the provided snakemake pipeline should first fill out this file with paths to
 # their own data, as the Snakefile requires it.
 # Note: this file is written in the YAML syntax (https://learnxinyminutes.com/docs/yaml/)
 
-
-# what should our classifier predict?
-# use "INS" if you want the classifier to predict insertions,
-# use "DEL" if you want it to predict deletions,
-# use "SNP" if you want it to predict SNVs, or
-# use "." if you want it to simply predict whether any variant exists at that site
-# __deprecated__: you can also specify a multilabel classification by providing a list instead of a single string (ex: ["INS", "DEL"] to predict both ins and dels)
-label: "."
 
 # DATASETs
 # the dataset should be named by a unique id
@@ -23,10 +15,7 @@ label: "."
 #   2) truth - The truth caller id in the dataset
 #      This is only required if the dataset will be used for training data
 #      If you provide this attribute for a prediction dataset, the dataset will be used as a test set
-#   3) na - Default values for every column
-#      You must specify an NA value for every column that you want to use in the classifier
-#      Specify a regex expression to match some column names as the key and a replacement for NA values in those columns as the value
-#   4) filter - (optional) A list of filtering expressions for filtering the data before training or testing
+#   3) filter - (optional) A list of filtering expressions for filtering the data before training or testing
 #      A filtering expression consists of the following concatenated together:
 #          - the name of the column in the table upon which to filter
 #          - one of any of awk's comparison operators (ex: >, <, ==)
@@ -34,35 +23,26 @@ label: "."
 #      The order of the filtering expressions must match the order of the cols in the TSV.
 data:
   SRR891269_odd:
-    path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_indel/SRR891269_odd-chrom.tsv.gz
+    path: /iblm/netapp/home/amassarat/breakCA/predict/out/merged_indel/SRR891269/odd-chrom.tsv.gz
     truth: &truth
       pg-indel
-    na: &na
-      '^gatk-indel~(QD|FS|MQ|AC|ExcessHet|DP|GQ)$': 0
-      '^varscan-indel~(ADP|GQ|SDP|DP|RD|AD|RBQ|ABQ|RDF|RDR|ADF|ADR)$': 0
-      '^varscan-indel~PVAL$': '1.01E0'
-      '^vardict-indel~(QUAL|DP|VD|AF|QSTD|MQ|SN|HIAF|ADJAF|NM|SVLEN|DUPRATE)$': 0
-      '^(vardict-indel|pindel|illumina-manta)~(SV)?TYPE$': 'NC'
-      '^delly~(RC|GQ)$': 0
-      '^pindel~(HOMLEN|SVLEN|PL|RD)$': 0
-      '^illumina-manta~(QUAL|SVLEN|HOMLEN|BND_DEPTH|MATE_BND_DEPTH|GQ)$': 0
-      '^illumina-strelka~(QUAL|REFREP|IDREP|MQ|GQX|DP|DPF|MIN_DP|DPI|SB)$': 0
-      '^breakca~.*$': 0
-    filter: &filter
-      - 'gatk-indel~DP>0'
+    # filter: &filter
+    #   - 'gatk-indel~DP>10'
   SRR891269_even:
-    path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_indel/SRR891269_even-chrom.tsv.gz
-    truth: *truth # use the same truth column names as the SRR891269 data
-    na: *na # use the same na values as the SRR891269 data
-    filter: *filter
+    path: /iblm/netapp/home/amassarat/breakCA/predict/out/merged_indel/SRR891269/even-chrom.tsv.gz
+    truth: *truth # use the same truth column names as the SRR891269_odd data
+    # filter: *filter
   # SRR891271:
-  #   path: /iblm/netapp/home/amassarat/breakCA/merge_callers/out/merged_indel/SRR891271.tsv.gz
+  #   path: /iblm/netapp/home/amassarat/breakCA/predict/out/merged_indel/SRR891271.tsv.gz
   #   truth: *truth # use the same truth column names as the SRR891269 data
-  #   na: *na # use the same na values as the SRR891269 data
-  #   # filter: *filter
 
 # The unique id of the training set to be used for training the classifier
 train: SRR891269_odd
+
+# If you already have an RDA file containing a trained classifier, you can provide the path to it here.
+# If this parameter is provided, the training step will not be performed and the training sample will be ignored.
+# But if this parameter is commented out, the training step will be performed like usual.
+# model: /iblm/netapp/home/amassarat/breakCA/predict/out/classify/SRR891269_odd/model.rda
 
 # A list of samples for which to make predictions, identified by their unique sample id
 # You may optionally specify a truth set for each sample if you want it to serve as test data (see "data" above)
@@ -71,23 +51,20 @@ predict: [SRR891269_even]
 # Whether to perform undersampling on the training data to obtain balanced data
 balance: false
 
-# Whether your data contains pseudo-numerical values
-# ex: scientific notation or numbers followed by a percent sign
-norm_numerics: true
-
 # If you'd like the pipeline to create a plot of precision-recall curves, specify
 # the column names to use for thresholding here. Otherwise, comment out these lines.
 # Only single point precision-recall calculation will be performed for
 # column names that don't have a value
 # Prefix the column name with a * if it should be sorted in reverse order
 prcols:
-  'gatk-indel': QD
+  gatk-indel: QD
   '*varscan-indel': PVAL
-  'vardict-indel': QUAL
-  'pindel':
-  'illumina-manta': QUAL
-  'illumina-strelka': QUAL
+  vardict-indel: QUAL
+  pindel:
+  delly:
+  illumina-manta: QUAL
+  illumina-strelka: QUAL
 
 # The path to the directory in which to place all of the output files
 # defined relative to whatever directory you execute the snakemake command in
-out: /iblm/netapp/home/amassarat/breakCA/predict/out
+out: /iblm/netapp/home/amassarat/breakCA/predict/out/classify

@@ -5,6 +5,14 @@ A pipeline for running an ensemble of variant callers to predict variants in ATA
 
 This project is based on [@Arkosen](https://github.com/Arkosen)'s [project](https://github.com/Arkosen/BreakCA) of the same name.
 
+# execution
+The pipeline is written as Snakefiles and so can be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the `run-<pipeline>.bash` scripts for an example. Make sure to provide required input and options in the [config files](https://github.com/aryam7/breakCA/blob/master/configs) before executing.
+
+By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing the pipeline.
+
+# dependencies
+If you have [conda](https://conda.io/docs/user-guide/install/index.html) installed (highly recommended), use the `--use-conda` flag when calling `snakemake` to let it automatically handle all dependencies of the pipelines. Otherwise, you must manually install the dependencies listed in the [env files](https://github.com/aryam7/breakCA/blob/master/envs).
+
 # files and directories
 
 ### Snakefiles/Snakefile-prepare
@@ -31,10 +39,3 @@ An example bash script for executing the `prepare` pipeline on an SGE cluster us
 ### run-classify.bash
 An example bash script for executing the `classify` pipeline on an SGE cluster using snakemake.
 
-# execution
-The pipeline is written as Snakefiles and so can be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the `run-<pipeline>.bash` scripts for an example. Make sure to provide required input and options in the [config files](https://github.com/aryam7/breakCA/blob/master/configs) before executing.
-
-By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing the pipeline.
-
-# dependencies
-If you have [conda](https://conda.io/docs/user-guide/install/index.html) installed (highly recommended), use the `--use-conda` flag when calling `snakemake` to let it automatically handle all dependencies of the pipelines. Otherwise, you must manually install the dependencies listed in the [env files](https://github.com/aryam7/breakCA/blob/master/envs).

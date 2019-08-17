@@ -1,14 +1,15 @@
 # This is the Snakemake configuration file that specifies paths and 
-# and options for the merge_callers pipeline. Anybody wishing to use
+# and options for the prepare pipeline. Anybody wishing to use
 # the provided snakemake pipeline should first fill out this file with paths to
 # their own data, as the Snakefile requires it.
+# Note: this file is written in the YAML syntax (https://learnxinyminutes.com/docs/yaml/)
 
 
 # The path to a text file specifying where to find read information for each sample
 # Each row in the sample file should represent a different sample.
 # The sample file should have 3 columns (each separated by a single tab):
 #       <unique_sample_name> <fastq1_path> <fastq2_path>
-sample_file: /iblm/netapp/home/amassarat/breakCA/merge_callers/samples.tsv
+sample_file: /iblm/netapp/home/amassarat/breakCA/predict/samples.tsv
 
 # which samples should we execute the pipeline on?
 # Comment out this line if you want to run all samples in the sample file
@@ -19,7 +20,7 @@ genome: /iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sap
 
 # Directory in which to output all of the output files
 # Defined relative to whatever directory you execute the snakemake command in
-out: /iblm/netapp/home/amassarat/breakCA/merge_callers/out
+out: /iblm/netapp/home/amassarat/breakCA/predict/out
 
 # What are the maximum number of threads to use for the entire pipeline?
 num_threads: 8
@@ -37,17 +38,20 @@ indel_callers: [gatk-indel, varscan-indel, vardict-indel, delly, pindel, illumin
 # Use an empty string or comment out this line if you'd like your VCFs unfiltered
 # bcftools_params: "-M 2"
 
+# what should our classifier predict?
+# use "INS" if you want the classifier to predict insertions,
+# use "DEL" if you want it to predict deletions,
+# use "SNP" if you want it to predict SNVs, or
+# use "." if you want it to simply predict whether any variant exists at that site
+# __deprecated__: you can also specify a multilabel classification by providing a list instead of a single string (ex: ["INS", "DEL"] to predict both ins and dels)
+label: "."
+
 # Whether to "normalize" the VCF output of every caller script
 # This option is recommended if you plan to feed the data to a random forest
 # Normalization usually involves left-alignment and trimming of variants
 # See https://genome.sph.umich.edu/wiki/Variant_Normalization for more info
 # In our pipeline, the normalization step also reduces counts of variants that appear at the same position to 1
 normalize: true
-
-# Whether to normalize weird numerical columns before outputting the final TSV
-# This option is recommended if you plan to feed the data to a random forest
-# ex: scientific notation or numbers followed by a percent sign
-norm_numerics: true
 
 # Whether to replace NA values in the dataset before outputting the final TSV
 # This option is recommended if you plan to feed the data to a random forest
@@ -56,7 +60,8 @@ fillna: true
 
 # A list of filtering expressions for filtering the sites before outputting the final TSV
 # A filtering expression consists of the following concatenated together:
-#   - the name of the column in the table upon which to filter
+#   - the caller id
+#   - a tilde ~
 #   - one of awk's comparison operators (the following are currently supported: >, <, ==)
 #   - a value to filter on
 # Comment out these lines to disable filtering
@@ -64,15 +69,23 @@ fillna: true
 snp_filter: ['gatk-snp~DP>0']
 indel_filter: ['gatk-indel~DP>0']
 
+# Whether to normalize weird numerical columns before outputting the final TSV
+# ex: scientific notation or numbers followed by a percent sign
+# This option is recommended if you plan to feed the data to a random forest
+norm_numerics: true
+
 
 # CALLER SPECIFIC PARAMETERS
 # you can specify:
-#   1) any other columns (besides CHROM, POS, REF, and ALT) to extract from the VCFs output by each caller
-#      (note that this feature is unavailable if your caller script outputs a TSV instead of a VCF)
-#   2) any parameters that should be passed to each caller script
-#   3) whether your caller outputs a VCF (assumed if not specified) or a TSV
-# key should be <caller_name> and value can be a dictionary where "cols" are the columns, "params" is a string or list of parameters, and "ext" is either 'vcf' or 'tsv'
+#   1) cols - any other columns (besides CHROM, POS, REF, and ALT) to extract from the VCFs output by each caller
+#      (note that this attribute will be ignored if your caller script outputs a TSV instead of a VCF)
+#   2) params - any extra parameters that should be passed to the caller script
+#   3) ext - whether your caller outputs a VCF (assumed if not specified) or a TSV
+#   4) na - replacement values to use (instead of 0) when filling NA's
+#      (note that this is ignored if 'fillna' is not set to true above)
+# key should be the <caller_id> and value can be a dictionary with each attribute
 # "cols" should be a dictionary of lists containing each category of column in the VCF (where categories can be 'info', 'format', and 'other' for all others)
+# "na" should be a dictionary containing as keys each column name and as values the replacement value
 gatk-snp:
   cols:
     other: [QUAL]
@@ -82,12 +95,16 @@ gatk-snp:
 varscan-snp:
   cols:
     info: [ADP]
-    format: [SDP,DP,RD,AD,FREQ,PVAL,ABQ,GQ,RBQ,RDF,RDR,ADF,ADR]
+    format: [SDP,DP,RD,AD,PVAL,ABQ,GQ,RBQ,RDF,RDR,ADF,ADR]
+  na:
+    PVAL: 1.01E0
 
 vardict-snp:
   cols:
     other: [QUAL]
     info: [TYPE,DP,VD,AF,QSTD,MQ,SN,HIAF,ADJAF,NM,SVTYPE,SVLEN,DUPRATE]
+  na:
+    SVTYPE: NC
 
 pg-snp:
   # path to a bgzip, indexed VCF containing variants called in the platinum genomes project
@@ -101,42 +118,55 @@ gatk-indel:
 varscan-indel:
   cols:
     info: [ADP]
-    format: [SDP,DP,RD,AD,FREQ,PVAL,ABQ,GQ,RBQ,RDF,RDR,ADF,ADR]
+    format: [SDP,DP,RD,AD,PVAL,ABQ,GQ,RBQ,RDF,RDR,ADF,ADR]
+  na:
+    PVAL: 1.01E0
 
 vardict-indel:
   cols:
     other: [QUAL]
     info: [TYPE,DP,VD,AF,QSTD,MQ,SN,HIAF,ADJAF,NM,SVTYPE,SVLEN,DUPRATE]
+  na:
+    SVTYPE: NC
 
 delly:
-  cols:format: [RC,GQ]
+  cols:
+    format: [RC,GQ]
 
 pindel:
   cols:
     info: [HOMLEN,SVLEN,SVTYPE]
     format: [PL,RD]
+  na:
+    SVTYPE: NC
 
 illumina-manta:
   cols:
     other: [QUAL]
     info: [SVTYPE,SVLEN,HOMLEN,BND_DEPTH,MATE_BND_DEPTH]
     format: [GQ]
+  na:
+    SVTYPE: NC
 
 illumina-strelka:
   cols:
     other: [QUAL]
     info: [REFREP,IDREP,MQ]
     format: [GQX,DP,DPF,MIN_DP,DPI,SB]
-  # 1) path to strelka config file
-  # 2) path to the directory in which strelka is stored or "" if strelka is installed in your current conda env (or if using --use-conda)
-  params: [/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configureStrelkaGermlineWorkflow.py.ini, ""]
+  params:
+    # 1) path to strelka config file
+    - /iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configureStrelkaGermlineWorkflow.py.ini
+    # 2) path to the directory in which strelka is stored or "" if strelka is installed in your current conda env (or if using --use-conda)
+    - ""
 
 breakca:
   # specify that breakca creates a tsv instead of a vcf
   ext: tsv
-  # 1) the (relative) path to the root of the breakCA git repository
-  # 2) path to the directory in which the Rscript executable is held or "" if R is installed in your current conda env (or if using --use-conda)
-  params: [breakCA, ""]
+  params:
+    # 1) the (relative) path to the breakCA scripts directory
+    - breakCA
+    # 2) path to the directory in which the Rscript executable is held or "" if R is installed in your current conda env (or if using --use-conda)
+    - ""
 
 pg-indel:
   # path to a bgzip, indexed VCF containing variants called in the platinum genomes project
@@ -144,9 +174,11 @@ pg-indel:
 
 # Custom parameters can also be passed to special scripts that perform pre-caller steps:
 illumina:
-  # 1) path to manta config file
-  # 2) path to the directory in which manta is stored or "" if manta is installed in your current conda env (or if using --use-conda)
-  params: [/iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configManta.py.ini, ""]
+  params:
+    # 1) path to manta config file
+    - /iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configManta.py.ini
+    # 2) path to the directory in which manta is stored or "" if manta is installed in your current conda env (or if using --use-conda)
+    - ""
 
 pg:
   # path to a bgzip, indexed VCF containing variants called in the platinum genomes project

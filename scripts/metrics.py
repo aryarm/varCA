@@ -34,6 +34,7 @@ df = pd.read_csv(
     index_col=False, dtype={'predict': np.bool_, 'truth': np.bool_},
     low_memory=False, na_values='.'
 )
+df.fillna(0, inplace=True)
 
 to_idx = {'p': 0, 'r': 1, 'b': 2, 'f': 4, 't': 5}
 metrics = [to_idx[metric] for metric in args.metrics.split(",")]

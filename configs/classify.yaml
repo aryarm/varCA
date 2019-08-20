@@ -51,6 +51,10 @@ predict: [SRR891269_even]
 # Whether to perform undersampling on the training data to obtain balanced data
 balance: false
 
+# Whether to perform cross validation in order to tune hyperparameters of the classifier
+# Enabling this option will substantially increase the runtime of the pipeline
+tune: false
+
 # If you'd like the pipeline to create a plot of precision-recall curves, specify
 # the column names to use for thresholding here. Otherwise, comment out these lines.
 # Only single point precision-recall calculation will be performed for

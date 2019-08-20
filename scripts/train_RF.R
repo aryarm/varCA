@@ -6,13 +6,15 @@
 #         The last column must contain binarized, true labels. Note that NA's should be removed and numerical columns should be normalized (via norm_numerics.awk)
 # param2: The path to an RDA file in which to store the trained classifier. This file is required input to predict_RF.R
 # param3: An integer (0 or 1) indicating whether to attempt to balance the data
-# param4 (optional): The path a TSV in which to store information about how important the random forest deems each column in the data you provided.
+# param4: An integer (0 or 1) indicating whether to attempt cross validation in order to tune the classifier's hyperparameters
+# param5 (optional): The path a TSV in which to store information about how important the random forest deems each column in the data you provided.
 
 args <- commandArgs(trailingOnly = TRUE)
 training<- args[1]
 model<- args[2]
 balance<- args[3] # an integer (0 or 1) indicating whether to balance the data
-importance<- args[4] # if specified, importance for each of the variables is saved here
+tune<- args[4] # an integer (0 or 1) indicating whether to tune the hyperparameters
+importance<- args[5] # if specified, importance for each of the variables is saved here
 
 # load libraries
 library(plyr)

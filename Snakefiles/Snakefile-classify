@@ -63,7 +63,9 @@ rule add_truth:
         "paste "
         "<(zcat {input.annot} | cut -f 3- | scripts/cgrep.bash - -v '{params.truth}') "
         "<(zcat {input.annot} | cut -f 3- | scripts/cgrep.bash - '{params.truth}') | "
-        "sed 's/^\t//' | paste <(zcat {input.tsv} | scripts/cgrep.bash - -v '~CLASS:') - | gzip > {output}"
+        "sed 's/^\\t//' | paste <(zcat {input.tsv} | "
+        "scripts/cgrep.bash - -v '~CLASS:' | "
+        "scripts/cgrep.bash - -Evx '(CHROM|POS|REF)') - | gzip > {output}"
 
 rule train:
     """ train the classifier """

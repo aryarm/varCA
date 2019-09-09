@@ -53,7 +53,7 @@ balance: false
 
 # Whether to perform cross validation in order to tune hyperparameters of the classifier
 # Enabling this option will substantially increase the runtime of the pipeline
-tune: false
+tune: true
 
 # If you'd like the pipeline to create a plot of precision-recall curves, specify
 # the column names to use for thresholding here. Otherwise, comment out these lines.

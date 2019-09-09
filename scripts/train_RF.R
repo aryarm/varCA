@@ -20,6 +20,7 @@ importance<- args[5] # if specified, importance for each of the variables is sav
 library(plyr)
 library(dplyr)
 library(mlr)
+library(parallelMap)
 # library(tuneRanger)
 
 # load data.frame
@@ -63,9 +64,15 @@ if (as.integer(tune)) {
 	rdesc <- makeResampleDesc("CV",iters=4L)
 	# set optimization technique
 	ctrl <- makeTuneControlGrid(resolution=8L)
+	
 	# tune hyperparameters
-	print("tuning hyperparameters")
+	print("initiating multicore tuning of hyperparameters")
+        # but run the hyperparameter tuning in parallel, since it'll take a while
+	# number of cores should be detected automatically
+	parallelStartMulticore(level="mlr.tuneParams")
 	fit = tuneParams(learner=rf.lrn, task=traintask, resampling=rdesc, measures=list(acc), par.set=params, control=ctrl, show.info=T)
+	parallelStop()
+
 	print("tuned params are")
 	tune$x
 	rf.lrn$par.vals = c(rf.lrn$par.vals, tune$x)

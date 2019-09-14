@@ -21,6 +21,7 @@ library(plyr)
 library(dplyr)
 library(mlr)
 library(parallelMap)
+library(parallel)
 # library(tuneRanger)
 
 # load data.frame
@@ -68,8 +69,9 @@ if (as.integer(tune)) {
 	# tune hyperparameters
 	print("initiating multicore tuning of hyperparameters")
         # but run the hyperparameter tuning in parallel, since it'll take a while
-	# number of cores should be detected automatically
-	parallelStartMulticore(level="mlr.tuneParams")
+	# number of cores should be detected automatically (but don't use
+	# all of the cores because otherwise we'll use too much memory)
+	parallelStartMulticore(cpus=trunc(detectCores()/2.4), level="mlr.tuneParams")
 	fit = tuneParams(learner=rf.lrn, task=traintask, resampling=rdesc, measures=list(acc), par.set=params, control=ctrl, show.info=T)
 	parallelStop()
 

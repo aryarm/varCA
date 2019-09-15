@@ -72,9 +72,12 @@ if (as.integer(tune)) {
 	# number of cores should be detected automatically (but don't use
 	# all of the cores because otherwise we'll use too much memory)
 	parallelStartMulticore(cpus=trunc(detectCores()/2.4), level="mlr.tuneParams")
-	fit = tuneParams(learner=rf.lrn, task=traintask, resampling=rdesc, measures=list(acc), par.set=params, control=ctrl, show.info=T)
+	tune = tuneParams(learner=rf.lrn, task=traintask, resampling=rdesc, measures=list(acc), par.set=params, control=ctrl, show.info=T)
 	parallelStop()
 
+	print("matrix of classifier performance for each pair of hyperparams")
+	data = generateHyperParsEffectData(tune)
+	data
 	print("tuned params are")
 	tune$x
 	rf.lrn$par.vals = c(rf.lrn$par.vals, tune$x)

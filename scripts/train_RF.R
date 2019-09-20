@@ -59,10 +59,10 @@ if (as.integer(balance)) {
 if (as.integer(tune)) {
 	# mtry default: sqrt(number of features)
 	# nodesize default: 1
-	params <- makeParamSet(makeIntegerParam("mtry",lower = 4,upper = 12),
-                           makeIntegerParam("min.node.size",lower = 1,upper = 12))
+	params <- makeParamSet(makeIntegerParam("mtry",lower = 7,upper = 15),
+                           makeIntegerParam("min.node.size",lower = 6,upper = 10))
 	# set validation strategy; 4-fold cross validation
-	rdesc <- makeResampleDesc("CV",iters=4L)
+	rdesc <- makeResampleDesc("CV",iters=5L)
 	# set optimization technique
 	ctrl <- makeTuneControlGrid(resolution=8L)
 	

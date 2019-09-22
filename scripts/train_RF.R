@@ -64,7 +64,9 @@ if (as.integer(tune)) {
 	# set validation strategy; 4-fold cross validation
 	rdesc <- makeResampleDesc("CV",iters=5L)
 	# set optimization technique
-	ctrl <- makeTuneControlGrid(resolution=8L)
+	resolutn <- c(9L, 5L)
+	names(resolutn) <- c("mtry", "min.node.size")
+	ctrl <- makeTuneControlGrid(resolution=resolutn)
 	
 	# tune hyperparameters
 	print("initiating multicore tuning of hyperparameters")

@@ -67,25 +67,31 @@ rule add_truth:
         "scripts/cgrep.bash - -v '~CLASS:' | "
         "scripts/cgrep.bash - -Evx '(CHROM|POS|REF)') - | gzip > {output}"
 
+
+def train_output():
+    """ return the output to the train rule, conditional on the tune config param """
+    output = [config['out']+"/{sample}/model.rda", config['out']+"/{sample}/variable_importance.tsv"]
+    if 'tune' in config and config['tune']:
+        output.append(config['out']+"/{sample}/tune_matrix.tsv")
+    return output
+
+
 rule train:
     """ train the classifier """
     input: rules.add_truth.output
     params:
-        balance = int(config['balance']) if 'balance' in config else 0,
-        tune = int(config['tune']) if 'tune' in config else 0
-    output:
-        model = config['out']+"/{sample}/model.rda",
-        importance = config['out']+"/{sample}/variable_importance.tsv"
+        balance = int(config['balance']) if 'balance' in config else 0
+    output: train_output()
     conda: "../envs/classify.yml"
     shell:
-        "Rscript scripts/train_RF.R {input} {output.model} {params.balance} {params.tune} {output.importance}"
+        "Rscript scripts/train_RF.R {input} {params.balance} {output}"
 
 rule predict:
     """ predict variants using the classifier """
     input:
         model = lambda wildcards: config['model'] \
             if 'model' in config and config['model'] else \
-            expand(rules.train.output.model, sample=config['train']),
+            expand(rules.train.output[0], sample=config['train']),
         predict = lambda wildcards: expand(rules.add_truth.output, sample=wildcards.sample)
     conda: "../envs/classify.yml"
     output: temp(config['out']+"/{sample}/predictions.tsv")

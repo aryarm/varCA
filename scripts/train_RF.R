@@ -6,15 +6,15 @@
 #         The last column must contain binarized, true labels. Note that NA's should be removed and numerical columns should be normalized (via norm_numerics.awk)
 # param2: The path to an RDA file in which to store the trained classifier. This file is required input to predict_RF.R
 # param3: An integer (0 or 1) indicating whether to attempt to balance the data
-# param4: An integer (0 or 1) indicating whether to attempt cross validation in order to tune the classifier's hyperparameters
-# param5 (optional): The path a TSV in which to store information about how important the random forest deems each column in the data you provided.
+# param4: The path a TSV in which to store information about how important the random forest deems each column in the data you provided.
+# param5 (optional): The path to a TSV in which to store the results of cross validation on the classifier's hyperparameters. If not specified, cross validation will not be performed
 
 args <- commandArgs(trailingOnly = TRUE)
 training<- args[1]
-model<- args[2]
-balance<- args[3] # an integer (0 or 1) indicating whether to balance the data
-tune<- args[4] # an integer (0 or 1) indicating whether to tune the hyperparameters
-importance<- args[5] # if specified, importance for each of the variables is saved here
+balance<- args[2] # an integer (0 or 1) indicating whether to balance the data
+model<- args[3]
+importance<- args[4] # importance for each of the variables is saved here
+tune<- args[5] # if specified, the results of cross validation are saved here
 
 # load libraries
 library(plyr)
@@ -56,7 +56,7 @@ if (as.integer(balance)) {
 	rf.lrn$par.vals <- list(importance='impurity', verbose=TRUE)
 }
 
-if (as.integer(tune)) {
+if (!is.na(tune)) {
 	# mtry default: sqrt(number of features)
 	# nodesize default: 1
 	params <- makeParamSet(makeIntegerParam("mtry",lower = 7,upper = 15),
@@ -74,27 +74,26 @@ if (as.integer(tune)) {
 	# number of cores should be detected automatically (but don't use
 	# all of the cores because otherwise we'll use too much memory)
 	parallelStartMulticore(cpus=trunc(detectCores()/2.4), level="mlr.tuneParams")
-	tune = tuneParams(learner=rf.lrn, task=traintask, resampling=rdesc, measures=list(acc), par.set=params, control=ctrl, show.info=T)
+	tuned = tuneParams(learner=rf.lrn, task=traintask, resampling=rdesc, measures=list(acc), par.set=params, control=ctrl, show.info=T)
 	parallelStop()
 
 	print("matrix of classifier performance for each pair of hyperparams")
-	data = generateHyperParsEffectData(tune)
-	data
+	data = generateHyperParsEffectData(tuned)
+	print(data)
+	write.table(data, sep="\t", file=tune, quote=FALSE)
 	print("tuned params are")
-	tune$x
-	rf.lrn$par.vals = c(rf.lrn$par.vals, tune$x)
+	print(tuned$x)
+	rf.lrn$par.vals = c(rf.lrn$par.vals, tuned$x)
 }
 print("training model")
 fit = mlr::train(rf.lrn, traintask)
 
 # print out variable importance
-if (!is.na(importance)) {
-	print("recording variable importance:")
-	importance_df = as.data.frame(sort(fit$learner.model$variable.importance, decreasing=TRUE))
-	print(importance_df)
-	names(importance_df) <- c("variable\timportance")
-	write.table(importance_df, sep="\t", file=importance, quote=FALSE)
-}
+print("recording variable importance:")
+importance_df = as.data.frame(sort(fit$learner.model$variable.importance, decreasing=TRUE))
+print(importance_df)
+names(importance_df) <- c("variable\timportance")
+write.table(importance_df, sep="\t", file=importance, quote=FALSE)
 
 # save.data
 save.image( model )

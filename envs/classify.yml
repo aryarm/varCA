@@ -14,5 +14,7 @@ dependencies:
   - r-ranger>=0.11.2
   - r-parallelmap>=1.4
   - r
+  - r-earth
+  - r-r.devices
   - coreutils>=8.31
   - gawk

@@ -78,7 +78,7 @@ if (!is.na(tune)) {
 	print("matrix of classifier performance for each pair of hyperparams")
 	data = generateHyperParsEffectData(tuned)
 	print(data$data)
-	write.table(data$data, sep="\t", file=tune, quote=FALSE)
+	write.table(data$data, sep="\t", file=tune, quote=FALSE, row.names=F)
 	print("tuned params are")
 	print(tuned$x)
 	rf.lrn$par.vals = c(rf.lrn$par.vals, tuned$x)

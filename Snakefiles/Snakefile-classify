@@ -17,6 +17,9 @@ rule all:
                 s for s in config['predict']
                 if 'truth' in config['data'][s] and config['data'][s]['truth']
             ] if 'prcols' in config and isinstance(config['prcols'], dict) else []
+        ) + expand(
+            config['out']+"/{sample}/tune.png",
+            sample=config['train'] if 'tune' in config and config['tune'] else []
         )
 
 rule apply_filters:
@@ -85,6 +88,14 @@ rule train:
     conda: "../envs/classify.yml"
     shell:
         "Rscript scripts/train_RF.R {input} {params.balance} {output}"
+
+rule plot_tune:
+    """ plot the results of the hyperparameter tuning step """
+    input: config['out']+"{sample}/tune_matrix.tsv"
+    output: config['out']+"{sample}/tune.png"
+    conda: "../envs/classify.yml"
+    shell:
+        "Rscript scripts/tune_plot.R {input} {output}"
 
 rule predict:
     """ predict variants using the classifier """

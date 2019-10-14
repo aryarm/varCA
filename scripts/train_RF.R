@@ -71,8 +71,8 @@ if (!is.na(tune)) {
         # but run the hyperparameter tuning in parallel, since it'll take a while
 	# number of cores should be detected automatically (but don't use
 	# all of the cores because otherwise we'll use too much memory)
-	tuned = tuneParams(learner=rf.lrn, task=traintask, resampling=rdesc, measures=list(acc), par.set=params, control=ctrl, show.info=T)
 	parallelStartSocket(cpus=trunc(detectCores()/12), level="mlr.tuneParams")
+	tuned = tuneParams(learner=rf.lrn, task=traintask, resampling=rdesc, measures=list(f1), par.set=params, control=ctrl, show.info=T)
 	parallelStop()
 
 	print("matrix of classifier performance for each pair of hyperparams")

@@ -59,12 +59,12 @@ if (as.integer(balance)) {
 if (!is.na(tune)) {
 	# mtry default: sqrt(number of features)
 	# nodesize default: 1
-	params <- makeParamSet(makeIntegerParam("mtry",lower = 7,upper = 15),
-                           makeIntegerParam("min.node.size",lower = 6,upper = 10))
+	params <- makeParamSet(makeIntegerParam("mtry",lower = 13,upper = 18),
+                           makeIntegerParam("min.node.size",lower = 5,upper = 11))
 	# set validation strategy; 4-fold cross validation
 	rdesc <- makeResampleDesc("CV",iters=5L)
 	# set optimization technique
-	ctrl <- makeTuneControlGrid(resolution=c(mtry=9, min.node.size=5))
+	ctrl <- makeTuneControlGrid(resolution=c(mtry=6, min.node.size=7))
 	
 	# tune hyperparameters
 	print("initiating multicore tuning of hyperparameters")

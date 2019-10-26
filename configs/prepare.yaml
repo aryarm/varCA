@@ -66,8 +66,8 @@ fillna: true
 #   - a value to filter on
 # Comment out these lines to disable filtering
 # Note that your filters may have unattended consequences if 'fillna' (above) is not set to true
-snp_filter: ['gatk-snp~DP>0']
-indel_filter: ['gatk-indel~DP>0']
+snp_filter: ['gatk-snp~DP>10']
+indel_filter: ['gatk-indel~DP>10']
 
 # Whether to normalize weird numerical columns before outputting the final TSV
 # ex: scientific notation or numbers followed by a percent sign

@@ -16,6 +16,9 @@ model<- args[3]
 importance<- args[4] # importance for each of the variables is saved here
 tune<- args[5] # if specified, the results of cross validation are saved here
 
+# what value of beta to use when tuning the hyperparameters via the F beta score
+BETA = 0.5
+
 # load libraries
 library(plyr)
 library(dplyr)
@@ -65,6 +68,29 @@ if (!is.na(tune)) {
 	rdesc <- makeResampleDesc("CV",iters=5L)
 	# set optimization technique
 	ctrl <- makeTuneControlGrid(resolution=c(mtry=6, min.node.size=7))
+
+	# create a custom F beta measure
+	#' @export fbeta
+	#' @rdname measures
+	#' @format none
+	fbeta = makeMeasure(id = "fbeta", minimize = FALSE, best = 1, worst = 0,
+		properties = c("classif", "req.pred", "req.truth"),
+		name = "fbeta measure",
+		note = "Defined as: (1+beta^2) * tp/ (beta^2 * sum(truth == positive) + sum(response == positive))",
+		fun = function(task, model, pred, feats, extra.args) {
+			beta = assertNumber(extra.args$beta, null.ok = TRUE, lower=0.00000001)
+			if (missing(beta)) beta = BETA
+			measureFbeta(pred$data$truth, pred$data$response, pred$task.desc$positive, beta)
+		})
+
+	#' @export measureFbeta
+	#' @rdname measures
+	#' @format none
+	measureFbeta = function(truth, response, positive, beta) {
+		beta = beta^2
+		(1+beta) * measureTP(truth, response, positive) /
+			(beta * sum(truth == positive) + sum(response == positive))
+	}
 	
 	# tune hyperparameters
 	print("initiating multicore tuning of hyperparameters")
@@ -72,7 +98,7 @@ if (!is.na(tune)) {
 	# number of cores should be detected automatically (but don't use
 	# all of the cores because otherwise we'll use too much memory)
 	parallelStartSocket(cpus=trunc(detectCores()/12), level="mlr.tuneParams")
-	tuned = tuneParams(learner=rf.lrn, task=traintask, resampling=rdesc, measures=list(f1), par.set=params, control=ctrl, show.info=T)
+	tuned = tuneParams(learner=rf.lrn, task=traintask, resampling=rdesc, measures=list(fbeta), par.set=params, control=ctrl, show.info=T)
 	parallelStop()
 
 	print("matrix of classifier performance for each pair of hyperparams")

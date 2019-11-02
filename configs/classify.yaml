@@ -32,16 +32,13 @@ data:
     path: /iblm/netapp/home/amassarat/breakCA/predict/out/merged_indel/SRR891269/even-chrom.tsv.gz
     truth: *truth # use the same truth column names as the SRR891269_odd data
     # filter: *filter
-  # SRR891271:
-  #   path: /iblm/netapp/home/amassarat/breakCA/predict/out/merged_indel/SRR891271.tsv.gz
-  #   truth: *truth # use the same truth column names as the SRR891269 data
 
 # The unique id of the training set to be used for training the classifier
 train: SRR891269_odd
 
 # If you already have an RDA file containing a trained classifier, you can provide the path to it here.
 # If this parameter is provided, the training step will not be performed and the training sample will be ignored.
-# But if this parameter is commented out, the training step will be performed like usual.
+# But if this parameter is commented out, the training step will be performed as usual.
 # model: /iblm/netapp/home/amassarat/breakCA/predict/out/classify/SRR891269_odd/model.rda
 
 # A list of samples for which to make predictions, identified by their unique sample id
@@ -57,7 +54,7 @@ tune: true
 
 # If you'd like the pipeline to create a plot of precision-recall curves, specify
 # the column names to use for thresholding here. Otherwise, comment out these lines.
-# Only single point precision-recall calculation will be performed for
+# Only single point precision-recall calculations will be performed for
 # column names that don't have a value
 # Prefix the column name with a * if it should be sorted in reverse order
 prcols:

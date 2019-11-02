@@ -13,7 +13,7 @@ sample_file: /iblm/netapp/home/amassarat/breakCA/predict/samples.tsv
 
 # which samples should we execute the pipeline on?
 # Comment out this line if you want to run all samples in the sample file
-SAMP_NAMES: [SRR891269,SRR891271]
+SAMP_NAMES: [SRR891269]
 
 # The path to a reference genome for BWA
 genome: /iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sapiens_assembly19.fasta

@@ -5,8 +5,6 @@ A pipeline for running an ensemble of variant callers to predict variants in ATA
 
 The entire pipeline is made up of two smaller pipelines. The `prepare` pipeline calls each variant caller and prepares the resulting data for use by the `classify` pipeline, which runs the ensemble classifier to predict the existence of variants at each site.
 
-To run the pipeline
-
 This project is based on [@Arkosen](https://github.com/Arkosen)'s [project](https://github.com/Arkosen/BreakCA) of the same name.
 
 # execution

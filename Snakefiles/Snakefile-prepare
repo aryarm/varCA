@@ -196,7 +196,7 @@ def sorted_cols(cols):
 
 
 def caller_out(ext):
-    # I'm embarassed by this code but it's the simplest way to achieve this
+    # this is unfortunately the simplest way to achieve this
     if not ext:
         ext = 'vcf'
     return re.sub("{ext}$", ext, rules.run_caller.output.vcf)
@@ -429,7 +429,7 @@ rule norm_nums:
     output: config['out']+"/merged_{type}/{sample}/norm.tsv.gz"
     conda: "../envs/prepare.yml"
     shell:
-        "zcat {input} | scripts/norm_nums.awk -F $'\\t' -v 'OFS=\\t' | "
+        "zcat {input} | awk -f scripts/norm_nums.awk -F $'\\t' -v 'OFS=\\t' | "
         "gzip >{output}"
 
 rule result:
@@ -438,4 +438,4 @@ rule result:
     output: config['out']+"/merged_{type}/{sample}/final.tsv.gz"
     conda: "../envs/prepare.yml"
     shell:
-        "ln -sf {input} {output}"
+        "ln -sf \"$(basename {input})\" {output}"

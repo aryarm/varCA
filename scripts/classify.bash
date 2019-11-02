@@ -56,7 +56,7 @@ function binarize() {
 for i in "${!callers[@]}"; do
 	id="$(cut -f1 -d: <<< "${callers[$i]}")"
 	idx="$(cut -f2 -d: <<< "${callers[$i]}")"
-	callers[$i]="<(zcat \"\$1\" | cut -f "$idx" | tail -n+2 | \"\$script_dir\"/classify.awk -v \"colname="$id"~CLASS\" | binarize \"\$2\")"
+	callers[$i]="<(zcat \"\$1\" | cut -f "$idx" | tail -n+2 | awk -f \"\$script_dir\"/classify.awk -v \"colname="$id"~CLASS\" | binarize \"\$2\")"
 done
 
 eval "paste ${callers[@]}"

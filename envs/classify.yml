@@ -1,20 +1,16 @@
 channels:
-  - r
-  - bioconda
-  - conda-forge
-  - davebx
+  - defaults
 dependencies:
-  - samtools>=1.9=h8571acd_11
-  - gatk4>=4.1.1.0
-  - r-data.table>=1.10.0
-  - r-plyr=1.8.4
   - r-dplyr>=0.7.4
-  - r-readr=1.1.1
-  - r-mlr>=2.12.1
+  - r-r.devices
   - r-ranger>=0.11.2
+  - r-earth
+  - conda-forge::coreutils>=8.31
+  - r-mlr>=2.12.1
   - r-parallelmap>=1.4
   - r
-  - r-earth
-  - r-r.devices
-  - coreutils>=8.31
-  - gawk
+  - r-readr=1.1.1
+  - r-data.table>=1.10.0
+  - r-plyr=1.8.4
+  - conda-forge::gawk
+

@@ -1,40 +1,37 @@
 channels:
-  - anaconda
-  - bioconda
-  - r
-  - conda-forge
-  - davebx
+  - defaults
 dependencies:
-  - bwa
-  - samtools=1.9=h8571acd_11
-  - macs2>=2.1.2
-  - gatk4>=4.1.1.0
-  - varscan
-  - delly
-  - bcftools=1.9=ha228f0b_4
-  - vcftools
-  - manta
-  - pindel
-  - coreutils>=8.31
+  - r-pbapply>=1.3_3
+  - r-stringr>=1.3.1
+  - r-readr=1.1.1
+  - bioconda::bioconductor-rsamtools>=1.26.1
   - gawk
-  - strelka
-  - vardict-java
-  - bedtools
   - tabix
+  - bcftools==1.9=ha228f0b_4
+  - bioconda::delly
+  - bioconda::bioconductor-bsgenome.hsapiens.ucsc.hg19=1.4.0
+  - bioconda::bioconductor-biovizbase>=1.22.0
+  - vcftools
+  - r-randomforest>=4.6_14
+  - conda-forge::r-rmutil>=1.1.0
+  - gatk4>=4.1.1.0
+  - r-lattice>=0.20_33
+  - r-reshape>=0.8.6
+  - vardict-java
+  - manta
+  - bwa
   - r-data.table>=1.10.0
   - r-plyr=1.8.4
+  - samtools==1.9=h8571acd_11
+  - strelka
+  - bioconda::bioconductor-variantannotation>=1.20.2
+  - pindel
+  - macs2>=2.1.2
+  - conda-forge::r-mlr>=2.12.1
   - r-dplyr>=0.7.4
-  - r-pbapply>=1.3_3
-  - r-readr=1.1.1
-  - r-reshape>=0.8.6
-  - r-rmutil>=1.1.0
-  - r-lattice>=0.20_33
-  - r-stringr>=1.3.1
-  - r-mlr>=2.12.1
-  - bioconductor-biovizbase>=1.22.0
-  - bioconductor-rtracklayer>=1.34.2
-  - bioconductor-rsamtools>=1.26.1
-  - bioconductor-bsgenome.hsapiens.ucsc.hg19=1.4.0
-  - bioconductor-genomicalignments>=1.10.0
-  - bioconductor-variantannotation>=1.20.2
-  - r-randomforest>=4.6_14
+  - bioconda::bioconductor-genomicalignments>=1.10.0
+  - bedtools
+  - varscan
+  - bioconda::bioconductor-rtracklayer>=1.34.2
+  - conda-forge::coreutils>=8.31
+

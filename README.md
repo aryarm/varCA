@@ -8,7 +8,7 @@ The entire pipeline is made up of two smaller pipelines. The `prepare` pipeline 
 This project is based on [@Arkosen](https://github.com/Arkosen)'s [project](https://github.com/Arkosen/BreakCA) of the same name.
 
 # execution
-The pipeline is written as Snakefiles and so can be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the `run.bash` script for an example. Make sure to provide required input and options in the [config files](https://github.com/aryam7/breakCA/blob/master/configs) before executing.
+The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the [`run.bash` script](https://github.com/aryam7/breakCA/blob/master/run.bash) for an example. Make sure to provide required input and options in the [config files](https://github.com/aryam7/breakCA/blob/master/configs) before executing.
 
 By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing the pipelines.
 

@@ -1,6 +1,6 @@
 # scripts
 This directory contains various scripts used by the pipeline.
-However, you can use most of these scripts on your own if you'd like. Some may even be helpful in day-to-day use.
+However, you can use most of these scripts on their own, too. Some may even be helpful in day-to-day use.
 
 All python scripts implement the `--help` argument. For bash, R, and awk scripts, you can run `head <script>` to read about their usage.
 
@@ -25,6 +25,9 @@ A bash script for replacing NA values in a large TSV.
 ### filter.bash
 A bash script for filtering rows from a large TSV by specific columns.
 
+### importance_plot.py
+A python script for creating plots of the importance of each variable (ie feature) outputted by each variant caller.
+
 ### metrics.py
 A python script for calculating evaluation metrics on a two column TSV of binary labels: truth and predictions.
 
@@ -46,3 +49,5 @@ A python script for generating points to use in a precision-recall or ROC curve.
 ### train_RF.R
 An R script for creating a trained classifier. We recommend using the `Snakefile-classify` pipeline to run this script.
 
+### tune_plot.R
+An R script for visualizing the results of hyperparameter tuning from the train_RF.R script.

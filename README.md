@@ -5,7 +5,7 @@ A pipeline for running an ensemble of variant callers to predict variants in ATA
 
 The entire pipeline is made up of two smaller pipelines. The `prepare` pipeline calls each variant caller and prepares the resulting data for use by the `classify` pipeline, which runs the ensemble classifier to predict the existence of variants at each site.
 
-This project is based on [@Arkosen](https://github.com/Arkosen)'s [project](https://github.com/Arkosen/BreakCA) of the same name.
+This project is based on [@Arkosen](https://github.com/Arkosen)'s [breakCA project](https://github.com/Arkosen/BreakCA).
 
 # execution
 The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the [`run.bash` script](https://github.com/aryam7/breakCA/blob/master/run.bash) for an example. Make sure to provide required input and options in the [config files](https://github.com/aryam7/breakCA/blob/master/configs) before executing.

@@ -127,19 +127,6 @@ rule results:
         "sed 's/response/CLASS:/' | sed 's/^/breakca~/' | "
         "paste -s && cat) | gzip > {output}"
 
-rule prc_pts:
-    """ generate single point precision recall metrics """
-    input: rules.results.output
-    params:
-        truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else ""
-    output: config['out']+"/{sample}/prc/pts/{caller}.txt"
-    conda: "../envs/prc.yml"
-    shell:
-        "paste "
-        "<(zcat {input} | scripts/cgrep.bash - '{params.truth}~CLASS:') "
-        "<(zcat {input} | scripts/cgrep.bash - '{wildcards.caller}~CLASS:') | "
-        "tail -n+2 | scripts/metrics.py -o {output}"
-
 
 def sort_col(caller):
     if caller in config['prcols']:
@@ -149,6 +136,24 @@ def sort_col(caller):
     else:
         return "", False
 
+
+rule prc_pts:
+    """ generate single point precision recall metrics """
+    input:
+        results = rules.results.output,
+        predicts = lambda wildcards: rules.results.output if wildcards.caller == 'breakca' else prepared_data(wildcards)
+    params:
+        truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else "",
+        predict_col = lambda wildcards: 'prob.1' if wildcards.caller == 'breakca' else sort_col(wildcards.caller)[0],
+        ignore_probs = lambda wildcards: "" if wildcards.caller == 'breakca' or sort_col(wildcards.caller)[0] else "--ignore-probs"
+    output: config['out']+"/{sample}/prc/pts/{caller}.txt"
+    conda: "../envs/prc.yml"
+    shell:
+        "paste "
+        "<(zcat {input.results} | scripts/cgrep.bash - '{params.truth}~CLASS:') "
+        "<(zcat {input.results} | scripts/cgrep.bash - '{wildcards.caller}~CLASS:') "
+        "<(zcat {input.predicts} | scripts/cgrep.bash - -F '{wildcards.caller}~{params.predict_col}')"
+        " | tail -n+2 | scripts/metrics.py -o {output} {params.ignore_probs}"
 
 rule prc_curves:
     """ generate the points for a precision recall curve """

@@ -44,10 +44,14 @@ for arg in sorted(all_args.keys()):
         table = np.loadtxt(all_args[arg])
         # recall: 1st row, precision: 2nd row
         if table.ndim != 1:
-            area = auc(table[0], table[1])
+            # area = auc(table[0], table[1])
+            # colors[arg] = plt.step(
+            #     table[0], table[1], where='post',
+            #     label=arg+": area={0:0.2f}".format(area)
+            # )[0].get_color()
             colors[arg] = plt.step(
                 table[0], table[1], where='post',
-                label=arg+": area={0:0.2f}".format(area)
+                label=arg
             )[0].get_color()
         else:
             area = table[1]

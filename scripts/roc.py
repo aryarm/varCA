@@ -44,10 +44,14 @@ for arg in sorted(all_args.keys()):
         table = np.loadtxt(all_args[arg])
         # fpr: 1st row, tpr: 2nd row
         if table.ndim != 1:
-            area = auc(table[0], table[1])
+            # area = auc(table[0], table[1])
+            # colors[arg] = plt.plot(
+            #     table[0], table[1],
+            #     label=arg+": area={0:0.2f}".format(area)
+            # )[0].get_color()
             colors[arg] = plt.plot(
                 table[0], table[1],
-                label=arg+": area={0:0.2f}".format(area)
+                label=arg
             )[0].get_color()
         else:
             area = table[1]

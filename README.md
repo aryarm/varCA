@@ -1,6 +1,6 @@
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.5.0-brightgreen.svg?style=flat-square)](https://snakemake.bitbucket.io)
 
-# breakCA
+# varCA
 A pipeline for running an ensemble of variant callers to predict variants in ATAC-seq reads.
 
 The entire pipeline is made up of two smaller pipelines. The `prepare` pipeline calls each variant caller and prepares the resulting data for use by the `classify` pipeline, which runs the ensemble classifier to predict the existence of variants at each site.

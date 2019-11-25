@@ -14,8 +14,8 @@ parser.add_argument(
 )
 parser.add_argument(
     "-m", "--metrics", default='r,p,b,t,f,a,v', help=(
-        "a comma separated, ordered list of metrics to output; use 'p' for "
-        "precision, 'r' for recall, 'b' for the F-beta score, 't' for total "
+        "a comma separated, ordered list of metrics to output; use 'r' for "
+        "recall, 'p' for precision, 'b' for the F-beta score, 't' for total "
         "positives, 'f' for total negatives, 'a' for the AUROC, and 'v' for "
         "the avg precision score"
     )
@@ -25,6 +25,9 @@ parser.add_argument(
 # )
 parser.add_argument(
     "-p", "--ignore-probs", action='store_true', help="whether to only read truth and predict columns and ignore a probs column if it is provided; note that the AUROC and avg precision will not be output"
+)
+parser.add_argument(
+    "-f", "--flip", action='store_true', help="whether to flip the probabilities; only relevant if --ignore-probs is not passed"
 )
 parser.add_argument(
     "table", nargs="?", default=sys.stdin,
@@ -55,11 +58,21 @@ scores = np.append(
 )
 # calculate additional metrics if we can
 if not args.ignore_probs:
+    # replace inf values with a number 1 larger than the next largest value
+    if df['probs'].max() == np.float_('inf'):
+        df['probs'] = df['probs'].replace(
+            np.float_('inf'), np.sort(df['probs'].unique())[-2]+1
+        )
+    # turn the scores into probabilities if they're not already
+    probs = df['probs']/df['probs'].max()
+    if args.flip:
+        print("Inverting predictions.", file=sys.stderr)
+        probs = 1-probs
     scores = np.append(
         scores,
         np.array([
-            sklearn.metrics.roc_auc_score(df['truth'], df['probs']),
-            sklearn.metrics.average_precision_score(df['truth'], df['probs'])
+            sklearn.metrics.roc_auc_score(df['truth'], probs),
+            sklearn.metrics.average_precision_score(df['truth'], probs)
         ])
     )
 

@@ -145,7 +145,8 @@ rule prc_pts:
     params:
         truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else "",
         predict_col = lambda wildcards: 'prob.1' if wildcards.caller == 'breakca' else sort_col(wildcards.caller)[0],
-        ignore_probs = lambda wildcards: "" if wildcards.caller == 'breakca' or sort_col(wildcards.caller)[0] else "--ignore-probs"
+        ignore_probs = lambda wildcards: "" if wildcards.caller == 'breakca' or sort_col(wildcards.caller)[0] else "--ignore-probs",
+        flip = lambda wildcards: ["", "-f"][sort_col(wildcards.caller)[1]]
     output: config['out']+"/{sample}/prc/pts/{caller}.txt"
     conda: "../envs/prc.yml"
     shell:
@@ -153,7 +154,7 @@ rule prc_pts:
         "<(zcat {input.results} | scripts/cgrep.bash - '{params.truth}~CLASS:') "
         "<(zcat {input.results} | scripts/cgrep.bash - '{wildcards.caller}~CLASS:') "
         "<(zcat {input.predicts} | scripts/cgrep.bash - -F '{wildcards.caller}~{params.predict_col}')"
-        " | tail -n+2 | scripts/metrics.py -o {output} {params.ignore_probs}"
+        " | tail -n+2 | scripts/metrics.py -o {output} {params.ignore_probs} {params.flip}"
 
 rule prc_curves:
     """ generate the points for a precision recall curve """

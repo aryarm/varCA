@@ -14,7 +14,7 @@ parser.add_argument(
     "-o", "--out", default=sys.stdout, help="the filename to save the data to"
 )
 parser.add_argument(
-    "-c", "--callers", default=None, help="a comma separated list of the caller names to include"
+    "-c", "--callers", default="", help="a comma separated list of the caller names to include"
 )
 parser.add_argument(
     "--caller", action='store_false', help="whether to compare importance to each individual feature (default if not specified) or each caller"
@@ -64,6 +64,7 @@ if args.caller:
     plot.legend(handles=patches)
     plt.xlabel('Feature')
     plt.ylabel('Importance')
+    plt.gcf().set_size_inches(13, 10)
 else:
     # aggregate importance by caller
     df = df[['importance', 'caller']].groupby('caller').mean().sort_values('caller')

@@ -46,11 +46,11 @@ snakemake \
 # split the output of the prepare pipeline into a training and testing set
 # (only if the output of the prepare pipeline has changed since last time)
 {
-	final="$out_path"/merged_indel/SRR891269/
-	[ -n "$(find -L "$final"/final.tsv.gz -prune -newer "$final"/odd-chrom.tsv.gz -exec echo . \;)" ] && \
+	final="$out_path"/merged_snp/SRR891269
+	([ ! -f "$final"/odd-chrom.tsv.gz ] || [ -n "$(find -L "$final"/final.tsv.gz -prune -newer "$final"/odd-chrom.tsv.gz -exec echo . \;)" ]) && \
 	zcat "$final"/final.tsv.gz | { read -r head && echo "$head" && awk -F'\t' -v 'OFS=\t' '$1 ~ /^[0-9]+$/ && $1%2'; } | gzip > "$final"/odd-chrom.tsv.gz
-	[ -n "$(find -L "$final"/final.tsv.gz -prune -newer "$final"/even-chrom.tsv.gz -exec echo . \;)" ] && \
-	zcat "$out_path"/merged_indel/SRR891269/final.tsv.gz | { read -r head && echo "$head" && awk -F'\t' -v 'OFS=\t' '$1 ~ /^[0-9]+$/ && $1%2 == 0'; } | gzip > "$out_path"/merged_indel/SRR891269/even-chrom.tsv.gz
+	([ ! -f "$final"/even-chrom.tsv.gz ] || [ -n "$(find -L "$final"/final.tsv.gz -prune -newer "$final"/even-chrom.tsv.gz -exec echo . \;)" ]) && \
+	zcat "$out_path"/merged_snp/SRR891269/final.tsv.gz | { read -r head && echo "$head" && awk -F'\t' -v 'OFS=\t' '$1 ~ /^[0-9]+$/ && $1%2 == 0'; } | gzip > "$final"/even-chrom.tsv.gz
 } >>"${out_path}/log" 2>&1
 
 # classify pipeline -- classify each site; is there a variant there?

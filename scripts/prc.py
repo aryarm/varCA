@@ -51,7 +51,7 @@ for arg in sorted(all_args.keys()):
             # )[0].get_color()
             colors[arg] = plt.step(
                 table[0], table[1], where='post',
-                label=arg
+                label=arg.replace('breakca', 'varca')
             )[0].get_color()
         else:
             area = table[1]
@@ -63,7 +63,7 @@ for arg in sorted(all_args.keys()):
                 extra = {}
             plt.plot(
                 table[0], table[1], marker=next(markers), ms=12,
-                label=arg+": height={0:0.2f}".format(area), **extra
+                label=arg.replace('breakca', 'varca')+": height={0:0.2f}".format(area), **extra
             )
 
 plt.legend(bbox_to_anchor=(1.02, 1), loc="upper left", fontsize='small')

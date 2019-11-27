@@ -2,12 +2,12 @@
 An isolated script in which you can define the logic for running a variant caller. These scripts are called, in turn, by the `prepare` pipeline.
 
 ## Creating a caller script
-If you'd like to add another variant caller to the pipeline, you can specify a script to execute it in the [callers dir](https://github.com/aryam7/breakCA/tree/master/callers).
+If you'd like to add another variant caller to the pipeline, you can specify a script to execute it in the [callers dir](/callers).
 The script should run the caller on a single sample.
 
 Each caller script is referred to in the pipeline by a unique identifier.
 Currently, the filename of the script is used as the identifier.
-When writing the [config file](https://github.com/aryam7/breakCA/blob/master/configs/prepare.yaml) for the `prepare` pipeline, you must refer to callers by their identifier.
+When writing the [config file](/configs/prepare.yaml) for the `prepare` pipeline, you must refer to callers by their identifier.
 
 ### Caller script inputs
 Each caller script is provided the following arguments respectively (any of which can be ignored):
@@ -17,15 +17,15 @@ Each caller script is provided the following arguments respectively (any of whic
 - the path to a directory in which the script must place any of its output
 - the sample name
 - the number of threads to use
-- the path to the output directory of a script that prepares files for the caller script (only if it is relevant -- see [below](https://github.com/aryam7/merge_callers/tree/master/callers#caller-scripts-that-depend-on-other-scripts))
-- user provided parameters (passed via the [config file](https://github.com/aryam7/breakCA/blob/master/configs/prepare.yaml))
+- the path to the output directory of a script that prepares files for the caller script (only if it is relevant -- see [below](#caller-scripts-that-depend-on-other-scripts))
+- user provided parameters (passed via the [config file](/configs/prepare.yaml))
 
 ### Caller script outputs
 Each caller script must use the provided output directory path for all of its output.
 
 Besides this requirement, there is only one other: that at the end of its execution, the script create a VCF file named by the caller identifier followed by a ".vcf" extension. The VCF file cannot be gzipped.
 
-You may optionally specify that the caller script outputs a TSV instead of a VCF. Just add an 'ext' attribute with a value of 'tsv' to the caller-specific parameters in the `prepare` [config file](https://github.com/aryam7/breakCA/blob/master/configs/prepare.yaml). The TSV file must be named similarly to the VCF, except that it must have a ".tsv" instead of a ".vcf" extension. The first two columns of the TSV must be "CHROM" and "POS", in that order.
+You may optionally specify that the caller script outputs a TSV instead of a VCF. Just add an 'ext' attribute with a value of 'tsv' to the caller-specific parameters in the `prepare` [config file](/configs/prepare.yaml). The TSV file must be named similarly to the VCF, except that it must have a ".tsv" instead of a ".vcf" extension. The first two columns of the TSV must be "CHROM" and "POS", in that order.
 
 ### Caller scripts that depend on other scripts
 Some caller scripts must depend on a different script for special input.

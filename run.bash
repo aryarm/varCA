@@ -52,6 +52,9 @@ snakemake \
 	([ ! -f "$final"/even-chrom.tsv.gz ] || [ -n "$(find -L "$final"/final.tsv.gz -prune -newer "$final"/even-chrom.tsv.gz -exec echo . \;)" ]) && \
 	zcat "$out_path"/merged_snp/SRR891269/final.tsv.gz | { read -r head && echo "$head" && awk -F'\t' -v 'OFS=\t' '$1 ~ /^[0-9]+$/ && $1%2 == 0'; } | gzip > "$final"/even-chrom.tsv.gz
 } >>"${out_path}/log" 2>&1
+# the above code is only included here so that this file can be executed on the example data all at once
+# rather than executing this code, you should manually execute whichever commands will help you prepare the data for the classify pipeline
+# (if you're not training the classifier, you probably won't even need to execute any intermediate commands at all)
 
 # classify pipeline -- classify each site; is there a variant there?
 snakemake \

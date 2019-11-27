@@ -8,12 +8,9 @@ The entire pipeline is made up of two smaller pipelines. The `prepare` pipeline 
 
 # execution
 ```
-# install snakemake via conda (if not already installed)
-conda install -c bioconda -c conda-forge -n snakemake 'snakemake>=5.5.0'
-# activate the conda env in which it was installed
-conda activate snakemake
-# execute the pipeline on example data on an SGE cluster
-qsub run.bash
+conda install -c bioconda -c conda-forge -n snakemake 'snakemake>=5.5.0' # install snakemake via conda (if not already installed)
+conda activate snakemake                                                 # activate the conda env in which it was installed
+qsub run.bash                                                            # execute the pipeline on example data on an SGE cluster
 ```
 
 The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing.

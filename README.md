@@ -7,6 +7,15 @@ A pipeline for running an ensemble of variant callers to predict variants in ATA
 The entire pipeline is made up of two smaller pipelines. The `prepare` pipeline calls each variant caller and prepares the resulting data for use by the `classify` pipeline, which runs the ensemble classifier to predict the existence of variants at each site.
 
 # execution
+```
+# install snakemake via conda (if not already installed)
+conda install -c bioconda -c conda-forge -n snakemake 'snakemake>=5.5.0'
+# activate the conda env in which it was installed
+conda activate snakemake
+# execute the pipeline on example data on an SGE cluster
+qsub run.bash
+```
+
 The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing.
 
 By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing the pipelines.

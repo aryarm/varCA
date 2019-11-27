@@ -28,7 +28,7 @@ Config files that define options and input for the `prepare` and `classify` pipe
 ### [callers/](callers)
 Scripts for executing each of the variant callers which are used by the `prepare` pipeline. Small pipelines can be written for each caller by using a special naming convention. See the [caller README](callers/README.md) for more information.
 
-### [breakCA/](breakCA]
+### [breakCA/](breakCA)
 Scripts for calculating posterior probabilities for the existence of an insertion or deletion, which can be used when running the classifier. These scripts are an adaptation from [@Arkosen](https://github.com/Arkosen)'s [breakCA code](https://github.com/Arkosen/BreakCA/tree/master/bin).
 
 ### [scripts/](scripts)

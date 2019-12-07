@@ -28,7 +28,7 @@ rule apply_filters:
     params:
         expr = lambda wildcards: config['data'][wildcards.sample]['filter']
     output: config['out']+"/{sample}/filter.tsv.gz"
-    conda: "envs/classify.yml"
+    conda: "../envs/classify.yml"
     shell:
         "zcat {input} | scripts/filter.bash {params.expr:q} | gzip > {output}"
 

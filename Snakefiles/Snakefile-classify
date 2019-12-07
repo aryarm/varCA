@@ -25,11 +25,12 @@ rule all:
 rule apply_filters:
     """ apply filtering on the data according to the filtering expressions """
     input: lambda wildcards: config['data'][wildcards.sample]['path']
-    params: lambda wildcards: "\t".join(config['data'][wildcards.sample]['filter'])
+    params:
+        expr = lambda wildcards: config['data'][wildcards.sample]['filter']
     output: config['out']+"/{sample}/filter.tsv.gz"
     conda: "envs/classify.yml"
     shell:
-        "zcat {input} | scripts/filter.bash {params} | gzip > {output}"
+        "zcat {input} | scripts/filter.bash {params.expr:q} | gzip > {output}"
 
 rule annotate:
     """ create a table of annotations at each site """

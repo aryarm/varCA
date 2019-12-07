@@ -7,11 +7,10 @@ A pipeline for running an ensemble of variant callers to predict variants in ATA
 The entire pipeline is made up of two smaller pipelines. The `prepare` pipeline calls each variant caller and prepares the resulting data for use by the `classify` pipeline, which runs the ensemble classifier to predict the existence of variants at each site.
 
 # download
-Execute the following command or download the [latest release](https://github.com/aryam7/varCA/releases/latest) manually.
+Execute the following commands or download the [latest release](https://github.com/aryam7/varCA/releases/latest) manually.
 ```
-curl -s https://api.github.com/repos/aryam7/varca/releases/latest | \
-grep "tarball_url" | grep -Po 'https.*(?=",$)' | wget -O- -qi - | \
-tar xvzf - && mv aryam7-* varca
+wget -O- -q https://github.com/aryam7/varca/tarball/master | tar xvzf -
+mv aryam7-* varca
 ```
 Also consider downloading the [example data](https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz).
 ```

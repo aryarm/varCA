@@ -33,8 +33,19 @@ df = pd.read_csv(
 df.columns = ['variable', 'importance']
 
 
-# assign a caller to each variable
+# # assign a caller to each variable
+# callers = ['gatk-indel', 'varscan-indel', 'vardict-indel', 'breakca', 'delly', 'pindel', 'illumina-manta', 'illumina-strelka', 'pg-indel']
+# curr_callers = args.callers.split(',')
+# for caller in curr_callers:
+#     indel_version = caller[:-len('snp')]+"indel"
+#     if caller.endswith('-snp') and indel_version not in callers:
+#     if caller not in callers:
+#         callers.append(caller)
+#     elif caller.endswith('-snp') and snp_version in curr_callers:
+#         callers.append(snp_version)
 callers = args.callers.split(',')
+
+# create a caller column in the df
 df['caller'] = [-1] * len(df)
 for v in range(len(df['variable'])):
     for i in range(len(callers)):
@@ -50,6 +61,7 @@ for v in range(len(df['variable'])):
 
 # should we create a feature plot or a caller plot?
 if args.caller:
+
     # pick a color for each variable based on its caller
     colors = plt.cm.Paired(df['caller'])
 
@@ -64,7 +76,7 @@ if args.caller:
     plot.legend(handles=patches)
     plt.xlabel('Feature')
     plt.ylabel('Importance')
-    plt.gcf().set_size_inches(13, 10)
+    plt.gcf().set_size_inches(13, 13)
 else:
     # aggregate importance by caller
     df = df[['importance', 'caller']].groupby('caller').mean().sort_values('caller')
@@ -76,4 +88,4 @@ else:
     plt.ylabel('Importance Mean')
 
 # save the plot
-plt.savefig(args.out, bbox_inches='tight', pad_inches=0.5, set_dpi=1000)
+plt.savefig(args.out, bbox_inches='tight', pad_inches=0.1, set_dpi=1000)

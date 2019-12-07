@@ -12,13 +12,13 @@ rule all:
             config['out']+"/{sample}/results.tsv.gz",
             sample=config['predict']
         ) + expand(
-            config['out']+"/{sample}/prc/results.png",
+            config['out']+"/{sample}/prc/results.pdf",
             sample=[
                 s for s in config['predict']
                 if 'truth' in config['data'][s] and config['data'][s]['truth']
             ] if 'prcols' in config and isinstance(config['prcols'], dict) else []
         ) + expand(
-            config['out']+"/{sample}/tune.png",
+            config['out']+"/{sample}/tune.pdf",
             sample=config['train'] if 'tune' in config and config['tune'] else []
         )
 
@@ -92,7 +92,7 @@ rule train:
 rule plot_tune:
     """ plot the results of the hyperparameter tuning step """
     input: config['out']+"{sample}/tune_matrix.tsv"
-    output: config['out']+"{sample}/tune.png"
+    output: config['out']+"{sample}/tune.pdf"
     conda: "../envs/classify.yml"
     shell:
         "Rscript scripts/tune_plot.R {input} {output}"
@@ -196,7 +196,7 @@ rule prc:
     params:
         pts = lambda _, input: [k for j in zip(['--'+i+"_pt" for i in ['breakca']+sort_cols()], input.pts) for k in j],
         curves = lambda _, input: [k for j in zip(['--'+i for i in ['breakca']+sort_cols(True)], input.curves) for k in j]
-    output: config['out']+"/{sample}/prc/results.png"
+    output: config['out']+"/{sample}/prc/results.pdf"
     conda: "../envs/prc.yml"
     shell:
         "scripts/prc.py {output} {params.pts} {params.curves}"

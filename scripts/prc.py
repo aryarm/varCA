@@ -36,7 +36,16 @@ def get_marker():
     yield from product([2]+list(range(3, 6, 2)), range(1, 3), [90])
 
 
-colors = {}
+# initialize all of the colors
+callers = ['gatk_indel', 'varscan_indel', 'vardict_indel', 'breakca', 'delly', 'pindel', 'illumina_manta', 'illumina_strelka', 'pg_indel']
+colors = dict(zip(callers, plt.cm.Paired(range(len(callers)))))
+# add the other callers, as well
+for k in list(colors.keys()):
+    if k.endswith('_indel'):
+        colors[k[:-len('indel')]+"snp"] = colors[k]
+    elif k == 'breakca':
+        colors['varca'] = colors[k]
+
 markers = get_marker()
 # go through each table and get its name from all of the args
 for arg in sorted(all_args.keys()):
@@ -49,10 +58,17 @@ for arg in sorted(all_args.keys()):
             #     table[0], table[1], where='post',
             #     label=arg+": area={0:0.2f}".format(area)
             # )[0].get_color()
-            colors[arg] = plt.step(
-                table[0], table[1], where='post',
-                label=arg.replace('breakca', 'varca')
-            )[0].get_color()
+            if arg in colors:
+                plt.step(
+                    table[0], table[1], where='post', color=colors[arg],
+                    label=arg.replace('breakca', 'varca')
+                )
+            else:
+                # pick the color randomly
+                plt.step(
+                    table[0], table[1], where='post',
+                    label=arg.replace('breakca', 'varca')
+                )
         else:
             area = table[1]
             # check if this pt has a curve of the same name
@@ -71,4 +87,5 @@ plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.ylim([0.0, 1.0])
 plt.xlim([0.0, 1.0])
-plt.savefig(args.out, bbox_inches='tight', pad_inches=0.5)
+plt.gcf().set_size_inches(10, 10)
+plt.savefig(args.out, bbox_inches='tight', pad_inches=0.1, set_dpi=10)

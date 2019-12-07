@@ -9,7 +9,7 @@ The entire pipeline is made up of two smaller pipelines. The `prepare` pipeline 
 # download
 Execute the following commands or download the [latest release](https://github.com/aryam7/varCA/releases/latest) manually.
 ```
-wget -O- -q https://github.com/aryam7/varca/tarball/master | tar xvzf -
+wget -O- -q https://github.com/aryam7/varca/tarball/master | tar mxvzf -
 mv aryam7-* varca
 ```
 Also consider downloading the [example data](https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz).

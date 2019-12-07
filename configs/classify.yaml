@@ -23,13 +23,13 @@
 #      The order of the filtering expressions must match the order of the cols in the TSV.
 data:
   SRR891269_odd:
-    path: /iblm/netapp/home/amassarat/breakCA/predict/out/merged_indel/SRR891269/odd-chrom.tsv.gz
+    path: data/odd-chrom.tsv.gz
     truth: &truth
       pg-indel
     # filter: &filter
     #   - 'gatk-indel~DP>10'
   SRR891269_even:
-    path: /iblm/netapp/home/amassarat/breakCA/predict/out/merged_indel/SRR891269/even-chrom.tsv.gz
+    path: data/even-chrom.tsv.gz
     truth: *truth # use the same truth column names as the SRR891269_odd data
     # filter: *filter
 
@@ -39,18 +39,15 @@ train: SRR891269_odd
 # If you already have an RDA file containing a trained classifier, you can provide the path to it here.
 # If this parameter is provided, the training step will not be performed and the training sample will be ignored.
 # But if this parameter is commented out, the training step will be performed as usual.
-# model: /iblm/netapp/home/amassarat/breakCA/predict/out/classify/SRR891269_odd/model.rda
+model: data/model.rda
 
 # A list of samples for which to make predictions, identified by their unique sample id
 # You may optionally specify a truth set for each sample if you want it to serve as test data (see "data" above)
 predict: [SRR891269_even]
 
-# Whether to perform undersampling on the training data to obtain balanced data
-balance: false
-
 # Whether to perform cross validation in order to tune hyperparameters of the classifier
 # Enabling this option will substantially increase the runtime of the pipeline
-tune: true
+tune: false
 
 # If you'd like the pipeline to create a plot of precision-recall curves, specify
 # the column names to use for thresholding here. Otherwise, comment out these lines.
@@ -68,4 +65,4 @@ prcols:
 
 # The path to the directory in which to place all of the output files
 # defined relative to whatever directory you execute the snakemake command in
-out: /iblm/netapp/home/amassarat/breakCA/predict/out/classify
+out: out/classify

@@ -9,7 +9,7 @@
 # Each row in the sample file should represent a different sample.
 # The sample file should have 3 columns (each separated by a single tab):
 #       <unique_sample_name> <fastq1_path> <fastq2_path>
-sample_file: /iblm/netapp/home/amassarat/breakCA/predict/samples.tsv
+sample_file: data/samples.tsv
 
 # which samples should we execute the pipeline on?
 # Comment out this line if you want to run all samples in the sample file
@@ -20,7 +20,7 @@ genome: /iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sap
 
 # Directory in which to output all of the output files
 # Defined relative to whatever directory you execute the snakemake command in
-out: /iblm/netapp/home/amassarat/breakCA/predict/out
+out: out
 
 # What are the maximum number of threads to use for the entire pipeline?
 num_threads: 8
@@ -155,7 +155,7 @@ illumina-strelka:
     format: [GQX,DP,DPF,MIN_DP,DPI,SB]
   params:
     # 1) path to strelka config file
-    - /iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configureStrelkaGermlineWorkflow.py.ini
+    - scripts/configureStrelkaGermlineWorkflow.py.ini
     # 2) path to the directory in which strelka is stored or "" if strelka is installed in your current conda env (or if using --use-conda)
     - ""
 
@@ -176,7 +176,7 @@ pg-indel:
 illumina:
   params:
     # 1) path to manta config file
-    - /iblm/netapp/home/amassarat/breakCA/merge_callers/scripts/configManta.py.ini
+    - scripts/configManta.py.ini
     # 2) path to the directory in which manta is stored or "" if manta is installed in your current conda env (or if using --use-conda)
     - ""
 

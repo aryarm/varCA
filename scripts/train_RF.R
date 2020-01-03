@@ -35,7 +35,7 @@ print("creating training task and making RF learner")
 traintask <- makeClassifTask(data = training, target = colnames(training)[ncol(training)], positive = 1)
 
 # create learner
-rf.lrn <- makeLearner("classif.ranger", predict.type = "prob", mtry=9, min.node.size=16)
+rf.lrn <- makeLearner("classif.ranger", predict.type = "prob")
 
 if (as.integer(balance)) {
 	print("calculating class weights in order to ensure data is balanced when sampled")
@@ -101,6 +101,9 @@ if (!is.na(tune)) {
 	print("tuned params are")
 	print(tuned$x)
 	rf.lrn$par.vals = c(rf.lrn$par.vals, tuned$x)
+} else {
+	# set default hyperparameter values
+	rf.lrn$par.vals = c(rf.lrn$par.vals, mtry=9, min.node.size=16)
 }
 print("training model")
 fit = mlr::train(rf.lrn, traintask)

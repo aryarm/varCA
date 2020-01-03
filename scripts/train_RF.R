@@ -6,7 +6,7 @@
 #         The last column must contain binarized, true labels. Note that NA's should be removed and numerical columns should be normalized (via norm_numerics.awk)
 # param2: The path to an RDA file in which to store the trained classifier. This file is required input to predict_RF.R
 # param3: An integer (0 or 1) indicating whether to attempt to balance the data
-# param4: The path a TSV in which to store information about how important the random forest deems each column in the data you provided.
+# param4: The path to a TSV in which to store information about how important the random forest deems each column in the data you provided.
 # param5 (optional): The path to a TSV in which to store the results of cross validation on the classifier's hyperparameters. If not specified, cross validation will not be performed
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -35,7 +35,7 @@ print("creating training task and making RF learner")
 traintask <- makeClassifTask(data = training, target = colnames(training)[ncol(training)], positive = 1)
 
 # create learner
-rf.lrn <- makeLearner("classif.ranger", predict.type = "prob")
+rf.lrn <- makeLearner("classif.ranger", predict.type = "prob", mtry=9, min.node.size=16)
 
 if (as.integer(balance)) {
 	print("calculating class weights in order to ensure data is balanced when sampled")

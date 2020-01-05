@@ -22,11 +22,15 @@ library(dplyr)
 library(mlr)
 library(parallelMap)
 library(parallel)
-# library(tuneRanger)
 
 # load data.frame
 print("loading training data into R")
-training<- read.table(training, header=TRUE, sep="\t", na.strings=c("NA",".","na","N/A"), skipNul=FALSE, row.names=NULL)
+training<- read.table(training, header=TRUE, sep="\t", na.strings=c("NA",".","na","N/A","inf","Inf","infinity","Infinity"), skipNul=T, row.names=NULL)
+nrows_total <- nrow(training)
+training <- na.omit(training)
+if (nrows_total-nrow(training)>0) {
+	print(paste("ignoring", nrows_total-nrow(training), "rows that have NA values"))
+}
 
 print("creating training task and making RF learner")
 

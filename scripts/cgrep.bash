@@ -7,7 +7,7 @@
 # if stdin is provided without the -, the col idxs will be output instead
 
 # example to retrieve CHROM, POS, and all ALT cols from a gzipped file:
-# zcat file.tsv.gz | ./cgrep.bash '^CHROM$|^POS$|.*~ALT$' - | less
+# zcat file.tsv.gz | ./cgrep.bash - -E '^CHROM$|^POS$|.*~ALT$' | less
 
 col_idxs() {
 	# get comma separated list of column indices

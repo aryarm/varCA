@@ -86,23 +86,32 @@ rule add_mate_info:
         "samtools sort -@ {threads} -o {output} -"
 
 rule rm_dups:
-    """Remove duplicates that may have occurred from PCR and index the
-    resulting file."""
+    """Remove duplicates that may have occurred from PCR."""
     input:
         rules.add_mate_info.output
     output:
-        final_bam = config['out'] + "/align/{sample}/rmdup.bam",
-        final_bam_index = config['out'] + "/align/{sample}/rmdup.bam.bai"
+        final_bam = config['out'] + "/align/{sample}/rmdup.bam"
     threads: config['num_threads']
     conda: "../envs/prepare.yml"
     shell:
-        "samtools markdup -@ {threads} {input} {output.final_bam} && "
-        "samtools index -b -@ {threads} {output.final_bam}"
+        "samtools markdup -@ {threads} {input} {output.final_bam}"
+
+rule rm_dups_idx:
+    """Index each resulting BAM file."""
+    input:
+        rules.rm_dups.output.final_bam
+    output:
+        final_bam_idx = config['out'] + "/align/{sample}/rmdup.bam.bai"
+    threads: config['num_threads']
+    conda: "../envs/prepare.yml"
+    shell:
+        "samtools index -b -@ {threads} {input}"
 
 rule call_peaks:
     """Call peaks in the bam files using macs2"""
     input:
-        rules.rm_dups.output.final_bam
+        final_bam = rules.rm_dups.output.final_bam,
+        final_bam_idx = rules.rm_dups_idx.output
     params:
         output_dir = lambda wildcards, output: os.path.dirname(output[0])
     output:
@@ -110,7 +119,7 @@ rule call_peaks:
     conda: "../envs/prepare.yml"
     shell:
         "macs2 callpeak --nomodel --extsize 200 --slocal 1000 --qvalue 0.05 "
-        "-g hs -f BAMPE -t {input} -n {wildcards.sample} --outdir {params.output_dir}"
+        "-g hs -f BAMPE -t {input.final_bam} -n {wildcards.sample} --outdir {params.output_dir}"
 
 rule bed_peaks:
     """Convert the BAMPE file to a sorted BED file (with the ref allele)"""
@@ -124,7 +133,8 @@ rule bed_peaks:
         # to convert to BED, we must extract the first three columns (chr, start, stop)
         "cut -f -3 \"{input.peaks}\" | "
         "bedtools getfasta -fi {input.ref} -bedOut -bed stdin | "
-        "sort -t $'\t' -k1,1V -k2,2n > \"{output}\""
+        "sort -t $'\t' -k1,1V -k2,2n > \"{output}\" && "
+        "test -s \"{output}\""
 
 
 def get_special_script_path(wildcards):

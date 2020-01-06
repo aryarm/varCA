@@ -38,7 +38,7 @@ def get_marker():
 
 # initialize all of the colors
 callers = ['gatk_indel', 'varscan_indel', 'vardict_indel', 'breakca', 'delly', 'pindel', 'illumina_manta', 'illumina_strelka', 'pg_indel']
-colors = dict(zip(callers, plt.cm.Paired(range(len(callers)))))
+colors = dict(zip(callers, plt.cm.Set1(range(len(callers)))))
 # add the other callers, as well
 for k in list(colors.keys()):
     if k.endswith('_indel'):

@@ -61,9 +61,8 @@ for v in range(len(df['variable'])):
 
 # should we create a feature plot or a caller plot?
 if args.caller:
-
     # pick a color for each variable based on its caller
-    colors = plt.cm.Paired(df['caller'])
+    colors = plt.cm.Set1(df['caller'])
 
     # create the plot
     plot = df[['variable', 'importance']].plot.bar(x='variable', color=[colors])
@@ -82,7 +81,7 @@ else:
     df = df[['importance', 'caller']].groupby('caller').mean().sort_values('caller')
     df['callern'] = callers
     # create the plot
-    plot = df.plot.bar(x='callern', color=[plt.cm.Paired(df.index)])
+    plot = df.plot.bar(x='callern', color=[plt.cm.Set1(df.index)])
     plot.legend().remove()
     plt.xlabel('Caller')
     plt.ylabel('Importance Mean')

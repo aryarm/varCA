@@ -40,4 +40,4 @@ rm -rf "$output_dir"/results "$output_dir"/workspace "$output_dir"/workflow* "$o
 
 "$output_dir"/runWorkflow.py -m sge -j 24 && \
 bgzip -d "$output_dir"/results/variants/genome.S1.vcf.gz && \
-ln -sf "$output_dir"/results/variants/genome.S1.vcf "$output_dir/illumina-strelka.vcf"
+ln -sf results/variants/genome.S1.vcf "$output_dir/illumina-strelka.vcf"

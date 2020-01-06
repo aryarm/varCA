@@ -13,4 +13,4 @@ illumina_dir="$7"
 [[ -z "$7" ]] && { echo "Parameter 7 is empty" 1>&2; exit 1; }
 
 
-ln -sf "$illumina_dir"/results/variants/diploidSV.vcf "$output_dir/illumina-manta.vcf"
+ln -sf "$(realpath --relative-to "$output_dir" "$illumina_dir"/results/variants/diploidSV.vcf)" "$output_dir/illumina-manta.vcf"

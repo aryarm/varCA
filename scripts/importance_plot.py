@@ -78,13 +78,13 @@ if args.caller:
     plt.gcf().set_size_inches(13, 13)
 else:
     # aggregate importance by caller
-    df = df[['importance', 'caller']].groupby('caller').mean().sort_values('caller')
+    df = df[['importance', 'caller']].groupby('caller').sum().sort_values('caller')
     df['callern'] = callers
     # create the plot
     plot = df.plot.bar(x='callern', color=[plt.cm.Set1(df.index)])
     plot.legend().remove()
     plt.xlabel('Caller')
-    plt.ylabel('Importance Mean')
+    plt.ylabel('Importance Sum')
 
 # save the plot
 plt.savefig(args.out, bbox_inches='tight', pad_inches=0.1, set_dpi=1000)

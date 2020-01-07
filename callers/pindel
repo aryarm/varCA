@@ -15,11 +15,19 @@ threads="$6"
 [[ -z "$6" ]] && { echo "Parameter 6 is empty" 1>&2; exit 1; }
 
 
-pindel -f "$genome" -i <(echo "$bam" 300 "$samp") -j "$peaks" -o "$output_dir/" -L "$output_dir/log" -T "$threads"
+# we sleep between each command to avoid potential problems with filesystem latency
+pindel -f "$genome" -i <(echo "$bam" 300 "$samp") -j "$peaks" -o "$output_dir/" -L "$output_dir/log" -T "$threads" && \
+sleep 10 && \
 for file in _D _INV _SI _TD; do
 	pindel2vcf -p "$output_dir/$file" -r "$genome" -R x -d 00000000 -v "$output_dir/$file.raw.vcf" && \
-	bgzip -f "$output_dir/$file.raw.vcf" && tabix -p vcf -f "$output_dir/$file.raw.vcf.gz" && \
-	bcftools norm -d all "$output_dir/$file.raw.vcf" > "$output_dir/$file.vcf" && \
+	sleep 10 && \
+	bgzip -f "$output_dir/$file.raw.vcf" && \
+	sleep 10 && \
+	tabix -p vcf -f "$output_dir/$file.raw.vcf.gz" && \
+	sleep 10 && \
+	bcftools norm -d all "$output_dir/$file.raw.vcf.gz" > "$output_dir/$file.vcf" && \
+	sleep 10 && \
 	bgzip -f "$output_dir/$file.vcf" && tabix -p vcf -f "$output_dir/$file.vcf.gz"
-done
+done && \
+sleep 10 && \
 bcftools concat -a -d all "$output_dir/"{_D,_INV,_SI,_TD}.vcf.gz > "$output_dir/pindel.vcf"

@@ -22,8 +22,9 @@ The example data includes the following files:
 - `samples.tsv` - An example samples file, required for the `predict` pipeline.
 - `snp.rda` - A trained RF model for classifying SNVs
 - `indel.rda` - A trained RF model for classifying indels
-- `snp.tsv.gz` - Prepared, example SNV data
-- `indel.tsv.gz` - Prepared, example indel data
+- `snp.tsv.gz` - Prepared, example SNV training data
+- `indel.tsv.gz` - Prepared, example indel training data
+- `even-indels.tsv.gz` - Prepared, example indel test data
 
 # execution
 On example data:
@@ -35,7 +36,7 @@ qsub run.bash                                                             # exec
 # snakemake -s Snakefiles/Snakefile-classify --use-conda                  # execute the pipeline on example data locally
 ```
 
-The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing.
+The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing. The `classify.yaml` config file is currently configured to run the pipeline on the test data provided.
 
 By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing each pipeline.
 
@@ -57,7 +58,7 @@ Config files that define options and input for the `prepare` and `classify` pipe
 Scripts for executing each of the variant callers which are used by the `prepare` pipeline. Small pipelines can be written for each caller by using a special naming convention. See the [caller README](callers/README.md) for more information.
 
 ### [breakCA/](breakCA)
-Scripts for calculating posterior probabilities for the existence of an insertion or deletion, which can be used when running the classifier. These scripts are an adaptation from [@Arkosen](https://github.com/Arkosen)'s [breakCA code](https://www.biorxiv.org/content/10.1101/605642v1.abstract).
+Scripts for calculating posterior probabilities for the existence of an insertion or deletion, which can be used when running the classifier. These scripts are an adaptation from [@Arkosen](https://github.com/Arkosen)'s [BreakCA code](https://www.biorxiv.org/content/10.1101/605642v1.abstract).
 
 ### [scripts/](scripts)
 Various scripts used by the pipeline. See the [script README](scripts/README.md) for more information.

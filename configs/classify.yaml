@@ -31,7 +31,7 @@ data:
   # here is an example test sample, but you can replace this with whichever
   # sample for which you'd like to predict variants::
   SRR891269_even:
-    path: out/merged_indel/SRR891269/even-chrom.tsv.gz
+    path: data/even-indels.tsv.gz
     truth: *truth # use the same truth column names as the SRR891269 training data
     filter: *filter # use the same filtering expressions, too
 

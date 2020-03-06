@@ -37,7 +37,7 @@ snakemake -s Snakefiles/Snakefile-classify --use-conda
 #qsub run.bash
 ```
 
-The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing. The `classify.yaml` config file is currently configured to run the pipeline on the test data provided.
+The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing. The `classify.yaml` config file is currently configured to run the pipeline on the example data provided.
 
 By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing each pipeline.
 

@@ -1,6 +1,5 @@
 #!/bin/bash
 #$ -t 1
-#$ -q iblm.q
 #$ -V
 #$ -j y
 #$ -cwd
@@ -35,7 +34,7 @@ fi
 # prepare pipeline -- extract features for each site to prepare for classifying
 #snakemake \
 #-s Snakefiles/Snakefile-prepare \
-#--cluster "qsub -t 1 -V -q iblm.q -j y -o ${out_path}/qlog" \
+#--cluster "qsub -t 1 -V -j y -o ${out_path}/qlog" \
 #-j 24 \
 #--config output_dir="${out_path}" \
 #--latency-wait 60 \
@@ -46,7 +45,7 @@ fi
 # classify pipeline -- classify each site; is there a variant there?
 snakemake \
 -s Snakefiles/Snakefile-classify \
---cluster "qsub -t 1 -V -q iblm.q -j y -o ${out_path}/qlog" \
+--cluster "qsub -t 1 -V -j y -o ${out_path}/qlog" \
 -j 12 \
 --config out="${out_path}/classify" \
 --latency-wait 60 \

@@ -29,11 +29,12 @@ The example data includes the following files:
 # execution
 On example data:
 ```
-conda install -c bioconda -c conda-forge -n snakemake 'snakemake>=5.5.0'  # install snakemake via conda (if not already installed)
-conda activate snakemake                                                  # activate the conda env
+conda install -c bioconda -c conda-forge 'snakemake>=5.5.0'  # install snakemake via conda (if not already installed)
 
-qsub run.bash                                                             # execute the pipeline on example data on an SGE cluster
-# snakemake -s Snakefiles/Snakefile-classify --use-conda                  # execute the pipeline on example data locally
+# execute the pipeline on example data locally
+snakemake -s Snakefiles/Snakefile-classify --use-conda
+# execute the pipeline on example data on an SGE cluster
+#qsub run.bash
 ```
 
 The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing. The `classify.yaml` config file is currently configured to run the pipeline on the test data provided.

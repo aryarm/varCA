@@ -29,7 +29,8 @@ The example data includes the following files:
 # execution
 On example data:
 ```
-conda install -c bioconda -c conda-forge 'snakemake>=5.5.0'  # install snakemake via conda (if not already installed)
+# install snakemake via conda (if not already installed)
+conda install -c bioconda -c conda-forge 'snakemake>=5.5.0'
 
 # execute the pipeline on example data locally
 snakemake -s Snakefiles/Snakefile-classify --use-conda

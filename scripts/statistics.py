@@ -26,6 +26,9 @@ parser.add_argument(
     "-r", "--roc", action='store_true', help="create roc (instead of prc) data"
 )
 parser.add_argument(
+    "-t", "--thresh", action='store_true', help="also output thresholds for each precision/recall value"
+)
+parser.add_argument(
     "table", nargs="?", default=sys.stdin,
     help="a two column (truth/probs) table of variant classifications w/o a header"
 )
@@ -66,7 +69,13 @@ else:
         scores = 1-scores
 if args.roc:
     fpr, tpr, thresh = roc_curve(df['truth'], scores)
-    np.savetxt(args.out, np.array([fpr, tpr]))
+    if args.thresh:
+        np.savetxt(args.out, np.array([fpr, tpr, np.hstack(([0], thresh))]))
+    else:
+        np.savetxt(args.out, np.array([fpr, tpr]))
 else:
     precision, recall, thresh = precision_recall_curve(df['truth'], scores)
-    np.savetxt(args.out, np.array([recall, precision]))
+    if args.thresh:
+        np.savetxt(args.out, np.array([recall, precision, np.hstack(([0], thresh))]))
+    else:
+        np.savetxt(args.out, np.array([recall, precision]))

@@ -165,14 +165,15 @@ rule prc_curves:
     params:
         truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else "",
         predict_col = lambda wildcards: 'prob.1' if wildcards.caller == 'breakca' else sort_col(wildcards.caller)[0],
-        flip = lambda wildcards: ["", "-f"][sort_col(wildcards.caller)[1]]
+        flip = lambda wildcards: ["", "-f"][sort_col(wildcards.caller)[1]],
+        thresh = lambda wildcards: "-t" if wildcards.caller == 'breakca' else ""
     output: config['out']+"/{sample}/prc/curves/{caller}.txt"
     conda: "../envs/prc.yml"
     shell:
         "paste "
         "<(zcat {input.annot} | scripts/cgrep.bash - '{params.truth}~CLASS:') "
         "<(zcat {input.predicts} | scripts/cgrep.bash - -F '{wildcards.caller}~{params.predict_col}') | "
-        "tail -n+2 | scripts/statistics.py -o {output} {params.flip}"
+        "tail -n+2 | scripts/statistics.py -o {output} {params.flip} {params.thresh}"
 
 
 def sort_cols(strict=False):

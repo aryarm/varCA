@@ -199,8 +199,11 @@ def write_vcf(out, records):
     vcf.header.info.add("CALLER", 1, 'String', "The caller from which this site was taken", Source='varca')
     contigs = set()
     for rec in records:
+        # handle pysam increasing the start and end sites by 1
+        rec['start'] -= 1
+        rec['stop'] -= 1
+        # parse the record into a pysam.VariantRecord
         try:
-            # parse the record into a pysam.VariantRecord
             record = vcf.new_record(
                 **rec, samples=None, id=None, filter=None
             )

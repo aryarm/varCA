@@ -17,7 +17,7 @@ output<- args[3]
 library(data.table)
 library(plyr)
 library(dplyr)
-library(mlr)
+suppressMessages(library(mlr))
 
 # load model
 print("loading appropriate model")

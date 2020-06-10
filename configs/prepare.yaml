@@ -22,9 +22,6 @@ genome: /iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sap
 # Defined relative to whatever directory you execute the snakemake command in
 out: out
 
-# What are the maximum number of threads to use for the entire pipeline?
-num_threads: 8
-
 # Which callers do you want to run to find SNVs?
 # If you don't want to run the snp pipeline, set this to a falsey value or comment out the line
 snp_callers: [gatk-snp, varscan-snp, vardict-snp, pg-snp]

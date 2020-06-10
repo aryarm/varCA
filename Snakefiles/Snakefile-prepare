@@ -69,10 +69,9 @@ rule align:
         fastq2 = lambda wildcards: SAMP[wildcards.sample][1]
     output:
         config['out'] + "/align/{sample}/aln.bam"
-    threads: config['num_threads']
     conda: "../envs/prepare.yml"
     shell:
-        "bwa mem -t {threads} {input.ref} {input.fastq1} {input.fastq2} "
+        "bwa mem {input.ref} {input.fastq1} {input.fastq2} "
         "-R '@RG\\tID:{wildcards.sample}\\tLB:lib1\\tPL:Illumina\\tPU:unit1\\tSM:{wildcards.sample}' | "
         "samtools view -S -b -h -F 4 -q 20 -> {output}"
 
@@ -84,12 +83,11 @@ rule add_mate_info:
         rules.align.output
     output:
         config['out'] + "/align/{sample}/sorted.mated.bam"
-    threads: config['num_threads']
     conda: "../envs/prepare.yml"
     shell:
-        "samtools sort -n -@ {threads} {input} | "
-        "samtools fixmate -m -@ {threads} -O bam - - | "
-        "samtools sort -@ {threads} -o {output} -"
+        "samtools sort -n {input} | "
+        "samtools fixmate -m -O bam - - | "
+        "samtools sort -o {output} -"
 
 rule rm_dups:
     """Remove duplicates that may have occurred from PCR."""
@@ -97,10 +95,9 @@ rule rm_dups:
         rules.add_mate_info.output
     output:
         final_bam = config['out'] + "/align/{sample}/rmdup.bam"
-    threads: config['num_threads']
     conda: "../envs/prepare.yml"
     shell:
-        "samtools markdup -@ {threads} {input} {output.final_bam}"
+        "samtools markdup {input} {output.final_bam}"
 
 rule rm_dups_idx:
     """Index each resulting BAM file."""
@@ -108,10 +105,9 @@ rule rm_dups_idx:
         rules.rm_dups.output.final_bam
     output:
         final_bam_idx = config['out'] + "/align/{sample}/rmdup.bam.bai"
-    threads: config['num_threads']
     conda: "../envs/prepare.yml"
     shell:
-        "samtools index -b -@ {threads} {input}"
+        "samtools index -b {input}"
 
 rule call_peaks:
     """Call peaks in the bam files using macs2"""
@@ -170,13 +166,12 @@ rule prepare_caller:
     wildcard_constraints:
         sample = "[^\/]*",
         caller = "[^\/]*"
-    threads: config['num_threads']
     conda: "../envs/prepare.yml"
     shell:
         "mkdir -p \"{output}\" && "
         "{input.caller_script} {input.bam} {input.peaks} "
         "{input.genome} {output} {wildcards.sample} "
-        "{threads} {input.shared} {params.caller_params}"
+        "{input.shared} {params.caller_params}"
 
 rule run_caller:
     """Run any callers that are needed"""
@@ -193,13 +188,12 @@ rule run_caller:
         vcf = config['out'] + "/callers/{sample}/{caller}/{caller}.{ext}"
     wildcard_constraints:
         ext = "(tsv|vcf)"
-    threads: config['num_threads']
     conda: "../envs/prepare.yml"
     shell:
         "mkdir -p \"{params.out_dir}\" && "
         "{input.caller_script} {input.bam} {input.peaks} "
         "{input.genome} {params.out_dir} {wildcards.sample} "
-        "{threads} {input.shared} {params.caller_params}"
+        "{input.shared} {params.caller_params}"
 
 
 def sorted_cols(cols):

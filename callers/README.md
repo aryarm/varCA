@@ -16,7 +16,6 @@ Each caller script is provided the following arguments respectively (any of whic
 - a reference genome
 - the path to a directory in which the script must place any of its output
 - the sample name
-- the number of threads to use
 - the path to the output directory of a script that prepares files for the caller script (only if it is relevant -- see [below](#caller-scripts-that-depend-on-other-scripts))
 - user provided parameters (passed via the [config file](/configs/prepare.yaml))
 

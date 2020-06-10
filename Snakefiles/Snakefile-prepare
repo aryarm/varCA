@@ -9,6 +9,12 @@ min_version("5.5.0")
 
 configfile: "configs/prepare.yaml"
 
+container: "docker://continuumio/miniconda3:4.8.2"
+
+
+def check_config(value, default=False, place=config):
+    """ return true if config value exists and is true """
+    return place[value] if (value in place and place[value]) else default
 
 def read_samples():
     """Function to get names and dna fastq paths from a sample file

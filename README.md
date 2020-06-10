@@ -43,6 +43,7 @@ By default, the pipeline will automatically delete some files it deems unnecessa
 
 # dependencies
 We highly recommend you install [Snakemake via conda](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) so that you can use the `--use-conda` flag when calling `snakemake` to let it automatically handle all dependencies of the pipelines. Otherwise, you must manually install the dependencies listed in the [env files](envs).
+We also provide the option of executing the pipelines in a Docker container using `singularity`. Just provide Snakemake with the `--use-conda --use-singularity` flags when you execute it. Unlike with the previous method, having `conda` installed on your machine is not a requirement for this option, since it will be installed automatically in the Docker container.
 
 # files and directories
 

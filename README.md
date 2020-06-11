@@ -1,4 +1,4 @@
-[![Snakemake](https://img.shields.io/badge/snakemake-≥5.5.0-brightgreen.svg?style=flat-square)](https://snakemake.bitbucket.io)
+[![Snakemake](https://img.shields.io/badge/snakemake-5.18.0-brightgreen.svg?style=flat-square)](https://snakemake.readthedocs.io/)
 [![License](https://img.shields.io/apm/l/vim-mode.svg)](LICENSE)
 
 # varCA
@@ -29,7 +29,7 @@ The example data includes the following files:
 # execution
 On example data:
 ```
-conda install -c bioconda -c conda-forge 'snakemake>=5.5.0'  # install snakemake via conda (if not already installed)
+conda install -c bioconda -c conda-forge 'snakemake==5.18.0'  # install snakemake via conda (if not already installed)
 
 # execute the pipeline on example data locally
 snakemake -s Snakefiles/Snakefile-classify --use-conda

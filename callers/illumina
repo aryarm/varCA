@@ -10,7 +10,10 @@ genome="$3"
 output_dir="$4"
 [[ -z "$4" ]] && { echo "Parameter 4 is empty" 1>&2; exit 1; }
 config="$6"
-[[ -z "$6" ]] && { echo "Parameter 6 is empty" 1>&2; exit 1; }
+[[ -z "$6" ]] && { config="configs/configManta.py.ini" && echo "Path to config file was not specified. Using '$config'." 1>&2; }
+if [ ! -f  "$config" ]; then
+	echo "The mamta config file ($config) could not be found. Check that it exists." 1>&2; exit 1;
+fi
 manta_dir="$7"
 if [[ -z "$7" ]]; then
 	echo "Manta directory not specified. Attempting to retrieve from conda env..." 1>&2

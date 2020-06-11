@@ -12,7 +12,10 @@ output_dir="$4"
 illumina_dir="$6"
 [[ -z "$6" ]] && { echo "Parameter 6 is empty" 1>&2; exit 1; }
 config="$7"
-[[ -z "$7" ]] && { echo "Parameter 7 is empty" 1>&2; exit 1; }
+[[ -z "$7" ]] && { config="configs/configureStrelkaGermlineWorkflow.py.ini" && echo "Path to config file was not specified. Using '$config'." 1>&2; }
+if [ ! -f  "$config" ]; then
+	echo "The strelka config file ($config) could not be found. Check that it exists." 1>&2; exit 1;
+fi
 strelka_dir="$8"
 if [[ -z "$8" ]]; then
 	echo "Strelka directory not specified. Attempting to retrieve from conda env..." 1>&2

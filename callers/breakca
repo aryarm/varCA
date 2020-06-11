@@ -10,7 +10,10 @@ genome="$3"
 output_dir="$4"
 [[ -z "$4" ]] && { echo "Parameter 4 is empty" 1>&2; exit 1; }
 breakca_dir="$6"
-[[ -z "$6" ]] && { echo "Parameter 6 is empty" 1>&2; exit 1; }
+[[ -z "$6" ]] && { echo "Path to breakCA scripts directory was not specified. Using 'breakCA'." 1>&2 && breakca_dir="breakCA"; }
+if [ ! -f  "$breakca_dir"/get_reads_from_bam.R ] || [ ! -f  "$breakca_dir"/count_reads_per_base.R ] || [ ! -f  "$breakca_dir"/calculate_posterior.R ]; then
+	echo "The breakCA scripts directory ($breakca_dir) does not contain the proper scripts." 1>&2; exit 1;
+fi
 Rscript="$7"
 if [[ -z "$7" ]]; then
 	echo "Rscript path not specified. Attempting to retrieve from conda env..." 1>&2

@@ -38,23 +38,22 @@ rule apply_filters:
     shell:
         "zcat {input} | scripts/filter.bash {params.expr:q} | gzip > {output}"
 
+
+def prepared_data(wildcards):
+    """ return the path to the prepared data """
+    if check_config('filter', place=config['data'][wildcards.sample]):
+        return rules.apply_filters.output
+    else:
+        return config['data'][wildcards.sample]['path']
+
+
 rule annotate:
     """ create a table of annotations at each site """
-    input: lambda wildcards: rules.apply_filters.output \
-        if 'filter' in config['data'][wildcards.sample] and \
-        config['data'][wildcards.sample]['filter'] else config['data'][wildcards.sample]['path']
+    input: prepared_data
     output: temp(config['out']+"/{sample}/annot.tsv.gz")
     conda: "../envs/classify.yml"
     shell:
         "zcat {input} | scripts/cgrep.bash - -E '^CHROM$|^POS$|~CLASS:' | gzip > {output}"
-
-
-def prepared_data(wildcards):
-    """ return the path to the prepared data """
-    if 'filter' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['filter']:
-        return rules.apply_filters.output
-    else:
-        return config['data'][wildcards.sample]['path']
 
 rule add_truth:
     """
@@ -66,7 +65,7 @@ rule add_truth:
         tsv = prepared_data,
         annot = rules.annotate.output
     params:
-        truth = lambda wildcards: '^'+config['data'][wildcards.sample]['truth']+"~" if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else ""
+        truth = lambda wildcards: '^'+config['data'][wildcards.sample]['truth']+"~" if check_config('truth', place=config['data'][wildcards.sample]) else ""
     output: config['out']+"/{sample}/prepared.tsv.gz"
     conda: "../envs/classify.yml"
     shell:
@@ -81,7 +80,7 @@ rule add_truth:
 def train_output():
     """ return the output to the train rule, conditional on the tune config param """
     output = [config['out']+"/{sample}/model.rda", config['out']+"/{sample}/variable_importance.tsv"]
-    if 'tune' in config and config['tune']:
+    if check_config('tune'):
         output.append(config['out']+"/{sample}/tune_matrix.tsv")
     return output
 
@@ -107,9 +106,8 @@ rule plot_tune:
 rule predict:
     """ predict variants using the classifier """
     input:
-        model = lambda wildcards: config['model'] \
-            if 'model' in config and config['model'] else \
-            expand(rules.train.output[0], sample=config['train']),
+        model = lambda wildcards: config['model'] if check_config('model') \
+            else expand(rules.train.output[0], sample=config['train']),
         predict = lambda wildcards: expand(rules.add_truth.output, sample=wildcards.sample)
     conda: "../envs/classify.yml"
     output: temp(config['out']+"/{sample}/predictions.tsv")
@@ -125,7 +123,7 @@ rule results:
         predict = rules.predict.output,
         annot = rules.annotate.output
     params:
-        truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else ""
+        truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if check_config('truth', place=config['data'][wildcards.sample]) else ""
     output: config['out']+"/{sample}/results.tsv.gz"
     conda: "../envs/classify.yml"
     shell:
@@ -150,7 +148,7 @@ rule prc_pts:
         results = rules.results.output,
         predicts = lambda wildcards: rules.results.output if wildcards.caller == 'breakca' else prepared_data(wildcards)
     params:
-        truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else "",
+        truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if check_config('truth', place=config['data'][wildcards.sample]) else "",
         predict_col = lambda wildcards: 'prob.1' if wildcards.caller == 'breakca' else sort_col(wildcards.caller)[0],
         ignore_probs = lambda wildcards: "" if wildcards.caller == 'breakca' or sort_col(wildcards.caller)[0] else "--ignore-probs",
         flip = lambda wildcards: ["", "-f"][sort_col(wildcards.caller)[1]]
@@ -169,7 +167,7 @@ rule prc_curves:
         annot = rules.annotate.output,
         predicts = lambda wildcards: rules.results.output if wildcards.caller == 'breakca' else prepared_data(wildcards)
     params:
-        truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if 'truth' in config['data'][wildcards.sample] and config['data'][wildcards.sample]['truth'] else "",
+        truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if check_config('truth', place=config['data'][wildcards.sample]) else "",
         predict_col = lambda wildcards: 'prob.1' if wildcards.caller == 'breakca' else sort_col(wildcards.caller)[0],
         flip = lambda wildcards: ["", "-f"][sort_col(wildcards.caller)[1]],
         thresh = lambda wildcards: "-t" if wildcards.caller == 'breakca' else ""

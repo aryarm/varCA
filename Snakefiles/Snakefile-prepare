@@ -160,7 +160,7 @@ rule prepare_caller:
         shared = get_special_script_path,
         caller_script = "callers/{caller}"
     params:
-        caller_params = lambda wildcards: config[wildcards.caller]['params'] if wildcards.caller in config and 'params' in config[wildcards.caller] else ""
+        caller_params = lambda wildcards: config[wildcards.caller]['params'] if check_config(wildcards.caller) and 'params' in config[wildcards.caller] else ""
     output:
         directory(config['out'] + "/callers/{sample}/{caller}")
     wildcard_constraints:
@@ -182,7 +182,7 @@ rule run_caller:
         shared = get_special_script_path,
         caller_script = "callers/{caller}"
     params:
-        caller_params = lambda wildcards: config[wildcards.caller]['params'] if wildcards.caller in config and 'params' in config[wildcards.caller] else "",
+        caller_params = lambda wildcards: config[wildcards.caller]['params'] if check_config(wildcards.caller) and 'params' in config[wildcards.caller] else "",
         out_dir = config['out'] + "/callers/{sample}/{caller}"
     output:
         vcf = config['out'] + "/callers/{sample}/{caller}/{caller}.{ext}"
@@ -225,8 +225,8 @@ rule filter_vcf:
 rule normalize_vcf:
     """ normalize the vcf, split multiallelic sites, and remove duplicate sites if needed """
     input:
-        vcf = rules.filter_vcf.output.vcf if 'bcftools_params' in config \
-            and config['bcftools_params'] else caller_out('vcf'),
+        vcf = rules.filter_vcf.output.vcf if check_config('bcftools_params') \
+            else caller_out('vcf'),
         ref = config['genome']
     output:
         vcf = pipe(caller_out('vcf')+".norm")
@@ -239,10 +239,9 @@ rule normalize_vcf:
 rule prepare_vcf:
     """ bgzip and index the vcf """
     input:
-        vcf = rules.normalize_vcf.output.vcf if 'normalize' in config \
-            and config['normalize'] else rules.filter_vcf.output.vcf \
-            if 'bcftools_params' in config and config['bcftools_params'] else \
-            caller_out('vcf')
+        vcf = rules.normalize_vcf.output.vcf if check_config('normalize') \
+            else rules.filter_vcf.output.vcf if check_config('bcftools_params') \
+            else caller_out('vcf')
     output:
         gzvcf = temp(caller_out('vcf')+".gz"),
         index = temp(caller_out('vcf')+".gz.tbi")
@@ -253,7 +252,7 @@ rule prepare_vcf:
 
 def bcftools_query_str(wildcards):
     """ return the bcftools query string for this caller's columns """
-    if wildcards.caller in config and config[wildcards.caller] and 'cols' in config[wildcards.caller]:
+    if check_config(wildcards.caller) and 'cols' in config[wildcards.caller]:
         cols = config[wildcards.caller]['cols'].copy()
     else:
         cols = {}
@@ -274,9 +273,8 @@ def cols_str(wildcards):
         ['CHROM', 'POS', 'REF', 'ALT'] +
         sorted_cols(
             config[wildcards.caller]['cols']
-            if wildcards.caller in config and config[wildcards.caller]
-            and 'cols' in config[wildcards.caller]
-            else {}
+            if check_config(wildcards.caller) and
+            'cols' in config[wildcards.caller] else {}
         )
     )
     if not hasattr(wildcards, 'hash'):
@@ -301,7 +299,7 @@ rule vcf2tsv:
 
 
 def caller_tsv(wildcards):
-    if wildcards.caller in config and 'ext' in config[wildcards.caller] and config[wildcards.caller]['ext'] == 'tsv':
+    if check_config(wildcards.caller) and check_config('ext', place=config[wildcards.caller]) == 'tsv':
         return expand(
             caller_out('tsv'),
             sample=wildcards.sample, caller=wildcards.caller
@@ -392,12 +390,13 @@ rule binarize:
 def na_vals(wildcards):
     """ retrieve all of the NA parameters """
     na_vals = []
-    for caller in config[wildcards.type+"_callers"]:
-        if caller in config and config[caller] and \
-          'na' in config[caller] and isinstance(config[caller]['na'], dict):
-            for na_col in config[caller]['na']:
-                na_vals.append(caller+"~"+na_col)
-                na_vals.append(config[caller]['na'][na_col])
+    if check_config(wildcards.type+"_callers"):
+        for caller in config[wildcards.type+"_callers"]:
+            if check_config(caller) and 'na' in config[caller] and \
+            isinstance(config[caller]['na'], dict):
+                for na_col in config[caller]['na']:
+                    na_vals.append(caller+"~"+na_col)
+                    na_vals.append(config[caller]['na'][na_col])
     return na_vals
 
 
@@ -420,8 +419,8 @@ rule fillna:
 
 rule apply_filters:
     """ apply filtering on the data according to the filtering expressions """
-    input: rules.fillna.output if 'fillna' in config and \
-        config['fillna'] else rules.fillna.input
+    input: rules.fillna.output if check_config('fillna') \
+        else rules.fillna.input
     params:
         expr = lambda wildcards: config[wildcards.type+"_filter"]
     output: config['out']+"/merged_{type}/{sample}/filter.tsv.gz"
@@ -434,8 +433,8 @@ rule norm_nums:
         convert pseudo-numerical column values (like those in
         scientific notation or percent format) to simple numerics
     """
-    input: lambda wildcards: rules.apply_filters.output if wildcards.type+"_filter" in config and \
-        config[wildcards.type+"_filter"] else rules.apply_filters.input
+    input: lambda wildcards: rules.apply_filters.output if \
+        check_config(wildcards.type+"_filter") else rules.apply_filters.input
     output: config['out']+"/merged_{type}/{sample}/norm.tsv.gz"
     conda: "../envs/prepare.yml"
     shell:
@@ -444,7 +443,7 @@ rule norm_nums:
 
 rule result:
     """ symlink the result so the user knows what the final output is """
-    input: rules.norm_nums.output if 'norm_numerics' in config and config['norm_numerics'] else rules.norm_nums.input
+    input: rules.norm_nums.input if check_config('pure_numerics') else rules.norm_nums.output
     output: config['out']+"/merged_{type}/{sample}/final.tsv.gz"
     conda: "../envs/prepare.yml"
     shell:

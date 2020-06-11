@@ -78,7 +78,7 @@ rule align:
     shell:
         "bwa mem {input.ref} {input.fastq1} {input.fastq2} "
         "-R '@RG\\tID:{wildcards.sample}\\tLB:lib1\\tPL:Illumina\\tPU:unit1\\tSM:{wildcards.sample}' | "
-        "samtools view -S -b -h -F 4 -q 20 -> {output}"
+        "samtools view -b -h -F 4 -q 20 -> {output}"
 
 rule add_mate_info:
     """Use fixmate to fill in mate coordinates and mate related flags, since

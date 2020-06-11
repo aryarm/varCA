@@ -26,13 +26,18 @@ def read_samples():
     samp_dict = {}
     for line in f:
         words = line.strip().split("\t")
-        samp_dict[words[0]] = (words[1], words[2])
+        if len(words) == 2:
+            samp_dict[words[0]] = words[1]
+        elif len(words) == 3:
+            samp_dict[words[0]] = (words[1], words[2])
+        else:
+            raise ValueError('Your samples is not formatted correctly. Make sure that it has the correct number of tab-separated columns for every row.')
     return samp_dict
 SAMP = read_samples()
 
 # the user can change config['SAMP_NAMES'] here (or define it in the config
 # file) to contain whichever sample names they'd like to run the pipeline on
-if 'SAMP_NAMES' not in config:
+if 'SAMP_NAMES' not in config or not config['SAMP_NAMES']:
     config['SAMP_NAMES'] = list(SAMP.keys())
 else:
     # double check that the user isn't asking for samples they haven't provided
@@ -80,7 +85,7 @@ rule add_mate_info:
     our data is pair-ended. We need the MC tags (included because we used the
     -m flag) that it creates for markdup"""
     input:
-        rules.align.output
+        lambda wildcards: rules.align.output if type(SAMP[wildcards.sample]) is tuple else SAMP[wildcards.sample]
     output:
         config['out'] + "/align/{sample}/sorted.mated.bam"
     conda: "../envs/prepare.yml"

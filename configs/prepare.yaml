@@ -9,6 +9,11 @@
 # Each row in the sample file should represent a different sample.
 # The sample file should have 3 columns (each separated by a single tab):
 #       <unique_sample_name> <fastq1_path> <fastq2_path>
+# Alternatively, if you don't have FASTQ files, but you have BAM files, each
+# row can have just two columns (where, again, each are separated by a tab):
+#       <unique_sample_name> <bam_path>
+# Note that if you provide a BAM file, it must have read group information.
+# this is a required input!
 sample_file: data/samples.tsv
 
 # which samples should we execute the pipeline on?

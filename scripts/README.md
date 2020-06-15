@@ -4,6 +4,9 @@ However, you can use most of these scripts on their own, too. Some may even be h
 
 All python scripts implement the `--help` argument. For bash, R, and awk scripts, you can run `head <script>` to read about their usage.
 
+### [2vcf.py](2vcf.py)
+A python script that uses files from the `prepare` and `classify` pipelines to create a VCF with the final, predicted variants.
+
 ### [cgrep.bash](cgrep.bash)
 A bash script for extracting columns from TSVs via `grep`. Every argument besides the first is passed directly to `grep`.
 
@@ -12,12 +15,6 @@ A fast awk script for classifying each site in a VCF as DEL, INS, SNP, etc. It a
 
 ### [classify.bash](classify.bash)
 A bash script for converting all REF/ALT columns in a TSV to binary positive/negative labels using `classify.awk`.
-
-### [configManta.py.ini](configManta.py.ini)
-The configuration file used by the `manta` variant caller. The path to this file must be specified in the `config.yaml`.
-
-### [configureStrelkaGermlineWorkflow.py.ini](configureStrelkaGermlineWorkflow.py.ini)
-The configuration file used by the `strelka` variant caller. The path to this file must also be specified in the `config.yaml`.
 
 ### [fillna.bash](fillna.bash)
 A bash script for replacing NA values in a large TSV.

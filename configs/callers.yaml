@@ -1,0 +1,125 @@
+# All paths are relative to the directory that Snakemake is executed in
+# Note: this file is written in the YAML syntax (https://learnxinyminutes.com/docs/yaml/)
+
+# CALLER SPECIFIC PARAMETERS
+# These parameters are used by the pipeline when it executes each of the callers.
+# All caller specific parameters are optional except where otherwise noted as
+# "required" in the comments below.
+# You can specify:
+#   1) cols - any other columns (besides CHROM, POS, REF, and ALT) to extract from the VCFs output by each caller
+#      (note that this attribute will be ignored if your caller script outputs a TSV instead of a VCF)
+#   2) params - any extra parameters that should be passed to the caller script
+#   3) ext - whether your caller outputs a VCF (assumed if not specified) or a TSV
+#   4) na - replacement values to use (instead of 0) when filling NA's
+#      (note that this is ignored if 'fillna' is not set to true above)
+# Each key should be the <caller_id> and each value can be a dictionary containing any of the attributes listed above
+# "cols" should be a dictionary of lists for each category of columns in the VCF (where categories can be 'info', 'format', and 'other' for all others)
+# "params" can be a single string or a list of strings
+# "na" should be a dictionary containing as keys each column name and as values the replacement value
+gatk-snp:
+  cols:
+    other: [QUAL]
+    info: [QD,FS,MQ,AC,ExcessHet]
+    format: [DP,GQ]
+
+varscan-snp:
+  cols:
+    info: [ADP]
+    format: [SDP,DP,RD,AD,PVAL,ABQ,GQ,RBQ,RDF,RDR,ADF,ADR]
+  na:
+    PVAL: 1.01E0
+
+vardict-snp:
+  cols:
+    other: [QUAL]
+    info: [TYPE,DP,VD,AF,QSTD,MQ,SN,HIAF,ADJAF,NM,SVTYPE,SVLEN,DUPRATE]
+  na:
+    SVTYPE: NC
+
+pg-snp:
+  # path to a bgzip, indexed VCF containing variants called in the platinum genomes project
+  # required!
+  params: /iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz
+
+gatk-indel:
+  cols:
+    info: [QD,FS,MQ,AC,ExcessHet]
+    format: [DP,GQ]
+
+varscan-indel:
+  cols:
+    info: [ADP]
+    format: [SDP,DP,RD,AD,PVAL,ABQ,GQ,RBQ,RDF,RDR,ADF,ADR]
+  na:
+    PVAL: 1.01E0
+
+vardict-indel:
+  cols:
+    other: [QUAL]
+    info: [TYPE,DP,VD,AF,QSTD,MQ,SN,HIAF,ADJAF,NM,SVTYPE,SVLEN,DUPRATE]
+  na:
+    SVTYPE: NC
+
+delly:
+  cols:
+    format: [RC,GQ]
+
+pindel:
+  cols:
+    info: [HOMLEN,SVLEN,SVTYPE]
+    format: [PL,RD]
+  na:
+    SVTYPE: NC
+
+illumina-manta:
+  cols:
+    other: [QUAL]
+    info: [SVTYPE,SVLEN,HOMLEN,BND_DEPTH,MATE_BND_DEPTH]
+    format: [GQ]
+  na:
+    SVTYPE: NC
+
+illumina-strelka:
+  cols:
+    other: [QUAL]
+    info: [REFREP,IDREP,MQ]
+    format: [GQX,DP,DPF,MIN_DP,DPI,SB]
+  params:
+    # 1) path to strelka config file
+    # required!
+    - configs/configureStrelkaGermlineWorkflow.py.ini
+    # 2) path to the directory in which strelka is stored or "" if strelka is installed in your current conda env (or if using --use-conda)
+    # required!
+    - ""
+
+breakca:
+  # specify that breakca creates a tsv instead of a vcf
+  # required!
+  ext: tsv
+  params:
+    # 1) the (relative) path to the breakCA scripts directory
+    # required!
+    - breakCA
+    # 2) path to the directory in which the Rscript executable is held or "" if R is installed in your current conda env (or if using --use-conda)
+    # required!
+    - ""
+
+pg-indel:
+  # path to a bgzip, indexed VCF containing variants called in the platinum genomes project
+  # required!
+  params: /iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz
+
+# Custom parameters can also be passed to special scripts that perform pre-caller steps:
+illumina:
+  params:
+    # 1) path to manta config file
+    # required!
+    - configs/configManta.py.ini
+    # 2) path to the directory in which manta is stored or "" if manta is installed in your current conda env (or if using --use-conda)
+    # required!
+    - ""
+
+pg:
+  # path to a bgzip, indexed VCF containing variants called in the platinum genomes project
+  # required!
+  params: /iblm/netapp/data1/external/PlatinumGenomes/2017-1.0/hg19/hybrid/hg19.hybrid.no_chr.vcf.gz

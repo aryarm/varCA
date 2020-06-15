@@ -8,6 +8,7 @@ from snakemake.utils import min_version
 min_version("5.18.0")
 
 configfile: "configs/prepare.yaml"
+configfile: "configs/callers.yaml"
 
 container: "docker://continuumio/miniconda3:4.8.2"
 

@@ -2,20 +2,31 @@
 # and options for the classify pipeline. Anybody wishing to use
 # the provided snakemake pipeline should first fill out this file with paths to
 # their own data, as the Snakefile requires it.
+# Every config option has reasonable defaults unless it is labeled as "required"
+# All paths are relative to the directory that Snakemake is executed in
 # Note: this file is written in the YAML syntax (https://learnxinyminutes.com/docs/yaml/)
 
 
+# The path to a reference genome
+# Provide the same one that you gave in prepare.yaml
+# required!
+genome: data/hg38.chr1.fa
+
 # DATASETs
-# the dataset should be named by a unique id
-# for each dataset, you must provide
+# required input!
+# The dataset should be keyed by a unique id
+# For each dataset, you must provide
 #   1) path - The path to the dataset in .tsv.gz format
 #      Each row must represent a position in the genome, and each column a feature to train on
 #      The first two columns must be "CHROM" and "POS", in that order
-#      All REF and ALT columns in the table must be prefixed by the caller they belong to, followed by a tilde "~", and either "REF" or "ALT"
-#   2) truth - The truth caller id in the dataset
-#      This is only required if the dataset will be used for training data
-#      If you provide this attribute for a prediction dataset, the dataset will be used as a test set
-#   3) filter - (optional) A list of filtering expressions for filtering the data before training or testing
+#   2) merged - The path to a .tsv.gz file containing REF/ALT columns for the sites in "path"
+#      This file is used to create a VCF from the output of the classification step.
+#      This is not required if the dataset will only be used for training
+#   3) truth - The truth caller id in the dataset
+#      This is only required if the dataset will be used for training or test data
+#      If you provide this attribute for a prediction dataset (see "predict"
+#      below), the dataset will be used as a test set
+#   4) filter - (optional) A list of filtering expressions for filtering the data before training or testing
 #      A filtering expression consists of the following concatenated together:
 #          - the name of the column in the table upon which to filter
 #          - one of any of awk's comparison operators (ex: >, <, ==)
@@ -24,19 +35,30 @@
 data:
   SRR891269:
     path: data/indel.tsv.gz # this is the platinum genomes training data!
-    truth: &truth
-      pg-indel
+    truth: pg-indel
     filter: &filter
-      - 'gatk-indel~DP>10'
-  # here is an example test sample, but you can replace this with whichever
-  # sample for which you'd like to predict variants::
-  SRR891269_even:
-    path: data/even-indels.tsv.gz
-    truth: *truth # use the same truth column names as the SRR891269 training data
-    filter: *filter # use the same filtering expressions, too
+      - 'gatk-indel~DP>10' # we only train on sites with a read depth above 10
+  # here are some example test samples, but you can replace these with whichever
+  # samples for which you'd like to predict variants
+  molt4_chr1:
+    path: out/merged_indel/molt4_chr1/final.tsv.gz
+    merged: out/merged_indel/molt4_chr1/merge.tsv.gz
+    filter: *filter # use the same filtering expression as the SRR891269 data
+  jurkat_chr1:
+    path: out/merged_indel/jurkat_chr1/final.tsv.gz
+    merged: out/merged_indel/jurkat_chr1/merge.tsv.gz
+    filter: *filter # use the same filtering expression as the SRR891269 data
+
 
 # The unique id of the training set to be used for training the classifier
+# required if you want to create a trained model (and don't already have one -- see "model" below)
 train: SRR891269
+
+# Whether to perform cross validation in order to tune hyperparameters of the classifier during training
+# Enabling this option will substantially increase the runtime of the pipeline
+# This value will default to false if not provided
+# It is ignored if "model" is provided below
+tune: false
 
 # If you already have an RDA file containing a trained classifier, you can provide the path to it here.
 # If this parameter is provided, the training step will not be performed and the training sample will be ignored.
@@ -44,17 +66,19 @@ train: SRR891269
 model: data/indel.rda
 
 # A list of samples for which to make predictions, identified by their unique sample id
-# You may optionally specify a truth set for each sample if you want it to serve as test data (see "data" above)
-predict: [SRR891269_even]
+# You may optionally specify a truth set for each sample if you want it to serve as test data (see "truth" above)
+# required!
+predict: [molt4_chr1, jurkat_chr1]
 
-# Whether to perform cross validation in order to tune hyperparameters of the classifier
-# Enabling this option will substantially increase the runtime of the pipeline
-tune: false
+# Callers to use when creating a VCF from the merged .tsv.gz file.
+# Supply a list of caller names in the order in which they should be considered when
+# variants are chosen for inclusion in the VCF.
+# If this line is commented out or set to a falsey value, the callers will be inferred.
+callers: [gatk-indel, varscan-indel, vardict-indel, illumina-manta, pindel, illumina-strelka, delly]
 
 # If you'd like the pipeline to create a plot of precision-recall curves, specify
-# the column names to use for thresholding here. Otherwise, comment out these lines.
-# Only single point precision-recall calculations will be performed for
-# column names that don't have a value
+# the caller names to use here. Otherwise, comment out these lines.
+# Only single point precision-recall calculations will be performed for caller names that don't have a value
 # Prefix the column name with a * if it should be sorted in reverse order
 prcols:
   gatk-indel: QD
@@ -67,4 +91,5 @@ prcols:
 
 # The path to the directory in which to place all of the output files
 # defined relative to whatever directory you execute the snakemake command in
+# required!
 out: out/classify

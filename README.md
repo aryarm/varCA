@@ -31,9 +31,12 @@ On example data:
 ```
 conda install -c bioconda -c conda-forge 'snakemake==5.18.0'  # install snakemake via conda (if not already installed)
 
-# execute the pipeline on example data locally
-snakemake -s Snakefiles/Snakefile-classify --use-conda
-# execute the pipeline on example data on an SGE cluster
+# execute the predict pipeline on example data locally
+snakemake -s Snakefiles/Snakefile-prepare -j --use-conda
+# execute the classify pipeline on example data locally
+snakemake -s Snakefiles/Snakefile-classify -j --use-conda
+
+# or execute the entire pipeline on example data on an SGE cluster
 #qsub run.bash
 ```
 
@@ -48,10 +51,10 @@ We also provide the option of executing the pipelines in a Docker container usin
 # files and directories
 
 ### [Snakefiles/Snakefile-prepare](Snakefiles/Snakefile-prepare)
-A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for preparing data for the classifier. It uses ATAC-seq FASTQ files to generate a tab-delimited table containing variant caller output for every site in open chromatin regions of the genome. The output of this pipeline can be fed into `Snakefiles/Snakefile-classify`.
+A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for preparing data for the classifier. It uses ATAC-seq FASTQ files to generate a tab-delimited table containing variant caller output for every site in open chromatin regions of the genome. The `prepare` pipeline uses the scripts in the [callers directory](callers) to run every variant caller in the ensemble.
 
 ### [Snakefiles/Snakefile-classify](Snakefiles/Snakefile-classify)
-A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for training and testing the classifier. It uses the output of `Snakefiles/Snakefile-prepare`.
+A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for training and testing the classifier. It uses the TSV output by `Snakefiles/Snakefile-prepare`. Its final output is a VCF containing predicted variants.
 
 ### [configs/](configs)
 Config files that define options and input for the `prepare` and `classify` pipelines. You should start by filling these out.

@@ -15,7 +15,7 @@ def check_config(value, default=False, place=config):
 rule all:
     input:
         expand(
-            config['out']+"/{sample}/results.tsv.gz",
+            config['out']+"/{sample}/final.vcf.gz",
             sample=config['predict']
         ) + expand(
             config['out']+"/{sample}/prc/results.pdf",
@@ -206,3 +206,25 @@ rule prc:
     conda: "../envs/prc.yml"
     shell:
         "scripts/prc.py {output} {params.pts} {params.curves}"
+
+rule vcf:
+    """ convert results.tsv.gz to vcf using merge.tsv.gz """
+    input:
+        merge = lambda wildcards: config['data'][wildcards.sample]['merged'],
+        results = rules.results.output
+    params:
+        callers = ",".join(config['callers']) if check_config('callers') else ""
+    output: temp(config['out']+"/{sample}/results.vcf.gz")
+    conda: "../envs/prc.yml"
+    shell:
+        "zcat {input.merge} | scripts/cgrep.bash - -E '^(CHROM|POS|REF)$|.*~(REF|ALT)$' | scripts/2vcf.py -o {output} -c {params.callers:q} {input.results}"
+
+rule vcf_header:
+    """ add contigs to the header of the vcf """
+    input:
+        genome = config['genome'],
+        vcf = rules.vcf.output
+    output: config['out']+"/{sample}/final.vcf.gz"
+    conda: "../envs/prc.yml"
+    shell:
+        "bcftools reheader -f {input.genome} {input.vcf} -o {output}"

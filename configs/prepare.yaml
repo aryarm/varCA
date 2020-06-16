@@ -2,8 +2,8 @@
 # and options for the prepare pipeline. Anybody wishing to use
 # the provided snakemake pipeline should first fill out this file with paths to
 # their own data, as the Snakefile requires it.
-# Every config option has reasonable defaults unless it is labeled as "required"
-# All paths are relative to the directory that Snakemake is executed in
+# Every config option has reasonable defaults unless it is labeled as "required."
+# All paths are relative to the directory that Snakemake is executed in.
 # Note: this file is written in the YAML syntax (https://learnxinyminutes.com/docs/yaml/)
 
 
@@ -20,7 +20,7 @@ sample_file: data/samples.tsv
 
 # which samples from the samples_file should we execute the pipeline on?
 # Comment out this line or set it to a falsey value if you want to run all samples in the sample file
-SAMP_NAMES: [molt4_chr1, jurkat_chr1]
+SAMP_NAMES: [SRR891269]
 
 # The path to a reference genome
 # The BWA index files, samtools index file (.fa.fai), and samtools dictionary file (.dict) must be stored in the same directory
@@ -28,7 +28,6 @@ SAMP_NAMES: [molt4_chr1, jurkat_chr1]
 genome: data/hg38.chr1.fa
 
 # Directory in which to output all of the output files
-# Defined relative to whatever directory you execute the snakemake command in
 # required!
 out: out
 
@@ -55,18 +54,18 @@ indel_callers: [gatk-indel, varscan-indel, vardict-indel, delly, pindel, illumin
 label: "."
 
 # Whether to "normalize" the VCF output of every caller script
-# This option is recommended if you plan to feed the data to a random forest
+# This option is not recommended if you plan to feed the data to a random forest
 # Normalization usually involves left-alignment and trimming of variants
 # See https://genome.sph.umich.edu/wiki/Variant_Normalization for more info
 # In our pipeline, the normalization step also reduces counts of variants that appear at the same position to 1
-# If this value is not provided, it will default to false, but we recommend using 'true'
-normalize: true
+# If this value is not provided, it will default to false
+no_normalize: false
 
 # Whether to replace NA values in the dataset before outputting the final TSV
-# This option is recommended if you plan to feed the data to a random forest
+# This option is not recommended if you plan to feed the data to a random forest
 # Unless otherwise specified in the Caller Specific Parameters below, NA values will be replaced with 0
 # If this value is not provided, it will default to false
-fillna: true
+keep_na: false
 
 # A list of filtering expressions for filtering the sites before outputting the final TSV
 # A filtering expression consists of the following concatenated together:

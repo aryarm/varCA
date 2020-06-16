@@ -3,7 +3,8 @@ from snakemake.utils import min_version
 ##### set minimum snakemake version #####
 min_version("5.18.0")
 
-configfile: "configs/classify.yaml"
+if not config:
+    configfile: "configs/classify.yaml"
 
 container: "docker://continuumio/miniconda3:4.8.2"
 
@@ -12,23 +13,24 @@ def check_config(value, default=False, place=config):
     """ return true if config value exists and is true """
     return place[value] if (value in place and place[value]) else default
 
-rule all:
-    input:
-        expand(
-            config['out']+"/{sample}/final.vcf.gz",
-            sample=config['predict']
-        ) + expand(
-            config['out']+"/{sample}/prc/results.pdf",
-            sample=[
-                s for s in config['predict']
-                if 'truth' in config['data'][s] and config['data'][s]['truth']
-            ] if 'prcols' in config and isinstance(config['prcols'], dict) else []
-        ) + expand(
-            config['out']+"/{sample}/tune.pdf",
-            sample=config['train'] if 'tune' in config and config['tune'] else []
-        )
+if not hasattr(rules, 'all'):
+    rule all:
+        input:
+            expand(
+                config['out']+"/{sample}/final.vcf.gz",
+                sample=config['predict']
+            ) + expand(
+                config['out']+"/{sample}/prc/results.pdf",
+                sample=[
+                    s for s in config['predict']
+                    if 'truth' in config['data'][s] and config['data'][s]['truth']
+                ] if 'prcols' in config and isinstance(config['prcols'], dict) else []
+            ) + expand(
+                config['out']+"/{sample}/tune.pdf",
+                sample=config['train'] if 'tune' in config and config['tune'] else []
+            )
 
-rule apply_filters:
+rule filters:
     """ apply filtering on the data according to the filtering expressions """
     input: lambda wildcards: config['data'][wildcards.sample]['path']
     params:
@@ -42,7 +44,7 @@ rule apply_filters:
 def prepared_data(wildcards):
     """ return the path to the prepared data """
     if check_config('filter', place=config['data'][wildcards.sample]):
-        return rules.apply_filters.output
+        return rules.filters.output
     else:
         return config['data'][wildcards.sample]['path']
 
@@ -103,11 +105,18 @@ rule plot_tune:
     shell:
         "Rscript scripts/tune_plot.R {input} {output}"
 
+def get_model_for_sample(wildcards):
+    """ get the appropriate model for the specified sample """
+    if check_config('model', place=config['data'][wildcards.sample]):
+        return config['data'][wildcards.sample]['model']
+    return config['model'] if check_config('model') else expand(
+        rules.train.output[0], sample=config['train']
+    )
+
 rule predict:
     """ predict variants using the classifier """
     input:
-        model = lambda wildcards: config['model'] if check_config('model') \
-            else expand(rules.train.output[0], sample=config['train']),
+        model = get_model_for_sample,
         predict = lambda wildcards: expand(rules.add_truth.output, sample=wildcards.sample)
     conda: "../envs/classify.yml"
     output: temp(config['out']+"/{sample}/predictions.tsv")
@@ -207,23 +216,23 @@ rule prc:
     shell:
         "scripts/prc.py {output} {params.pts} {params.curves}"
 
-rule vcf:
+rule tsv2vcf:
     """ convert results.tsv.gz to vcf using merge.tsv.gz """
     input:
         merge = lambda wildcards: config['data'][wildcards.sample]['merged'],
         results = rules.results.output
     params:
-        callers = ",".join(config['callers']) if check_config('callers') else ""
+        callers = "-c '"+",".join(config['callers'])+"'" if check_config('callers') else ""
     output: temp(config['out']+"/{sample}/results.vcf.gz")
     conda: "../envs/prc.yml"
     shell:
-        "zcat {input.merge} | scripts/cgrep.bash - -E '^(CHROM|POS|REF)$|.*~(REF|ALT)$' | scripts/2vcf.py -o {output} -c {params.callers:q} {input.results}"
+        "zcat {input.merge} | scripts/cgrep.bash - -E '^(CHROM|POS|REF)$|.*~(REF|ALT)$' | scripts/2vcf.py -o {output} {params.callers} {input.results}"
 
-rule vcf_header:
+rule fix_vcf_header:
     """ add contigs to the header of the vcf """
     input:
         genome = config['genome'],
-        vcf = rules.vcf.output
+        vcf = rules.tsv2vcf.output
     output: config['out']+"/{sample}/final.vcf.gz"
     conda: "../envs/prc.yml"
     shell:

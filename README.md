@@ -4,7 +4,7 @@
 # varCA
 A pipeline for running an ensemble of variant callers to predict variants in ATAC-seq reads.
 
-The entire pipeline is made up of two smaller pipelines. The `prepare` pipeline calls each variant caller and prepares the resulting data for use by the `classify` pipeline, which runs the ensemble classifier to predict the existence of variants at each site.
+The entire pipeline is made up of two smaller subworkflows. The `prepare` subworkflow calls each variant caller and prepares the resulting data for use by the `classify` subworkflow, which runs the ensemble classifier to predict the existence of variants at each site.
 
 # download
 Execute the following commands or download the [latest release](https://github.com/aryam7/varCA/releases/latest) manually.
@@ -29,20 +29,24 @@ The example data includes the following files:
 # execution
 On example data:
 ```
-conda install -c bioconda -c conda-forge 'snakemake==5.18.0'  # install snakemake via conda (if not already installed)
+# install snakemake via conda (if not already installed)
+conda install -c bioconda -c conda-forge 'snakemake==5.18.0'
 
-# execute the predict pipeline on example data locally
-snakemake -s Snakefiles/Snakefile-prepare -j --use-conda
-# execute the classify pipeline on example data locally
-snakemake -s Snakefiles/Snakefile-classify -j --use-conda
+# execute the pipeline on example data locally
+snakemake -j --use-conda
 
-# or execute the entire pipeline on example data on an SGE cluster
+# or execute the pipeline on example data on an SGE cluster
 #qsub run.bash
 ```
 
-The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io/en/stable/). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing. The `classify.yaml` config file is currently configured to run the pipeline on the example data provided.
+The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing. The config files are currently configured to run the pipeline on the example data provided.
 
-By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing each pipeline.
+### If this is your first time using Snakemake
+We highly recommend that you run `snakemake --help` to learn about all of the options available to you. You might discover, for example, that calling Snakemake with the `-n -p -r` flags can be a helpful way to check that the pipeline will be executed correctly before you run it. This can also be a good way to familiarize yourself with the steps of the pipeline and their inputs and outputs (the latter of which are inputs to the first rule in each Snakefile -- ie the `all` rule).
+
+Another important thing to know is that Snakemake will not recreate output that it has already generated, unless you request it. If a job fails or is interrupted, subsequent executions of Snakemake will just pick up where it left off.
+
+By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing the pipeline.
 
 # dependencies
 We highly recommend you install [Snakemake via conda](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) so that you can use the `--use-conda` flag when calling `snakemake` to let it automatically handle all dependencies of the pipelines. Otherwise, you must manually install the dependencies listed in the [env files](envs).
@@ -50,23 +54,26 @@ We also provide the option of executing the pipelines in a Docker container usin
 
 # files and directories
 
-### [Snakefiles/Snakefile-prepare](Snakefiles/Snakefile-prepare)
-A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for preparing data for the classifier. It uses ATAC-seq FASTQ files to generate a tab-delimited table containing variant caller output for every site in open chromatin regions of the genome. The `prepare` pipeline uses the scripts in the [callers directory](callers) to run every variant caller in the ensemble.
+### [Snakefile](Snakefile)
+A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for calling variants from a set of ATAC-seq reads. This pipeline is made up of two subworkflows:
 
-### [Snakefiles/Snakefile-classify](Snakefiles/Snakefile-classify)
-A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for training and testing the classifier. It uses the TSV output by `Snakefiles/Snakefile-prepare`. Its final output is a VCF containing predicted variants.
+1. the [`prepare` subworkflow](rules/prepare.smk), which prepares the reads for classification and
+2. the [`classify` subworkflow](rules/classify.smk), which creates a VCF containing predicted variants
+
+### [rules/](rules)
+Snakemake rules for the `prepare` and `classify` subworkflows. You can either execute these subworkflows from the [master Snakefile](#snakefile) or individually as their own Snakefiles. See the [rules README](rules/README.md) for more information.
 
 ### [configs/](configs)
-Config files that define options and input for the `prepare` and `classify` pipelines. You should start by filling these out.
+Config files that define options and input for the pipeline and the `prepare` and `classify` subworkflows. If you want to predict variants from your own ATAC-seq data, you should start by filling out [the config file for the pipeline](configs/config.yaml).
 
 ### [callers/](callers)
-Scripts for executing each of the variant callers which are used by the `prepare` pipeline. Small pipelines can be written for each caller by using a special naming convention. See the [caller README](callers/README.md) for more information.
+Scripts for executing each of the variant callers which are used by the `prepare` subworkflow. Small pipelines can be written for each caller by using a special naming convention. See the [caller README](callers/README.md) for more information.
 
 ### [breakCA/](breakCA)
-Scripts for calculating posterior probabilities for the existence of an insertion or deletion, which can be used when running the classifier. These scripts are an adaptation from [@Arkosen](https://github.com/Arkosen)'s [BreakCA code](https://www.biorxiv.org/content/10.1101/605642v1.abstract).
+Scripts for calculating posterior probabilities for the existence of an insertion or deletion, which can be used as features for the classifier. These scripts are an adaptation from [@Arkosen](https://github.com/Arkosen)'s [BreakCA code](https://www.biorxiv.org/content/10.1101/605642v1.abstract).
 
 ### [scripts/](scripts)
 Various scripts used by the pipeline. See the [script README](scripts/README.md) for more information.
 
 ### [run.bash](run.bash)
-An example bash script for executing the `prepare` and `classify` pipelines on an SGE cluster using `snakemake` and `conda`.
+An example bash script for executing the pipeline on an SGE cluster using `snakemake` and `conda`.

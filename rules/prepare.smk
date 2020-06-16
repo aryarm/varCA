@@ -7,7 +7,8 @@ from snakemake.utils import min_version
 ##### set minimum snakemake version #####
 min_version("5.18.0")
 
-configfile: "configs/prepare.yaml"
+if not config:
+    configfile: "configs/prepare.yaml"
 configfile: "configs/callers.yaml"
 
 container: "docker://continuumio/miniconda3:4.8.2"
@@ -18,11 +19,14 @@ def check_config(value, default=False, place=config):
     return place[value] if (value in place and place[value]) else default
 
 def read_samples():
-    """Function to get names and dna fastq paths from a sample file
-    specified in the configuration. Input file is expected to have 3
-    columns: <unique_sample_id> <fastq1_path> <fastq2_path>. Modify
-    this function as needed to provide a dictionary of sample_id keys and
-    (fastq1, fastq2) values"""
+    """
+        Function to get names and dna fastq paths from a sample file
+        specified in the configuration. Input file is expected to have 3
+        columns: <unique_sample_id> <fastq1_path> <fastq2_path>. Or two 
+        columns: <unique_sample_id> <paired_bam_path>. Modify this function
+        as needed to provide a dictionary of sample_id keys and either a tuple
+        of strings: (fastq1, fastq2) OR a single string: paired_bam
+    """
     f = open(config['sample_file'], "r")
     samp_dict = {}
     for line in f:
@@ -32,7 +36,7 @@ def read_samples():
         elif len(words) == 3:
             samp_dict[words[0]] = (words[1], words[2])
         else:
-            raise ValueError('Your samples is not formatted correctly. Make sure that it has the correct number of tab-separated columns for every row.')
+            raise ValueError('Your samples_file is not formatted correctly. Make sure that it has the correct number of tab-separated columns for every row.')
     return samp_dict
 SAMP = read_samples()
 
@@ -47,24 +51,21 @@ else:
     if len(config['SAMP_NAMES']) != len(user_samps):
         warnings.warn("Not all of the samples requested have provided input. Proceeding with as many samples as is possible...")
 
-
 def hash_str(to_hash):
     """ hash a str to get a unique value """
     return hashlib.md5(to_hash.encode('utf-8')).hexdigest()[:8]
 
 
-rule all:
-    # if you'd like to run the pipeline on only a subset of the samples,
-    # you should specify them in the config['SAMP_NAMES'] variable above
-    input:
-        expand(
-            config['out'] + "/merged_{type}/{sample}/final.tsv.gz",
-            sample=config['SAMP_NAMES'],
-            type=[
-                i for i in ["snp", "indel"]
-                if i+"_callers" in config and config[i+"_callers"]
-            ]
-        )
+if not hasattr(rules, 'all'):
+    rule all:
+        # if you'd like to run the pipeline on only a subset of the samples,
+        # you should specify them in the config['SAMP_NAMES'] variable above
+        input:
+            expand(
+                config['out'] + "/merged_{type}/{sample}/final.tsv.gz",
+                sample=config['SAMP_NAMES'],
+                type=[i for i in ["snp", "indel"] if check_config(i+"_callers")]
+            )
 
 rule align:
     """Align reads using BWA-MEM. Note that we use -R to specify read group
@@ -245,9 +246,9 @@ rule normalize_vcf:
 rule prepare_vcf:
     """ bgzip and index the vcf """
     input:
-        vcf = rules.normalize_vcf.output.vcf if check_config('normalize') \
-            else rules.filter_vcf.output.vcf if check_config('bcftools_params') \
-            else caller_out('vcf')
+        vcf = (rules.filter_vcf.output.vcf if check_config('bcftools_params') \
+            else caller_out('vcf')) if check_config('no_normalize') \
+            else rules.normalize_vcf.output.vcf
     output:
         gzvcf = temp(caller_out('vcf')+".gz"),
         index = temp(caller_out('vcf')+".gz.tbi")
@@ -425,8 +426,8 @@ rule fillna:
 
 rule apply_filters:
     """ apply filtering on the data according to the filtering expressions """
-    input: rules.fillna.output if check_config('fillna') \
-        else rules.fillna.input
+    input: rules.fillna.input if check_config('keep_na') \
+        else rules.fillna.output
     params:
         expr = lambda wildcards: config[wildcards.type+"_filter"]
     output: config['out']+"/merged_{type}/{sample}/filter.tsv.gz"

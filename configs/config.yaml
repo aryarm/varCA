@@ -1,0 +1,60 @@
+# This is the Snakemake configuration file that specifies paths and 
+# and options for both the prepare and classify pipelines when they are run
+# together. Anybody wishing to use the provided snakemake pipeline should first
+# fill out this file with paths to their own data, as the Snakefile requires it.
+# Every config option has reasonable defaults unless it is labeled as "required."
+# Any of the config options in configs/prepare.yaml can be used here.
+# All paths are relative to the directory that Snakemake is executed in.
+# Note: this file is written in the YAML syntax (https://learnxinyminutes.com/docs/yaml/)
+
+
+# The path to a text file specifying where to find read information for each sample
+# Each row in the sample file should represent a different sample.
+# The sample file should have 3 columns (each separated by a single tab):
+#       <unique_sample_name> <fastq1_path> <fastq2_path>
+# Alternatively, if you don't have FASTQ files, but you have BAM files, each
+# row can have just two columns (where, again, each are separated by a tab):
+#       <unique_sample_name> <bam_path>
+# Note that if you provide a BAM file, it must have read group information.
+# this is a required input!
+sample_file: data/samples.tsv
+
+# which samples from the samples_file should we execute the pipeline on?
+# Comment out this line or set it to a falsey value if you want to run all samples in the sample file
+# SAMP_NAMES: [molt4_chr1, jurkat_chr1]
+
+# The path to a reference genome
+# The BWA index files, samtools index file (.fa.fai), and samtools dictionary file (.dict) must be stored in the same directory
+# required!
+genome: data/hg38.chr1.fa
+
+# Directory in which to output all of the output files
+# required!
+out: out
+
+# Which callers do you want to run to find SNVs?
+# If you don't want to run the snp pipeline, set this to a falsey value or comment out the line
+snp_callers: [gatk-snp, varscan-snp, vardict-snp]
+
+# Which callers do you want to run to find indels?
+# If you don't want to run the indel pipeline, set this to a falsey value or comment out the line
+indel_callers: [gatk-indel, varscan-indel, vardict-indel, illumina-manta, pindel, illumina-strelka, delly, breakca]
+
+# A list of filtering expressions for filtering the sites before making variant predictions
+# A filtering expression consists of the following concatenated together:
+#   - the caller id
+#   - a tilde ~
+#   - one of awk's comparison operators (the following are currently supported: >, <, ==)
+#   - a value to filter on
+# Comment out these lines to disable filtering
+# Note that your filters may have unattended consequences if 'fillna' (above) is not set to true
+snp_filter: ['gatk-snp~DP>10']
+indel_filter: ['gatk-indel~DP>10']
+
+# The path to a trained, ensemble classifier, which can be used for calling indels
+# required!
+snp_model: data/snp.rda
+
+# The path to a trained, ensemble classifier, which can be used for calling indels
+# required!
+indel_model: data/indel.rda

@@ -2,8 +2,8 @@
 # and options for the classify pipeline. Anybody wishing to use
 # the provided snakemake pipeline should first fill out this file with paths to
 # their own data, as the Snakefile requires it.
-# Every config option has reasonable defaults unless it is labeled as "required"
-# All paths are relative to the directory that Snakemake is executed in
+# Every config option has reasonable defaults unless it is labeled as "required."
+# All paths are relative to the directory that Snakemake is executed in.
 # Note: this file is written in the YAML syntax (https://learnxinyminutes.com/docs/yaml/)
 
 
@@ -33,8 +33,10 @@ genome: data/hg38.chr1.fa
 #          - a value to filter on
 #      The order of the filtering expressions must match the order of the cols in the TSV.
 data:
+  # We include this sample here if you ever want to create your own trained model:
   SRR891269:
-    path: data/indel.tsv.gz # this is the platinum genomes training data!
+    # this is our platinum genomes training data! but you can replace it with whatever data you create
+    path: data/indel.tsv.gz
     truth: pg-indel
     filter: &filter
       - 'gatk-indel~DP>10' # we only train on sites with a read depth above 10
@@ -63,7 +65,7 @@ tune: false
 # If you already have an RDA file containing a trained classifier, you can provide the path to it here.
 # If this parameter is provided, the training step will not be performed and the training sample will be ignored.
 # But if this parameter is commented out, the training step will be performed as usual.
-model: data/indel.rda
+# model: data/indel.rda
 
 # A list of samples for which to make predictions, identified by their unique sample id
 # You may optionally specify a truth set for each sample if you want it to serve as test data (see "truth" above)

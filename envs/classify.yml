@@ -3,7 +3,7 @@ channels:
 dependencies:
   - r-dplyr==0.8.5
   - r-r.devices==2.16.1
-  - r-ranger==0.11.5
+  - r-ranger==0.11.2
   - r-earth==5.1.2
   - conda-forge::coreutils==8.31
   - r-mlr==2.17.1

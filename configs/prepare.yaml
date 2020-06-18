@@ -25,7 +25,7 @@ SAMP_NAMES: [SRR891269]
 # The path to a reference genome
 # The BWA index files, samtools index file (.fa.fai), and samtools dictionary file (.dict) must be stored in the same directory
 # required!
-genome: data/hg38.chr1.fa
+genome: /iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sapiens_assembly19.fasta # replace this with the path to your own reference genome
 
 # Directory in which to output all of the output files
 # required!
@@ -33,11 +33,11 @@ out: out
 
 # Which callers do you want to run to find SNVs?
 # If you don't want to run the snp pipeline, set this to a falsey value or comment out the line
-# snp_callers: [gatk-snp, varscan-snp, vardict-snp]
+snp_callers: [gatk-snp, varscan-snp, vardict-snp, pg-snp]
 
 # Which callers do you want to run to find indels?
 # If you don't want to run the indel pipeline, set this to a falsey value or comment out the line
-indel_callers: [gatk-indel, varscan-indel, vardict-indel, delly, pindel, illumina-manta, illumina-strelka, breakca]
+indel_callers: [gatk-indel, varscan-indel, vardict-indel, delly, pindel, illumina-manta, illumina-strelka, breakca, pg-indel]
 
 # Parameters to use when calling bcftools to filter the VCF output of every caller script
 # See http://www.htslib.org/doc/bcftools.html#view for all possible options

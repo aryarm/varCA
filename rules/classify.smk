@@ -231,7 +231,7 @@ rule tsv2vcf:
 rule fix_vcf_header:
     """ add contigs to the header of the vcf """
     input:
-        genome = config['genome'],
+        genome = config['genome']+".fai",
         vcf = rules.tsv2vcf.output
     output: config['out']+"/{sample}/final.vcf.gz"
     conda: "../envs/prc.yml"

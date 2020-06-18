@@ -12,25 +12,12 @@ from sklearn.metrics import roc_curve
 
 
 
-# def plot_precision_probs(a):
-#   a = np.loadtxt(a)[1:,1:]
-#   a[1] = -10*np.log10(1-a[1])
-#   p = np.poly1d(np.polyfit(a[0], a[1], 1))
-#   plt.scatter(a[0], a[1], label="_nolegend_")
-#   plt.xlabel("Precision")
-#   plt.ylabel("QUAL")
-#   plt.plot(a[0], p(a[0]), label=str(p))
-#   plt.legend()
-
-def plot_recall_probs(a):
-    df = pd.read_csv(results, sep="\t", header=0, index_col=["CHROM", "POS"], usecols=['CHROM', 'POS', 'breakca~truth', 'breakca~prob.1', 'breakca~CLASS:']).sort_values(by='breakca~prob.1')
-    a = df[['breakca~truth', 'breakca~prob.1']].to_numpy().T
-    roc = np.array(roc_curve(a[0], a[1]))[:,:-2]
-    roc[1] = -10*np.log10(1-roc[1])
+def plot_line(lst):
+    roc = lst.T
     p = np.poly1d(np.polyfit(roc[0], roc[1], 1))
     plt.scatter(roc[0], roc[1], label="_nolegend_")
-    plt.xlabel("Recall")
-    plt.ylabel("QUAL")
+    plt.xlabel("Probability")
+    plt.ylabel("TPR")
     plt.plot(roc[0], p(roc[0]), label=str(p))
     plt.legend()
 
@@ -47,14 +34,14 @@ def plot_accuracy_probs(results, bin_size):
 def phred(val):
     return -10*np.log10(1-val)
 
-def plot_tpr_probs(results, bin_size):
+def plot_tpr_probs(results, bin_size=20):
     """ bin the sites and calculate an accuracy for that bin """
     df = pd.read_csv(results, sep="\t", header=0, index_col=["CHROM", "POS"], usecols=['CHROM', 'POS', 'breakca~truth', 'breakca~prob.1', 'breakca~CLASS:']).sort_values(by='breakca~prob.1')
     # split the dataset into high (above 0.5) vs low (below 0.5) scores
     df1 = df[df['breakca~truth']>=0.5]
     df2 = df[df['breakca~truth']<0.5][::-1]
     lst = np.array([
-        (grp.iloc[:,1].mean(), phred(recall_score(grp.iloc[:,0], grp.iloc[:,2])))
+        (grp.iloc[:,1].mean(), recall_score(grp.iloc[:,0], grp.iloc[:,2]))
         for grp in (df1.iloc[i:i+bin_size] for i in range(0,len(df1)-bin_size+1,bin_size))
     ])
     bin_size = int(bin_size*len(df2)/len(df1))
@@ -69,6 +56,7 @@ def plot_tpr_probs(results, bin_size):
     #plt.plot(*lst.T, '--bo')
     #plt.xlabel("Predicted Probability")
     #plt.ylabel("QUAL (Phred-Scaled Recall)")
+    return lst
     return lst, lst2, lst3
 
 # def plot_tpr_probs(results, bin_size):
@@ -196,6 +184,8 @@ def main(prepared, classified, callers=None, cs=1000, all_sites=False, pretty=Fa
     )
     # keep track of how many sites in the classifications df we've had to skip
     skipped = 0
+    # keep track of how many sites we skipped but were predicted to have a variant
+    no_alts = 0
     # iterate through each site in the classifications df, get its alleles, and
     # then return them in a nice-looking dictionary
     for chunk in classified:
@@ -205,6 +195,8 @@ def main(prepared, classified, callers=None, cs=1000, all_sites=False, pretty=Fa
                 call = prepared.send((idx, row['breakca~CLASS:']))
             except StopIteration:
                 call = None
+            # we found a variant but couldn't find an alternate allele!
+            no_alts += not (call is None or (isnan(call[2]) + row['breakca~CLASS:']) % 2)
             # check: does the site appear in the prepared pipeline?
             # and does this site have a variant?
             if call is None or (not all_sites and isnan(call[2])):
@@ -220,6 +212,10 @@ def main(prepared, classified, callers=None, cs=1000, all_sites=False, pretty=Fa
     if skipped:
         warnings.warn(
             "Ignored {:n} classification sites that didn't have a variant.".format(skipped)
+        )
+    if no_alts:
+        warnings.warn(
+            "Ignored {:n} sites that we predicted to have variants but didn't appear in any of the callers.".format(no_alts)
         )
 
 def write_vcf(out, records):
@@ -282,5 +278,12 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    callers = None
+    if args.callers is not None:
+        callers = args.callers.split(",")
+
     if not args.nothing:
-        vcf = write_vcf(args.out, main(args.prepared, args.classified, args.callers.split(","), args.chunksize, args.all, args.pretty))
+        vcf = write_vcf(args.out, main(args.prepared, args.classified, callers, args.chunksize, args.all, args.pretty))
+    else:
+        plt.ion()
+        lst = plot_tpr_probs(args.classified)

@@ -33,7 +33,7 @@ On example data:
 conda install -c bioconda -c conda-forge 'snakemake==5.18.0'
 
 # execute the pipeline on example data locally
-snakemake -j --use-conda
+snakemake -j --use-conda >out/log 2>out/qlog2
 
 # or execute the pipeline on example data on an SGE cluster
 #qsub run.bash
@@ -49,8 +49,8 @@ Another important thing to know is that Snakemake will not recreate output that 
 By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing the pipeline.
 
 # dependencies
-We highly recommend you install [Snakemake via conda](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) so that you can use the `--use-conda` flag when calling `snakemake` to let it automatically handle all dependencies of the pipelines. Otherwise, you must manually install the dependencies listed in the [env files](envs).
-We also provide the option of executing the pipelines in a Docker container using `singularity`. Just provide Snakemake with the `--use-conda --use-singularity` flags when you execute it. Unlike with the previous method, having `conda` installed on your machine is not a requirement for this option, since it will be installed automatically in the Docker container.
+We highly recommend you install [Snakemake via conda](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) so that you can use the `--use-conda` flag when calling `snakemake` to let it automatically handle all dependencies of the pipeline. Otherwise, you must manually install the dependencies listed in the [env files](envs).
+Although currently untested, we also provide the option of executing the pipeline in a Docker container using [`singularity`](https://sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps). Just provide Snakemake with the `--use-conda --use-singularity` flags when you execute it. Unlike with the previous method, having `conda` installed on your machine is not a requirement for this option, since it will be installed automatically in the Docker container.
 
 # files and directories
 

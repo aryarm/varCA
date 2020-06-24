@@ -16,6 +16,9 @@
 # "cols" should be a dictionary of lists for each category of columns in the VCF (where categories can be 'info', 'format', and 'other' for all others)
 # "params" can be a single string or a list of strings
 # "na" should be a dictionary containing as keys each column name and as values the replacement value
+# Note that the trained classification models we provide in the example data
+# only work with these settings. So if you change any of the "cols" or "na"
+# values, you will also need to create new trained classification models.
 gatk-snp:
   cols:
     other: [QUAL]

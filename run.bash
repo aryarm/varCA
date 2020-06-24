@@ -26,7 +26,9 @@ fi
 
 # make sure that this script is executed from the directory that it lives in!
 
-# Before running thE snakemake pipeline, remember to complete the both.yaml
+# -----------
+
+# Before running the snakemake pipeline, remember to complete the both.yaml
 # file in the configs/ folder with the required input info. In particular,
 # make sure that you have created a samples.tsv file specifying paths to the
 # fastq (or bam) files for each of your samples.
@@ -39,3 +41,18 @@ snakemake \
 -k \
 -j \
 "$@" &>"${out_path}/log"
+
+# -----------
+
+# An example running the classify subworkflow
+# Remember to complete the classify.yaml config file before running this!
+
+# snakemake \
+# -s rules/classify.smk \
+# --cluster "qsub -t 1 -V -j y -cwd -o ${out_path}/qlog" \
+# --config out="${out_path}/classify" \
+# --latency-wait 60 \
+# --use-conda \
+# -k \
+# -j \
+# "$@" &>"${out_path}/log"

@@ -19,12 +19,14 @@ wget -O- -q https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz
 ```
 The example data includes the following files:
 
-- `samples.tsv` - An example samples file, required for the `predict` pipeline.
+- `samples.tsv` - An example samples file; required for the master pipeline and the `predict` subworkflow
 - `snp.rda` - A trained RF model for classifying SNVs
 - `indel.rda` - A trained RF model for classifying indels
 - `snp.tsv.gz` - Prepared, example SNV training data
 - `indel.tsv.gz` - Prepared, example indel training data
-- `even-indels.tsv.gz` - Prepared, example indel test data
+- `hg38.chr1.*` - Chromosome 1 of the hg38 reference genome and its index files
+- `jurkat.chr1.bam` - BAM file containing paired ATAC-seq reads for chromosome 1 from the Jurkat sample in GSE129086
+- `molt4.chr1.*.fq.gz` - FASTQ files containing paired ATAC-seq reads for chromosome 1 from the Molt-4 sample in GSE129086
 
 # execution
 On example data:

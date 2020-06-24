@@ -55,6 +55,9 @@ rule all:
             type=[i for i in ["snp", "indel"] if check_config(i+"_callers")]
         )
 
+# an internal variable we use to tell the other subworkflows not to import their configs
+config['imported'] = True
+
 include: "rules/prepare.smk"
 
 config['predict'] = []

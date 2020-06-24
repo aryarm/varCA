@@ -18,7 +18,7 @@
 # this is a required input!
 sample_file: data/samples.tsv
 
-# which samples from the samples_file should we execute the pipeline on?
+# Which samples from the samples_file should we execute the pipeline on?
 # Comment out this line or set it to a falsey value if you want to run all samples in the sample file
 SAMP_NAMES: [SRR891269]
 
@@ -37,7 +37,7 @@ snp_callers: [gatk-snp, varscan-snp, vardict-snp, pg-snp]
 
 # Which callers do you want to run to find indels?
 # If you don't want to run the indel pipeline, set this to a falsey value or comment out the line
-indel_callers: [gatk-indel, varscan-indel, vardict-indel, delly, pindel, illumina-manta, illumina-strelka, breakca, pg-indel]
+indel_callers: [gatk-indel, varscan-indel, illumina-manta, vardict-indel, pindel, illumina-strelka, delly, breakca, pg-indel]
 
 # Parameters to use when calling bcftools to filter the VCF output of every caller script
 # See http://www.htslib.org/doc/bcftools.html#view for all possible options

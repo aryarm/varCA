@@ -3,7 +3,7 @@ from snakemake.utils import min_version
 ##### set minimum snakemake version #####
 min_version("5.18.0")
 
-if not config:
+if 'imported' not in config:
     configfile: "configs/classify.yaml"
 
 container: "docker://continuumio/miniconda3:4.8.2"
@@ -18,21 +18,34 @@ if not hasattr(rules, 'all'):
         input:
             expand(
                 config['out']+"/{sample}/final.vcf.gz",
-                sample=config['predict']
+                sample=[
+                    s for s in config['predict']
+                    if check_config('merged', place=config['data'][s])
+                ]
             ) + expand(
                 config['out']+"/{sample}/prc/results.pdf",
                 sample=[
                     s for s in config['predict']
-                    if 'truth' in config['data'][s] and config['data'][s]['truth']
+                    if check_config('truth', place=config['data'][s])
                 ] if 'prcols' in config and isinstance(config['prcols'], dict) else []
             ) + expand(
                 config['out']+"/{sample}/tune.pdf",
-                sample=config['train'] if 'tune' in config and config['tune'] else []
+                sample=config['train'] if check_config('tune') and not check_config('model') else []
             )
+
+rule subset_callers:
+    """ take a subset of the callers for each dataset """
+    input: lambda wildcards: config['data'][wildcards.sample]['path']
+    params:
+        callers = "|".join(config['subset_callers'])
+    output: config['out']+"/{sample}/subset.tsv.gz"
+    conda: "../envs/classify.yml"
+    shell:
+        "zcat {input} | scripts/cgrep.bash - -E '^(CHROM|POS|REF)$|^({params.callers})~' | gzip > {output}"
 
 rule filters:
     """ apply filtering on the data according to the filtering expressions """
-    input: lambda wildcards: config['data'][wildcards.sample]['path']
+    input: lambda wildcards: rules.subset_callers.output if check_config('subset_callers') else config['data'][wildcards.sample]['path']
     params:
         expr = lambda wildcards: config['data'][wildcards.sample]['filter']
     output: config['out']+"/{sample}/filter.tsv.gz"
@@ -45,8 +58,9 @@ def prepared_data(wildcards):
     """ return the path to the prepared data """
     if check_config('filter', place=config['data'][wildcards.sample]):
         return rules.filters.output
-    else:
-        return config['data'][wildcards.sample]['path']
+    if check_config('subset_callers'):
+        return rules.subset_callers.output
+    return config['data'][wildcards.sample]['path']
 
 
 rule annotate:

@@ -19,7 +19,7 @@
 # this is a required input!
 sample_file: data/samples.tsv
 
-# which samples from the samples_file should we execute the pipeline on?
+# Which samples from the samples_file should we execute the pipeline on?
 # Comment out this line or set it to a falsey value if you want to run all samples in the sample file
 # SAMP_NAMES: [molt4_chr1, jurkat_chr1]
 
@@ -34,11 +34,23 @@ out: out
 
 # Which callers do you want to run to find SNVs?
 # If you don't want to run the snp pipeline, set this to a falsey value or comment out the line
+# If you decide to change the callers listed here, you should also make sure to
+# change the trained classification model (ie "snp_model" below), since the
+# model we provided in the example data only works with these callers. To create
+# a new model, run the classify subworkflow separately using the example
+# training data we provided. Make sure to set the appropriate callers in the
+# "subset_callers" config value of classify.yaml
 snp_callers: [gatk-snp, varscan-snp, vardict-snp]
 
 # Which callers do you want to run to find indels?
 # If you don't want to run the indel pipeline, set this to a falsey value or comment out the line
-indel_callers: [gatk-indel, varscan-indel, vardict-indel, illumina-manta, pindel, illumina-strelka, delly, breakca]
+# If you decide to change the callers listed here, you should also make sure to
+# change the trained classification model (ie "indel_model" below), since the
+# model we provided in the example data only works with these callers. To create
+# a new model, run the classify subworkflow separately using the example
+# training data we provided. Make sure to set the appropriate callers in the
+# "subset_callers" config value of classify.yaml
+indel_callers: [gatk-indel, varscan-indel, illumina-manta, vardict-indel, pindel, illumina-strelka, breakca, delly]
 
 # A list of filtering expressions for filtering the sites before making variant predictions
 # A filtering expression consists of the following concatenated together:

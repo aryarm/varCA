@@ -23,10 +23,11 @@ The output of the `classify` pipeline will be in `<output_directory>/classify/<s
 ## Creating your own trained model
 You may want to create your own trained models (rather than use the ones we provided in the example data) for any number of reasons. The most common are
 
-1. You changed a parameter in the `callers.yaml` config file, or
-2. You'd like to include a new variant caller that hasn't already been implemented as a caller script in the [callers directory](/callers)
+1. You changed one of the caller specific parameters in the `callers.yaml` config file, or
+2. You would like to use a different set of variant callers than the example models support, or
+3. You'd like to include a new variant caller that hasn't already been implemented as a caller script in the [callers directory](/callers)
 
-For the sake of this example, let's say you'd like to include a new indel variant caller (ie #2). You've also already followed the directions in the [callers README](/callers/README.md) to create your own caller script, and you've modified the `prepare.yaml` and `callers.yaml` config files to include your new indel caller. However, before you can predict variants using the indel caller, you must create a new trained classification model that knows how to interpret this new input.
+For the sake of this example, let's say you'd like to include a new indel variant caller (ie #3). You've also already followed the directions in the [callers README](/callers/README.md) to create your own caller script, and you've modified the `prepare.yaml` and `callers.yaml` config files to include your new indel caller. However, before you can predict variants using the indel caller, you must create a new trained classification model that knows how to interpret your new input.
 
 To do this, we recommend first downloading the training and truth sets we used to create our model. First, download the [GM12878 FASTQ files from Buenrostro et al](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE47753). Then, download the corresponding [Platinum Genomes VCF for that sample](https://www.illumina.com/platinumgenomes.html).
 

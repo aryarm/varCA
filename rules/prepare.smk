@@ -7,7 +7,7 @@ from snakemake.utils import min_version
 ##### set minimum snakemake version #####
 min_version("5.18.0")
 
-if not config:
+if 'imported' not in config:
     configfile: "configs/prepare.yaml"
 configfile: "configs/callers.yaml"
 

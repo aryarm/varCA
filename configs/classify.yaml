@@ -21,7 +21,8 @@ genome: data/hg38.chr1.fa
 #      The first two columns must be "CHROM" and "POS", in that order
 #   2) merged - The path to a .tsv.gz file containing REF/ALT columns for the sites in "path"
 #      This file is used to create a VCF from the output of the classification step.
-#      This is not required if the dataset will only be used for training
+#      This is not required if the dataset is a training or test set (ie it has
+#      a "truth" column -- see #3 below).
 #   3) truth - The truth caller id in the dataset
 #      This is only required if the dataset will be used for training or test data
 #      If you provide this attribute for a prediction dataset (see "predict"
@@ -37,7 +38,7 @@ data:
   SRR891269:
     # this is our platinum genomes training data! but you can replace it with whatever data you create
     path: data/indel.tsv.gz
-    truth: pg-indel
+    truth: &truth pg-indel
     filter: &filter
       - 'gatk-indel~DP>10' # we only train on sites with a read depth above 10
   # here are some example test samples, but you can replace these with whichever
@@ -52,44 +53,63 @@ data:
     filter: *filter # use the same filtering expression as the SRR891269 data
 
 
-# The unique id of the training set to be used for training the classifier
-# required if you want to create a trained model (and don't already have one -- see "model" below)
+# The unique ID (from "data" above) of the dataset you'd like to train the
+# classifier with. Note that it must have a "truth" column (see above).
+# This config entry is required if you want to create a trained model (and
+# don't already have one -- see "model" below).
 train: SRR891269
 
-# Whether to perform cross validation in order to tune hyperparameters of the classifier during training
-# Enabling this option will substantially increase the runtime of the pipeline
-# This value will default to false if not provided
-# It is ignored if "model" is provided below
+# Whether to perform cross validation in order to tune hyperparameters of the
+# classifier during training.
+# Enabling this option will substantially increase the runtime of the pipeline.
+# This value will default to false if not provided.
+# It is ignored if "model" is provided below.
 tune: false
 
-# If you already have an RDA file containing a trained classifier, you can provide the path to it here.
-# If this parameter is provided, the training step will not be performed and the training sample will be ignored.
-# But if this parameter is commented out, the training step will be performed as usual.
+# If you already have an RDA file containing a trained classifier, you can
+# provide the path to it here.
+# If this parameter is provided, the training step will not be performed and
+# the training sample will be ignored.
+# But if this parameter is commented out, the training step will be performed
+# as usual.
 # model: data/indel.rda
 
-# A list of samples for which to make predictions, identified by their unique sample id
-# You may optionally specify a truth set for each sample if you want it to serve as test data (see "truth" above)
-# required!
+# A list of datasets for which to make predictions, identified by their unique
+# dataset ID (from "data" above).
+# In most cases, this should include all of the datasets you've listed in "data"
+# except for the one you listed in "train". If you provide the training dataset
+# here, it will be used for both training and testing!
+# You may optionally specify a truth set for each dataset if you want it to
+# serve as test data (see "truth" above).
+# This config entry is required!
 predict: [molt4_chr1, jurkat_chr1]
 
 # Callers to use when creating a VCF from the merged .tsv.gz file.
-# Supply a list of caller names in the order in which they should be considered when
-# variants are chosen for inclusion in the VCF.
+# Supply a list of caller names in the order in which they should be considered
+# when variants are chosen for inclusion in the VCF.
 # If this line is commented out or set to a falsey value, the callers will be inferred.
-callers: [gatk-indel, varscan-indel, vardict-indel, illumina-manta, pindel, illumina-strelka, delly]
+callers: [gatk-indel, varscan-indel, illumina-manta, vardict-indel, pindel, illumina-strelka, delly]
 
-# If you'd like the pipeline to create a plot of precision-recall curves, specify
-# the caller names to use here. Otherwise, comment out these lines.
-# Only single point precision-recall calculations will be performed for caller names that don't have a value
+# For each dataset, only use this subset of the available callers
+# Use this option if you want each dataset to be subsetted to a specific set of
+# callers before training, testing, or applying the classifier.
+# If this line is commented out or set to a falsey value, the pipeline will just
+# use all of the callers that are available.
+subset_callers: [gatk-indel, vardict-indel, illumina-strelka, varscan-indel, pindel, breakca, illumina-manta, delly, *truth]
+
+# If you'd like the pipeline to create a plot of precision-recall curves,
+# specify the caller names to use here. Otherwise, comment out these lines.
+# Only single point precision-recall calculations will be performed for caller
+# names that don't have a value.
 # Prefix the column name with a * if it should be sorted in reverse order
 prcols:
   gatk-indel: QD
-  '*varscan-indel': PVAL
   vardict-indel: QUAL
-  pindel:
-  delly:
-  illumina-manta: QUAL
   illumina-strelka: QUAL
+  '*varscan-indel': PVAL
+  pindel:
+  illumina-manta: QUAL
+  delly:
 
 # The path to the directory in which to place all of the output files
 # defined relative to whatever directory you execute the snakemake command in

@@ -18,6 +18,8 @@ def check_config(value, default=False, place=config):
     """ return true if config value exists and is true """
     return place[value] if (value in place and place[value]) else default
 
+config['out'] = check_config('out', 'out')
+
 def read_samples():
     """
         Function to get names and dna fastq paths from a sample file

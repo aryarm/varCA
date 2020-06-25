@@ -27,8 +27,9 @@ SAMP_NAMES: [SRR891269]
 # required!
 genome: /iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sapiens_assembly19.fasta # replace this with the path to your own reference genome
 
-# Directory in which to output all of the output files
-# required!
+# The path to the directory in which to place all of the output files
+# Defined relative to whatever directory you execute the snakemake command in
+# Defaults to "out" if this line is commented out or set to a falsey value
 out: out
 
 # Which callers do you want to run to find SNVs?
@@ -37,7 +38,8 @@ snp_callers: [gatk-snp, varscan-snp, vardict-snp, pg-snp]
 
 # Which callers do you want to run to find indels?
 # If you don't want to run the indel pipeline, set this to a falsey value or comment out the line
-indel_callers: [gatk-indel, varscan-indel, illumina-manta, vardict-indel, pindel, illumina-strelka, delly, breakca, pg-indel]
+indel_callers: [gatk-indel, varscan-indel, vardict-indel, pindel, illumina-strelka, pg-indel]
+# indel_callers: [gatk-indel, varscan-indel, illumina-manta, vardict-indel, pindel, illumina-strelka, breakca, delly, pg-indel] # uncomment this line if you want to use all of the callers (instead of the most important subset -- the subset gives you comparable performance without the extra work)
 
 # Parameters to use when calling bcftools to filter the VCF output of every caller script
 # See http://www.htslib.org/doc/bcftools.html#view for all possible options

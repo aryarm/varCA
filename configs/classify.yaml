@@ -88,14 +88,15 @@ predict: [molt4_chr1, jurkat_chr1]
 # Supply a list of caller names in the order in which they should be considered
 # when variants are chosen for inclusion in the VCF.
 # If this line is commented out or set to a falsey value, the callers will be inferred.
-callers: [gatk-indel, varscan-indel, illumina-manta, vardict-indel, pindel, illumina-strelka, delly]
+callers: [gatk-indel, varscan-indel, vardict-indel, pindel, illumina-strelka]
+# callers: [gatk-indel, varscan-indel, illumina-manta, vardict-indel, pindel, illumina-strelka, delly] # uncomment this line if you want to use all of the callers (instead of the most important subset)
 
 # For each dataset, only use this subset of the available callers
 # Use this option if you want each dataset to be subsetted to a specific set of
 # callers before training, testing, or applying the classifier.
 # If this line is commented out or set to a falsey value, the pipeline will just
 # use all of the callers that are available.
-subset_callers: [gatk-indel, vardict-indel, illumina-strelka, varscan-indel, pindel, breakca, illumina-manta, delly, *truth]
+subset_callers: [gatk-indel, vardict-indel, illumina-strelka, varscan-indel, pindel, *truth]
 
 # If you'd like the pipeline to create a plot of precision-recall curves,
 # specify the caller names to use here. Otherwise, comment out these lines.
@@ -108,10 +109,10 @@ prcols:
   illumina-strelka: QUAL
   '*varscan-indel': PVAL
   pindel:
-  illumina-manta: QUAL
-  delly:
+  # illumina-manta: QUAL
+  # delly:
 
 # The path to the directory in which to place all of the output files
-# defined relative to whatever directory you execute the snakemake command in
-# required!
+# Defined relative to whatever directory you execute the snakemake command in
+# Defaults to "out/classify" if this line is commented out or set to a falsey value
 out: out/classify

@@ -10,7 +10,7 @@
 # The path to a reference genome
 # Provide the same one that you gave in prepare.yaml
 # required!
-genome: data/hg38.chr1.fa
+genome: /iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sapiens_assembly19.fasta # replace this with the path to your own reference genome
 
 # DATASETs
 # required input!

@@ -39,7 +39,7 @@ rule subset_callers:
     """ take a subset of the callers for each dataset """
     input: lambda wildcards: config['data'][wildcards.sample]['path']
     params:
-        callers = "|".join(config['subset_callers'])
+        callers = lambda wildcards: "|".join(config['subset_callers'])
     output: config['out']+"/{sample}/subset.tsv.gz"
     conda: "../envs/classify.yml"
     shell:

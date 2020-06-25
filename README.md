@@ -35,7 +35,7 @@ On example data:
 conda install -c bioconda -c conda-forge 'snakemake==5.18.0'
 
 # execute the pipeline on example data locally
-snakemake -j --use-conda >out/log 2>out/qlog2
+snakemake -j --use-conda >out/qlog 2>out/log
 
 # or execute the pipeline on example data on an SGE cluster
 #qsub run.bash

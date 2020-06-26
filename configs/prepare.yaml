@@ -14,7 +14,13 @@
 # Alternatively, if you don't have FASTQ files, but you have BAM files, each
 # row can have just two columns (where, again, each are separated by a tab):
 #       <unique_sample_name> <bam_path>
-# Note that if you provide a BAM file, it must have read group information.
+# If a BAM file is provided, PCR duplicates will not be removed as they usually
+# are. If you'd like to skip the peak calling step as well, you must provide a
+# third column:
+#       <unique_sample_name> <bam_path> <bed_path>
+# Note that if you provide a BAM file, it must have read group information and
+# no PCR duplicates. The BAM file must have a .bam file extension and the BED
+# file must have a .bed file extension.
 # this is a required input!
 sample_file: data/samples.tsv
 

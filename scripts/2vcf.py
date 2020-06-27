@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score, recall_score
+from sklearn.metrics import accuracy_score, precision_score
 from sklearn.metrics import roc_curve
 
 
@@ -112,18 +112,34 @@ def get_calls(prepared, callers=None, pretty=False):
     """
     # keep track of the contigs that we've seen
     contigs = set()
-    # retrieve the first CHROM/POS location
-    loc, predict = yield
+    # whether we've read the header yet
+    read_header = False
     # iterate through each row in the df and check whether they match loc
     for chunk in prepared:
-        # if callers is None, retrieve the callers from the columns of the dataframe
-        if callers is None:
-            callers = [
-                caller[:-len('~ALT')] for caller in chunk.columns
-                if caller.endswith('~ALT') and not caller.startswith('pg-')
-            ]
-        if callers is not dict:
-            callers = {caller: (strip_type(caller) if pretty else caller) for caller in callers}
+        # do some special stuff (parsing the header) on the very first iteration
+        if not read_header:
+            # if callers is None, retrieve the callers from the columns of the dataframe
+            if callers is None:
+                callers = [
+                    caller[:-len('~ALT')] for caller in chunk.columns
+                    if caller.endswith('~ALT') and not caller.startswith('pg-')
+                ]
+            # what types of variants are we dealing with? let's count how many
+            # times they appear in the caller names
+            vartypes = {'snp': 0, 'indel': 0}
+            # also, let's retrieve the callers as a dictionary
+            pretty_callers = {}
+            for caller in callers:
+                pretty_caller, vartype = strip_type(caller)
+                # don't beautify the callers if the user didn't request it
+                pretty_callers[caller] = pretty_caller if pretty else caller
+                # keep track of how often each vartype appears
+                if vartype in vartypes:
+                    vartypes[vartype] += 1
+            callers = pretty_callers
+            # retrieve the first CHROM/POS location and yield whether we are reading indels or snps
+            loc, predict = yield max(vartypes, key=vartypes.get)
+            read_header = True
         # now iterate through each row (and also convert the POS column to an int)
         for idx, row in chunk.iterrows():
             # check if we already passed the row -- ie we either:
@@ -163,7 +179,7 @@ def prob2qual(prob):
     # TODO: scale qual by trained linear regression model
     return -10*np.log10(1-prob)
 
-def main(prepared, classified, callers=None, cs=1000, all_sites=False, pretty=False):
+def main(prepared, classified, callers=None, cs=1000, all_sites=False, pretty=False, vartype=None):
     """
         use the results of the prepare pipeline and the classify pipeline
         to create a VCF with all of the classified sites
@@ -175,8 +191,12 @@ def main(prepared, classified, callers=None, cs=1000, all_sites=False, pretty=Fa
             dtype=str, chunksize=cs, na_values="."
         ), callers, pretty
     )
-    # flush out the first item in the generator
-    next(prepared)
+    # flush out the first item in the generator: the vartype
+    if vartype is None:
+        vartype = next(prepared)
+    else:
+        # if the user already gave us the vartype, then just discard this
+        next(prepared)
     # also retrieve the classifications as a df
     classified = pd.read_csv(
         classified, sep="\t", header=0, index_col=["CHROM", "POS"],
@@ -192,18 +212,20 @@ def main(prepared, classified, callers=None, cs=1000, all_sites=False, pretty=Fa
         for idx, row in chunk.iterrows():
             try:
                 # get the alleles for this CHROM/POS location
-                call = prepared.send((idx, row['breakca~CLASS:']))
+                call = prepared.send((idx, row['varca~CLASS:']))
             except StopIteration:
                 call = None
             # we found a variant but couldn't find an alternate allele!
-            no_alts += not (call is None or (isnan(call[2]) + row['breakca~CLASS:']) % 2)
+            no_alts += not (call is None or (isnan(call[2]) + row['varca~CLASS:']) % 2)
             # check: does the site appear in the prepared pipeline?
             # and does this site have a variant?
             if call is None or (not all_sites and isnan(call[2])):
                 skipped += 1
                 continue
             caller, ref, alt = call
-            qual = prob2qual(row['breakca~prob.'+str(int(not isnan(alt)))])
+            qual = prob2qual(
+                row['varca~prob.'+str(int(not isnan(alt)))], vartype
+            )
             # construct a dictionary with all of the relevant details
             yield {
                 'contig': str(idx[0]), 'start': idx[1], 'stop': idx[1]+len(ref),
@@ -274,7 +296,10 @@ if __name__ == "__main__":
         '-p', '--pretty', action='store_true', help="should caller names appear in the vcf by their pretty form (with all dashes intelligently removed) or their original caller ID form? (default: the original form)"
     )
     parser.add_argument(
-        '-n', '--nothing', action='store_true', help="do absolutely nothing, except read the arguments (for testing and internal use)"
+        '-t', '--type', choices=['indel', 'snp'], default=None, help="whether to recalibrate QUAL values assuming your data are SNPs or indels (default: infer from callers)"
+    )
+    parser.add_argument(
+        '-i', '--internal', action='store_true', help="For testing and internal use: recalibrate the QUAL scores (assumes varca~truth column exists in classified)"
     )
     args = parser.parse_args()
 
@@ -282,8 +307,15 @@ if __name__ == "__main__":
     if args.callers is not None:
         callers = args.callers.split(",")
 
-    if not args.nothing:
-        vcf = write_vcf(args.out, main(args.prepared, args.classified, callers, args.chunksize, args.all, args.pretty))
+    if not args.internal:
+        vcf = write_vcf(args.out, main(args.prepared, args.classified, callers, args.chunksize, args.all, args.pretty, args.type))
     else:
+        if not sys.flags.interactive:
+            sys.exit("ERROR: You must run this script in python's interactive mode (using python's -i flag) when providing the -i flag to this script.")
+        try:
+            df = pd.read_csv(args.classified, sep="\t", header=0, index_col=["CHROM", "POS"], usecols=['CHROM', 'POS', 'varca~truth', 'varca~prob.1', 'varca~CLASS:'], low_memory=False).sort_values(by='varca~prob.1')
+        except ValueError:
+            df = pd.read_csv(args.classified, sep="\t", header=0, index_col=["CHROM", "POS"], usecols=['CHROM', 'POS', 'breakca~truth', 'breakca~prob.1', 'breakca~CLASS:'], low_memory=False).sort_values(by='breakca~prob.1')
+            df.columns = ['varca~truth', 'varca~prob.1', 'varca~CLASS:']
         plt.ion()
         lst = plot_tpr_probs(args.classified)

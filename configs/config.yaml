@@ -20,8 +20,9 @@
 # third column:
 #       <unique_sample_name> <bam_path> <bed_path>
 # Note that if you provide a BAM file, it must have read group information and
-# no PCR duplicates. The BAM file must have a .bam file extension and the BED
-# file must have a .bed file extension.
+# no PCR duplicates. There must be an index (.bam.bai) file in the same
+# directory as the BAM file. And the BAM file itself must have a .bam file
+# extension, while the BED file must have a .bed file extension.
 # this is a required input!
 sample_file: data/samples.tsv
 

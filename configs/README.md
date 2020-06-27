@@ -12,8 +12,14 @@ The main inputs in this config file are:
 3. Lists of the variant callers to use in the ensemble when predicting a) SNVs and b) indels
 	Each caller must be referred to by its caller ID (see the [caller README](/callers/README.md) for more information)
 4. Trained, classification models that can be used for predicting a) SNVs and b) indels from the VCF output of each variant caller
+	You should provide these callers in a specific order, such that the callers that are more likely to make an accurate call are listed first.
 
-If you provide BAM files instead of FASTQs, the pipeline will assume that you have already removed PCR duplicates, so it will skip the duplicate removal step. If you would like to skip the peak calling step as well, you will also need to provide a BED file with the peaks that should be used.
+If you provide BAM files instead of FASTQs, the pipeline will assume that you have already removed PCR duplicates, so it will skip the duplicate removal step. If you would like to skip the peak calling step as well, you will also need to provide a BED file (with a .bed extension) containing the peaks that should be used. Note also that there are many requirements that your BAM files must adhere to:
+
+1. They must have [read group information](https://gatk.broadinstitute.org/hc/articles/360035890671)
+2. They cannot have PCR duplicates
+3. They must have '.bam' file extension
+4. There must be an index (.bam.bai file) in the same directory
 
 You may also provide the name of a directory in which to store all output, as well as any other configuration options from the `prepare.yaml` config file.
 
@@ -29,7 +35,7 @@ The main inputs in this config file are:
 3. Lists of the variant callers to use in the ensemble when predicting a) SNVs and b) indels
 	Each caller must be referred to by its caller ID (see the [caller README](/callers/README.md) for more information)
 
-If you provide BAM files instead of FASTQs, the pipeline will assume that you have already removed PCR duplicates, so it will skip the duplicate removal step. If you would like to skip the peak calling step as well, you will also need to provide a BED file with the peaks that should be used.
+As described for `config.yaml` above, you can provide a BED file if you want to skip the peak calling step. All of the requirements listed for the BAM files in `config.yaml` also apply here.
 
 You may also provide the name of a directory in which to store all output. Any other configuration options not listed here have reasonable defaults and are described in the [`prepare.yaml` config file](prepare.yaml).
 

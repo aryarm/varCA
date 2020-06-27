@@ -25,8 +25,9 @@ The example data includes the following files:
 - `snp.tsv.gz` - Prepared, example SNV training data
 - `indel.tsv.gz` - Prepared, example indel training data
 - `hg38.chr1.*` - Chromosome 1 of the hg38 reference genome and its index files
-- `jurkat.chr1.bam` - BAM file containing paired ATAC-seq reads for chromosome 1 from the Jurkat sample in GSE129086
-- `molt4.chr1.*.fq.gz` - FASTQ files containing paired ATAC-seq reads for chromosome 1 from the Molt-4 sample in GSE129086
+- `jurkat.chr1.bam` - BAM file from ATAC-seq on chromosome 1 from the Jurkat sample in GSE129086
+- `jurkat.chr1.bam.bai` - Index for the Jurkat BAM file
+- `molt4.chr1.*.fq.gz` - FASTQ files from paired ATAC-seq reads for chromosome 1 from the Molt-4 sample in GSE129086
 
 # execution
 On example data:
@@ -44,9 +45,9 @@ snakemake -j --use-conda >out/qlog 2>out/log
 The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing. The config files are currently configured to run the pipeline on the example data provided.
 
 ### If this is your first time using Snakemake
-We highly recommend that you run `snakemake --help` to learn about all of the options available to you. You might discover, for example, that calling Snakemake with the `-n -p -r` flags can be a helpful way to check that the pipeline will be executed correctly before you run it. This can also be a good way to familiarize yourself with the steps of the pipeline and their inputs and outputs (the latter of which are inputs to the first rule in each Snakefile -- ie the `all` rule).
+We highly recommend that you run `snakemake --help` to learn about all of the options available to you. You might discover, for example, that calling Snakemake with the `-n -p -r` flags can be a helpful way to check that the pipeline will be executed correctly before you run it. This can also be a good way to familiarize yourself with the steps of the pipeline and their inputs and outputs (the latter of which are inputs to the first rule in each workflow -- ie the `all` rule).
 
-Another important thing to know is that Snakemake will not recreate output that it has already generated, unless you request it. If a job fails or is interrupted, subsequent executions of Snakemake will just pick up where it left off.
+Another important thing to know is that Snakemake will not recreate output that it has already generated, unless you request it. If a job fails or is interrupted, subsequent executions of Snakemake will just pick up where it left off. This can also apply to files that *you* create and provide in place of the files it would have generated.
 
 By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing the pipeline.
 

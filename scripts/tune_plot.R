@@ -11,7 +11,7 @@ results<- args[1]
 out<- args[2]
 
 # load libraries
-library(mlr)
+suppressMessages(library(mlr))
 library(BBmisc)
 library(ggplot2)
 library(R.devices)

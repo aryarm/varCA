@@ -19,7 +19,7 @@ tune<- args[5] # if specified, the results of cross validation are saved here
 # load libraries
 library(plyr)
 library(dplyr)
-library(mlr)
+suppressMessages(library(mlr))
 library(parallelMap)
 library(parallel)
 

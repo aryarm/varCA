@@ -12,79 +12,96 @@ from sklearn.metrics import roc_curve
 
 
 
-def plot_line(lst):
-    roc = lst.T
-    p = np.poly1d(np.polyfit(roc[0], roc[1], 1))
-    plt.scatter(roc[0], roc[1], label="_nolegend_")
-    plt.xlabel("Probability")
-    plt.ylabel("TPR")
-    plt.plot(roc[0], p(roc[0]), label=str(p))
-    plt.legend()
+def phred(vals):
+    """ apply the phred scale to the vals provided """
+    return -10*np.log10(1-vals)
+    return -10*np.ma.log10(1-vals).filled(-3) # fill all infinite values with a phred scale of 30
 
-def plot_accuracy_probs(results, bin_size):
-    """ bin the sites and calculate an accuracy for that bin """
-    df = pd.read_csv(results, sep="\t", header=0, index_col=["CHROM", "POS"], usecols=['CHROM', 'POS', 'breakca~truth', 'breakca~prob.1', 'breakca~CLASS:']).sort_values(by='breakca~prob.1')
-    lst = np.array([
-        (grp.iloc[:,1].mean(), accuracy_score(grp.iloc[:,0], grp.iloc[:,2]))
-        for grp in (df.iloc[i:i+bin_size] for i in range(0,len(df)-bin_size+1,bin_size))
-    ])
-    plt.plot(*lst.T)
+def plot_line(lst, show_discards=False):
+    plt.clf()
+    roc = np.copy(lst.T)
+    roc[1] = phred(roc[1])
+    max_val = phred(max(roc[2])/(max(roc[2])+1))
+    # discard inf or na cols
+    inf_or_na_cols = np.isinf(roc).any(axis=0) | np.isnan(roc).any(axis=0)
+    # warn the user if we're discarding the majority of points
+    discarded = np.sum(inf_or_na_cols)/roc.shape[1]*100
+    if (not show_discards and discarded != 0) or discarded >= 50:
+        warnings.warn("Discarding NaN or Inf points ({}% of points)".format(discarded))
+    roc = roc[:,~(inf_or_na_cols)]
+    # perform a simple linear regression
+    p = np.polyfit(roc[0], roc[1], 1)
+    r_squared = 1 - (sum((roc[1] - (p[0] * roc[0] + p[1]))**2) / ((len(roc[1]) - 1) * np.var(roc[1], ddof=1)))
+    p = np.poly1d(p)
+    # plot the points and the line
+    plt.scatter(roc[0], roc[1], color='r', label="_nolegend_")
+    if max(roc[0]) <= 1:
+        plt.xlabel("RF Probability")
+    elif max(roc[0]) <= np.pi/2:
+        plt.xlabel("Reverse Arcsin of RF Probability")
+    else:
+        plt.xlabel("Phred-Scaled RF Probability")
+    plt.ylabel("Phred-Scaled Accuracy (QUAL)")
+    plt.plot(
+        roc[0],
+        p(roc[0]),
+        label=str(p)+"\nr-squared: "+str(round(r_squared, 2))+ \
+            ("\ndiscarded: "+str(int(discarded))+"%" if show_discards else "")
+    )
+    plt.hlines(max_val, min(roc[0]), max(roc[0]), colors='g', linestyles='dashed')
+    plt.legend(frameon=False, loc='lower right')
+    plt.tight_layout()
+
+def eqbin_mean(grp, log=True, pseudo=True, discards_ok=False, inverse=False):
+    if inverse:
+        return np.arcsin(grp.mean())
+    else:
+        if log:
+            if discards_ok or not pseudo:
+                return phred(grp).mean()
+            else:
+                return phred(grp.sum()/(len(grp) + pseudo))
+        else:
+           return grp.mean()
+
+def tpr_probs(df, bins=15, eqbin=True, log=True, pseudo=True, discards_ok=False, inverse=False):
+    """ bin the sites and calculate an accuracy (predicted positive value) for that bin """
+    # retrieve only predicted positives
+    df = df[df['varca~CLASS:']>=0.5]
+    if eqbin:
+        bin_size = int(len(df)/bins)
+        # create bins (ie each grp) and add a single false positive to it so we don't get Inf
+        lst = np.array([
+            (
+                eqbin_mean(grp['varca~prob.1'], log, pseudo, discards_ok, inverse),
+                precision_score(
+                    np.append(grp['varca~truth'].values, 0) if pseudo else grp['varca~truth'],
+                    np.append(grp['varca~CLASS:'].values, 1) if pseudo else grp['varca~CLASS:']
+                ),
+                grp['varca~prob.1'].size
+            )
+            for grp in (df.iloc[i:i+bin_size] for i in range(0,len(df)-bin_size+1,bin_size))
+        ])
+    else:
+        if log:
+            df = df.copy()
+            df['varca~prob.1'] = phred(df['varca~prob.1'])
+        start = phred(0.5) if log else 0.5
+        # get the end excluding inf values (in case log == True)
+        end = df.loc[df['varca~prob.1'] != np.inf, 'varca~prob.1'].max()
+        # create bins (ie each grp) and add a single false positive to it so we don't get Inf
+        lst = np.array([
+            (
+                grp[1]['varca~prob.1'].mean(),
+                precision_score(
+                    np.append(grp[1]['varca~truth'].values, 0) if pseudo else grp['varca~truth'],
+                    np.append(grp[1]['varca~CLASS:'].values, 1) if pseudo else grp['varca~CLASS:']
+                ),
+                grp[1]['varca~prob.1'].size
+            )
+            for grp in df.groupby(pd.cut(df['varca~prob.1'], pd.interval_range(start, end, bins)))
+        ])
     return lst
-
-def phred(val):
-    return -10*np.log10(1-val)
-
-def plot_tpr_probs(results, bin_size=20):
-    """ bin the sites and calculate an accuracy for that bin """
-    df = pd.read_csv(results, sep="\t", header=0, index_col=["CHROM", "POS"], usecols=['CHROM', 'POS', 'breakca~truth', 'breakca~prob.1', 'breakca~CLASS:']).sort_values(by='breakca~prob.1')
-    # split the dataset into high (above 0.5) vs low (below 0.5) scores
-    df1 = df[df['breakca~truth']>=0.5]
-    df2 = df[df['breakca~truth']<0.5][::-1]
-    lst = np.array([
-        (grp.iloc[:,1].mean(), recall_score(grp.iloc[:,0], grp.iloc[:,2]))
-        for grp in (df1.iloc[i:i+bin_size] for i in range(0,len(df1)-bin_size+1,bin_size))
-    ])
-    bin_size = int(bin_size*len(df2)/len(df1))
-    # lst2 = np.array([
-    #     (grp.iloc[:,1].mean(), phred(recall_score(grp.iloc[:,0], grp.iloc[:,2], pos_label=0)))
-    #     for grp in (df2.iloc[i:i+bin_size] for i in range(0,len(df2)-bin_size+1,bin_size))
-    # ])
-    # lst3 = np.array([
-    #     (grp.iloc[:,1].mean(), phred(recall_score(grp.iloc[:,0], grp.iloc[:,2])))
-    #     for grp in (df.iloc[i:i+bin_size] for i in range(0,len(df)-bin_size+1,bin_size))
-    # ])
-    #plt.plot(*lst.T, '--bo')
-    #plt.xlabel("Predicted Probability")
-    #plt.ylabel("QUAL (Phred-Scaled Recall)")
-    return lst
-    return lst, lst2, lst3
-
-# def plot_tpr_probs(results, bin_size):
-#     """ bin the sites and calculate an accuracy for that bin """
-#     df = pd.read_csv(results, sep="\t", header=0, index_col=["CHROM", "POS"], usecols=['CHROM', 'POS', 'breakca~truth', 'breakca~prob.1', 'breakca~CLASS:']).sort_values(by='breakca~prob.1')
-#     # split the dataset into high (above 0.5) vs low (below 0.5) scores
-#     df1 = df[df['breakca~truth']>=0.5]
-#     df2 = df[df['breakca~truth']<0.5][::-1]
-#     lst = np.array([
-#         (grp[1].iloc[:,1].mean(), recall_score(grp[1].iloc[:,0], grp[1].iloc[:,2]), len(grp[1]))
-#         for grp in df1.groupby(pd.cut(df1['breakca~prob.1'], pd.interval_range(0.5, 1, bin_size)))
-#     ])
-#     bin_size = int(bin_size*len(df2)/len(df1))
-#     # lst2 = np.array([
-#     #     (grp[1].iloc[:,1].mean(), recall_score(grp[1].iloc[:,0], grp[1].iloc[:,2], pos_label=0))
-#     #     for grp in df1.groupby(pd.cut(df1['breakca~prob.1'], pd.interval_range(0, 0.5, bin_size)))
-#     # ])
-#     #plt.plot(*lst.T, '--bo')
-#     #plt.xlabel("Predicted Probability")
-#     #plt.ylabel("QUAL (Phred-Scaled Recall)")
-#     return lst
-
-# def prob_phred(results):
-#     df = pd.read_csv(results, sep="\t", header=0, index_col=["CHROM", "POS"], usecols=['CHROM', 'POS', 'breakca~truth', 'breakca~prob.1', 'breakca~CLASS:']).sort_values(by='breakca~prob.1')
-#     df['phred'] = -10*np.log10(1-df['breakca~prob.1'])
-#     prob1 = df[df['phred']>-10*np.log10(0.5)]
-#     plt.plot(range(len(prob1['phred'])), prob1['phred'])
-
 
 
 
@@ -92,15 +109,18 @@ def strip_type(caller):
     """
         strip the -indel or -snp from the end of a caller name
     """
+    vartype = ''
     if caller.endswith('-snp'):
         caller = caller[:-len('-snp')]
+        vartype = 'snp'
     elif caller.endswith('-indel'):
         caller = caller[:-len('-indel')]
+        vartype = 'indel'
     # if there is still a dash, get everything after it
     i = caller.rfind('-')
     if i != -1:
         caller = caller[i+1:]
-    return caller
+    return caller, vartype
 
 def isnan(val):
     return type(val) is float and np.isnan(val)
@@ -175,9 +195,15 @@ def get_calls(prepared, callers=None, pretty=False):
             # save the current contig so that we know which ones we've seen
             contigs.add(idx[0])
 
-def prob2qual(prob):
-    # TODO: scale qual by trained linear regression model
-    return -10*np.log10(1-prob)
+def prob2qual(prob, vartype):
+    # values are from linear model that we created from using the "-i" option
+    if vartype == 'snp':
+        return 0.6237*phred(prob)+8.075
+    elif vartype == 'indel':
+        return 0.8463*phred(prob)+2.724
+    else:
+        # we shouldn't ever encounter this situation, but just in case...
+        return phred(prob)
 
 def main(prepared, classified, callers=None, cs=1000, all_sites=False, pretty=False, vartype=None):
     """
@@ -318,4 +344,4 @@ if __name__ == "__main__":
             df = pd.read_csv(args.classified, sep="\t", header=0, index_col=["CHROM", "POS"], usecols=['CHROM', 'POS', 'breakca~truth', 'breakca~prob.1', 'breakca~CLASS:'], low_memory=False).sort_values(by='breakca~prob.1')
             df.columns = ['varca~truth', 'varca~prob.1', 'varca~CLASS:']
         plt.ion()
-        lst = plot_tpr_probs(args.classified)
+        plot_line(tpr_probs(df))

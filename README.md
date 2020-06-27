@@ -27,6 +27,7 @@ The example data includes the following files:
 - `hg38.chr1.*` - Chromosome 1 of the hg38 reference genome and its index files
 - `jurkat.chr1.bam` - BAM file from ATAC-seq on chromosome 1 from the Jurkat sample in GSE129086
 - `jurkat.chr1.bam.bai` - Index for the Jurkat BAM file
+- `jurkat.chr1.bed` - ATAC-seq peaks for the Jurkat sample
 - `molt4.chr1.*.fq.gz` - FASTQ files from paired ATAC-seq reads for chromosome 1 from the Molt-4 sample in GSE129086
 
 # execution

@@ -154,7 +154,7 @@ rule results:
     shell:
         "cat {input.predict} | paste <(zcat {input.annot}) "
         "<(read -r head && echo \"$head\" | tr '\\t' '\\n' | "
-        "sed 's/response/CLASS:/' | sed 's/^/breakca~/' | "
+        "sed 's/response/CLASS:/' | sed 's/^/varca~/' | "
         "paste -s && cat) | gzip > {output}"
 
 
@@ -171,11 +171,11 @@ rule prc_pts:
     """ generate single point precision recall metrics """
     input:
         results = rules.results.output,
-        predicts = lambda wildcards: rules.results.output if wildcards.caller == 'breakca' else prepared_data(wildcards)
+        predicts = lambda wildcards: rules.results.output if wildcards.caller == 'varca' else prepared_data(wildcards)
     params:
         truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if check_config('truth', place=config['data'][wildcards.sample]) else "",
-        predict_col = lambda wildcards: 'prob.1' if wildcards.caller == 'breakca' else sort_col(wildcards.caller)[0],
-        ignore_probs = lambda wildcards: "" if wildcards.caller == 'breakca' or sort_col(wildcards.caller)[0] else "--ignore-probs",
+        predict_col = lambda wildcards: 'prob.1' if wildcards.caller == 'varca' else sort_col(wildcards.caller)[0],
+        ignore_probs = lambda wildcards: "" if wildcards.caller == 'varca' or sort_col(wildcards.caller)[0] else "--ignore-probs",
         flip = lambda wildcards: ["", "-f"][sort_col(wildcards.caller)[1]]
     output: config['out']+"/{sample}/prc/pts/{caller}.txt"
     conda: "../envs/prc.yml"
@@ -190,12 +190,12 @@ rule prc_curves:
     """ generate the points for a precision recall curve """
     input:
         annot = rules.annotate.output,
-        predicts = lambda wildcards: rules.results.output if wildcards.caller == 'breakca' else prepared_data(wildcards)
+        predicts = lambda wildcards: rules.results.output if wildcards.caller == 'varca' else prepared_data(wildcards)
     params:
         truth = lambda wildcards: config['data'][wildcards.sample]['truth'] if check_config('truth', place=config['data'][wildcards.sample]) else "",
-        predict_col = lambda wildcards: 'prob.1' if wildcards.caller == 'breakca' else sort_col(wildcards.caller)[0],
+        predict_col = lambda wildcards: 'prob.1' if wildcards.caller == 'varca' else sort_col(wildcards.caller)[0],
         flip = lambda wildcards: ["", "-f"][sort_col(wildcards.caller)[1]],
-        thresh = lambda wildcards: "-t" if wildcards.caller == 'breakca' else ""
+        thresh = lambda wildcards: "-t" if wildcards.caller == 'varca' else ""
     output: config['out']+"/{sample}/prc/curves/{caller}.txt"
     conda: "../envs/prc.yml"
     shell:
@@ -218,15 +218,15 @@ rule prc:
     input:
         pts = lambda wildcards: expand(
             rules.prc_pts.output, sample=wildcards.sample,
-            caller=['breakca']+sort_cols()
+            caller=['varca']+sort_cols()
         ),
         curves = lambda wildcards: expand(
             rules.prc_curves.output, sample=wildcards.sample,
-            caller=['breakca']+sort_cols(True)
+            caller=['varca']+sort_cols(True)
         )
     params:
-        pts = lambda _, input: [k for j in zip(['--'+i+"_pt" for i in ['breakca']+sort_cols()], input.pts) for k in j],
-        curves = lambda _, input: [k for j in zip(['--'+i for i in ['breakca']+sort_cols(True)], input.curves) for k in j]
+        pts = lambda _, input: [k for j in zip(['--'+i+"_pt" for i in ['varca']+sort_cols()], input.pts) for k in j],
+        curves = lambda _, input: [k for j in zip(['--'+i for i in ['varca']+sort_cols(True)], input.curves) for k in j]
     output: config['out']+"/{sample}/prc/results.pdf"
     conda: "../envs/prc.yml"
     shell:

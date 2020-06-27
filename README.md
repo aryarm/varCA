@@ -67,7 +67,7 @@ A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for calling 
 Snakemake rules for the `prepare` and `classify` subworkflows. You can either execute these subworkflows from the [master Snakefile](#snakefile) or individually as their own Snakefiles. See the [rules README](rules/README.md) for more information.
 
 ### [configs/](configs)
-Config files that define options and input for the pipeline and the `prepare` and `classify` subworkflows. If you want to predict variants from your own ATAC-seq data, you should start by filling out [the config file for the pipeline](configs/config.yaml).
+Config files that define options and input for the pipeline and the `prepare` and `classify` subworkflows. If you want to predict variants from your own ATAC-seq data, you should start by filling out [the config file for the pipeline](/configs#configyaml).
 
 ### [callers/](callers)
 Scripts for executing each of the variant callers which are used by the `prepare` subworkflow. Small pipelines can be written for each caller by using a special naming convention. See the [caller README](callers/README.md) for more information.

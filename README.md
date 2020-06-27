@@ -42,7 +42,7 @@ conda install -c bioconda -c conda-forge 'snakemake==5.18.0'
 qsub run.bash
 ```
 
-The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing. The config files are currently configured to run the pipeline on the example data provided.
+The pipeline is written as a Snakefile, so it must be executed via [Snakemake](https://snakemake.readthedocs.io). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing. The config files are currently configured to run the pipeline on the example data provided.
 
 ### If this is your first time using Snakemake
 We highly recommend that you run `snakemake --help` to learn about all of the options available to you. You might discover, for example, that calling Snakemake with the `-n -p -r` flags can be a helpful way to check that the pipeline will be executed correctly before you run it. This can also be a good way to familiarize yourself with the steps of the pipeline and their inputs and outputs (the latter of which are inputs to the first rule in each workflow -- ie the `all` rule).

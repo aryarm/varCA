@@ -32,14 +32,14 @@ The example data includes the following files:
 # execution
 On example data:
 ```
-# install snakemake via conda (if not already installed)
+# 1) install snakemake via conda (if not already installed)
 conda install -c bioconda -c conda-forge 'snakemake==5.18.0'
 
-# execute the pipeline on example data locally
-snakemake -j --use-conda >out/qlog 2>out/log
+# 2) execute the pipeline on example data locally
+./run.bash &
 
-# or execute the pipeline on example data on an SGE cluster
-#qsub run.bash
+# OR execute the pipeline on example data on an SGE cluster
+qsub run.bash
 ```
 
 The pipeline is written as Snakefiles, so it must be executed via [Snakemake](https://snakemake.readthedocs.io). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing. The config files are currently configured to run the pipeline on the example data provided.
@@ -79,4 +79,4 @@ Scripts for calculating posterior probabilities for the existence of an insertio
 Various scripts used by the pipeline. See the [script README](scripts/README.md) for more information.
 
 ### [run.bash](run.bash)
-An example bash script for executing the pipeline on an SGE cluster using `snakemake` and `conda`.
+An example bash script for executing the pipeline using `snakemake` and `conda`. Any parameters to this script are passed directly to `snakemake`.

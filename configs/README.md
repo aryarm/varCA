@@ -23,7 +23,7 @@ If you provide BAM files instead of FASTQs, the pipeline will assume that you ha
 
 You may also provide any other configuration options from the `prepare.yaml` config file.
 
-Once you have finished filling out the `config.yaml` file, you should be ready to execute the master pipeline on your own data. Just executed [the `run.bash` script](/run.bash).
+Once you have finished filling out the `config.yaml` file, you should be ready to execute the master pipeline on your own data. Just execute [the `run.bash` script](/run.bash).
 
 The output of the master pipeline is the `final.vcf.gz` file in the `classify` directory. For example, when the master pipeline is executed on the example data, the output is `out/classify/*/final.vcf.gz`.
 

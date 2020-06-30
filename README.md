@@ -9,12 +9,11 @@ The entire pipeline is made up of two smaller subworkflows. The `prepare` subwor
 # download
 Execute the following commands or download the [latest release](https://github.com/aryam7/varCA/releases/latest) manually.
 ```
-wget -O- -q https://github.com/aryam7/varca/tarball/master | tar mxvzf -
-mv aryam7-* varca
+git clone https://github.com/aryam7/varCA.git
 ```
 Also consider downloading the [example data](https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz).
 ```
-cd varca
+cd varCA
 wget -O- -q https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz | tar xvzf -
 ```
 The example data includes the following files:
@@ -31,20 +30,23 @@ The example data includes the following files:
 - `molt4.chr1.*.fq.gz` - FASTQ files from paired ATAC-seq reads for chromosome 1 from the Molt-4 sample in GSE129086
 
 # execution
-On example data:
-```
-# 1) install snakemake via conda (if not already installed)
-conda create -n varca -c bioconda -c conda-forge 'snakemake==5.18.0'
-conda activate varca
+1. Install and activate [snakemake via `conda`](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) (if not already installed)
+    ```
+    conda create -n varca -c bioconda -c conda-forge 'snakemake==5.18.0'
+    conda activate varca
+    ```
+2. Execute the pipeline on example data
+	```
+	# locally
+	./run.bash &
 
-# 2) execute the pipeline on example data locally
-./run.bash &
+	# OR on an SGE cluster
+	qsub run.bash
+	```
 
-# OR execute the pipeline on example data on an SGE cluster
-qsub run.bash
-```
+The pipeline is written as a Snakefile, so it must be executed via [Snakemake](https://snakemake.readthedocs.io). If you want to execute the pipeline on your own data, you must provide [required input in the config.yaml file](configs#configyaml) before executing. This config file is currently configured to run the pipeline on the example data provided.
 
-The pipeline is written as a Snakefile, so it must be executed via [Snakemake](https://snakemake.readthedocs.io). See the [`run.bash` script](run.bash) for an example. Make sure to provide required input and options in the [config files](configs) before executing. The config files are currently configured to run the pipeline on the example data provided.
+The pipeline is made up of [two subworkflows](rules), which can each be executed separately from the master pipeline for more advanced usage. You will need to execute the subworkflows separately [if you ever need to create your own trained model](rules#creating-your-own-trained-model).
 
 ### If this is your first time using Snakemake
 We highly recommend that you run `snakemake --help` to learn about all of the options available to you. You might discover, for example, that calling Snakemake with the `-n -p -r` flags can be a helpful way to check that the pipeline will be executed correctly before you run it. This can also be a good way to familiarize yourself with the steps of the pipeline and their inputs and outputs (the latter of which are inputs to the first rule in each workflow -- ie the `all` rule).
@@ -55,6 +57,7 @@ By default, the pipeline will automatically delete some files it deems unnecessa
 
 # dependencies
 We highly recommend you install [Snakemake via conda](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) so that you can use the `--use-conda` flag when calling `snakemake` to let it automatically handle all dependencies of the pipeline. Otherwise, you must manually install the dependencies listed in the [env files](envs).
+
 Although currently untested, we also provide the option of executing the pipeline in a Docker container using [`singularity`](https://sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps). Just provide Snakemake with the `--use-conda --use-singularity` flags when you execute it. Unlike with the previous method, having `conda` installed on your machine is not a requirement for this option, since it will be installed automatically in the Docker container.
 
 # files and directories

@@ -17,10 +17,15 @@ cd varCA
 wget -O- -q https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz | tar xvzf -
 ```
 
+# Setup
+We highly recommend you install [Snakemake via conda](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) so that you can use the `--use-conda` flag when calling `snakemake` to let it automatically handle all dependencies of the pipeline. Otherwise, you must manually install the dependencies listed in the [env files](envs).
+```
+conda create -n snakemake -c bioconda -c conda-forge 'snakemake==5.18.0'
+```
+
 # Execution
-1. Install and activate [snakemake via `conda`](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) (recommended: version 5.18.0).
+1. Activate [snakemake via `conda`](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) (recommended: version 5.18.0)
     ```
-    conda create -n snakemake -c bioconda -c conda-forge 'snakemake==5.18.0'
     conda activate snakemake
     ```
 2. Execute the pipeline on the example data
@@ -44,11 +49,6 @@ We highly recommend that you run `snakemake --help` to learn about all of the op
 Another important thing to know is that Snakemake will not recreate output that it has already generated, unless you request it. If a job fails or is interrupted, subsequent executions of Snakemake will just pick up where it left off. This can also apply to files that *you* create and provide in place of the files it would have generated.
 
 By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing the pipeline.
-
-# Dependencies
-We highly recommend you install [Snakemake via conda](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) so that you can use the `--use-conda` flag when calling `snakemake` to let it automatically handle all dependencies of the pipeline. Otherwise, you must manually install the dependencies listed in the [env files](envs).
-
-Although currently untested, we also provide the option of executing the pipeline in a Docker container using [`singularity`](https://sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps). Just provide Snakemake with the `--use-conda --use-singularity` flags when you execute it.
 
 # Files and Directories
 

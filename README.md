@@ -6,7 +6,7 @@ A pipeline for running an ensemble of variant callers to predict variants in ATA
 
 The entire pipeline is made up of two smaller subworkflows. The `prepare` subworkflow calls each variant caller and prepares the resulting data for use by the `classify` subworkflow, which runs the ensemble classifier to predict the existence of variants at each site.
 
-# download
+# Download
 Execute the following command or download the [latest release](https://github.com/aryam7/varCA/releases/latest) manually.
 ```
 git clone https://github.com/aryam7/varCA.git
@@ -17,8 +17,8 @@ cd varCA
 wget -O- -q https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz | tar xvzf -
 ```
 
-# execution
-1. Install and activate [snakemake via `conda`](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) (if not already installed)
+# Execution
+1. Install and activate [snakemake via `conda`](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) (if not already installed). We tested the pipeline on Snakemake version 5.18.0
     ```
     conda create -n varca -c bioconda -c conda-forge 'snakemake==5.18.0'
     conda activate varca
@@ -27,7 +27,8 @@ wget -O- -q https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz
 	```
 	# locally
 	./run.bash &
-
+	```
+	```
 	# OR on an SGE cluster
 	qsub run.bash
 	```
@@ -43,12 +44,12 @@ Another important thing to know is that Snakemake will not recreate output that 
 
 By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing the pipeline.
 
-# dependencies
+# Dependencies
 We highly recommend you install [Snakemake via conda](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) so that you can use the `--use-conda` flag when calling `snakemake` to let it automatically handle all dependencies of the pipeline. Otherwise, you must manually install the dependencies listed in the [env files](envs).
 
 Although currently untested, we also provide the option of executing the pipeline in a Docker container using [`singularity`](https://sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps). Just provide Snakemake with the `--use-conda --use-singularity` flags when you execute it.
 
-# files and directories
+# Files and Directories
 
 ### [Snakefile](Snakefile)
 A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for calling variants from a set of ATAC-seq reads. This pipeline is made up of two subworkflows:

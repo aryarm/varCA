@@ -19,12 +19,14 @@ wget -O- -q https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz
 
 # Setup
 We highly recommend you install [Snakemake via conda](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) so that you can use the `--use-conda` flag when calling `snakemake` to let it automatically handle all dependencies of the pipeline. Otherwise, you must manually install the dependencies listed in the [env files](envs).
+
+We recommend installing version 5.18.0
 ```
 conda create -n snakemake -c bioconda -c conda-forge 'snakemake==5.18.0'
 ```
 
 # Execution
-1. Activate [snakemake via `conda`](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) (recommended: version 5.18.0)
+1. Activate snakemake via `conda`
     ```
     conda activate snakemake
     ```

@@ -21,7 +21,7 @@ wget -O- -q https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz
 1. Install and activate [snakemake via `conda`](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) (recommended: version 5.18.0).
     ```
     conda create -n snakemake -c bioconda -c conda-forge 'snakemake==5.18.0'
-    conda activate varca
+    conda activate snakemake
     ```
 2. Execute the pipeline on the example data
 

@@ -20,22 +20,23 @@ wget -O- -q https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz
 # Execution
 1. Install and activate [snakemake via `conda`](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) (if not already installed). We tested the pipeline on Snakemake version 5.18.0
     ```
-    conda create -n varca -c bioconda -c conda-forge 'snakemake==5.18.0'
+    conda create -n snakemake -c bioconda -c conda-forge 'snakemake==5.18.0'
     conda activate varca
     ```
-2. Execute the pipeline on example data
-	```
-	# locally
-	./run.bash &
-	```
-	```
-	# OR on an SGE cluster
-	qsub run.bash
-	```
+2. Execute the pipeline on the example data
+
+    Locally:
+    ```
+    ./run.bash &
+    ```
+    or on an SGE cluster:
+    ```
+    ./run.bash --sge-cluster &
+    ```
 
 The pipeline is written as a Snakefile, so it must be executed via [Snakemake](https://snakemake.readthedocs.io). If you want to execute the pipeline on your own data, you must provide [required input in the config.yaml file](configs#configyaml) before executing. This config file is currently configured to run the pipeline on the example data provided.
 
-The pipeline is made up of [two subworkflows](rules), which can each be executed separately from the master pipeline for more advanced usage. You will need to execute the subworkflows separately [if you ever need to create your own trained model](rules#creating-your-own-trained-model).
+The pipeline is made up of [two subworkflows](rules), which can each be executed separately from the master pipeline for more advanced usage. See the [rules README](rules/README.md) for execution instructions. You will need to execute the subworkflows separately [if you ever need to create your own trained models](rules#creating-your-own-trained-model).
 
 ### If this is your first time using Snakemake
 We highly recommend that you run `snakemake --help` to learn about all of the options available to you. You might discover, for example, that calling Snakemake with the `-n -p -r` flags can be a helpful way to check that the pipeline will be executed correctly before you run it. This can also be a good way to familiarize yourself with the steps of the pipeline and their inputs and outputs (the latter of which are inputs to the first rule in each workflow -- ie the `all` rule).

@@ -28,8 +28,8 @@ if [ -f "$out_path/qlog" ]; then
 	echo ""> "$out_path/qlog";
 fi
 
-# check: are we being executed from within qsub?
-if [ "$ENVIRONMENT" = "BATCH" ]; then
+# check: should we execute via qsub?
+if [[ $* == *--sge-cluster* ]]; then
 	snakemake \
 	--cluster "qsub -t 1 -V -j y -cwd -o $out_path/qlog" \
 	--config out="$out_path" \
@@ -37,20 +37,7 @@ if [ "$ENVIRONMENT" = "BATCH" ]; then
 	--use-conda \
 	-k \
 	-j \
-	"$@" &>"$out_path/log"
-
-	# -----------
-	# An example running the classify subworkflow
-	# Remember to complete the classify.yaml config file before running this!
-	# snakemake \
-	# -s rules/classify.smk \
-	# --cluster "qsub -t 1 -V -j y -cwd -o $out_path/qlog" \
-	# --config out="$out_path/classify" \
-	# --latency-wait 60 \
-	# --use-conda \
-	# -k \
-	# -j \
-	# "$@" &>"$out_path/log"
+	${@//--sge-cluster/} &>"$out_path/log"
 else
 	snakemake \
 	--config out="$out_path" \
@@ -59,17 +46,5 @@ else
 	-k \
 	-j \
 	"$@" 2>"$out_path/log" >"$out_path/qlog"
-
-	# -----------
-	# An example running the classify subworkflow
-	# Remember to complete the classify.yaml config file before running this!
-	# snakemake \
-	# -s rules/classify.smk \
-	# --config out="$out_path/classify" \
-	# --latency-wait 60 \
-	# --use-conda \
-	# -k \
-	# -j \
-	# "$@" 2>"$out_path/log" >"$out_path/qlog"
 fi
 

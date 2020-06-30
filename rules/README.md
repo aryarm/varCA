@@ -5,7 +5,7 @@ The `prepare` subworkflow is included within the [master pipeline](/Snakefile) a
 
 First, make sure that you fill out the [`prepare.yaml`](/configs/prepare.yaml) and the [`callers.yaml`](/configs/callers.yaml) config files, which specify input and parameters for the `prepare` subworkflow. See the [config README](/configs) for more information.
 
-You can execute the workflow like this:
+To execute the workflow, just call Snakemake with `-s rules/prepare.smk`:
 
 	snakemake -s rules/prepare.smk --use-conda -j
 
@@ -18,7 +18,7 @@ The `classify` subworkflow is included within the [master pipeline](/Snakefile) 
 
 First, make sure that you fill out the [`classify.yaml`](/configs/classify.yaml) config file, which specifies input and parameters for the `classify` subworkflow. See the [config README](/configs) for more information.
 
-You can execute the workflow like this:
+To execute the workflow, just call Snakemake with `-s rules/classify.smk`:
 
 	snakemake -s rules/classify.smk --use-conda -j
 

@@ -18,7 +18,7 @@ wget -O- -q https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz
 ```
 
 # Execution
-1. Install and activate [snakemake via `conda`](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) (if not already installed). We tested the pipeline on Snakemake version 5.18.0
+1. Install and activate [snakemake via `conda`](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) (recommended: version 5.18.0).
     ```
     conda create -n snakemake -c bioconda -c conda-forge 'snakemake==5.18.0'
     conda activate varca

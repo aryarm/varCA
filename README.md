@@ -34,7 +34,7 @@ The example data includes the following files:
 On example data:
 ```
 # 1) install snakemake via conda (if not already installed)
-conda install -c bioconda -c conda-forge 'snakemake==5.18.0'
+conda create -n varca -c bioconda -c conda-forge 'snakemake==5.18.0'
 
 # 2) execute the pipeline on example data locally
 ./run.bash &

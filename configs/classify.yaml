@@ -37,7 +37,7 @@ data:
   # We include this sample here if you ever want to create your own trained model:
   SRR891269:
     # this is our platinum genomes training data! but you can replace it with whatever data you create
-    path: data/indel.tsv.gz
+    path: data/indel.tsv.gz # if you are trying to reproduce our results, you'll probably want to replace this with something like out/merged_indel/SRR891269/odds.tsv.gz
     truth: &truth pg-indel
     filter: &filter
       - 'gatk-indel~DP>10' # we only train on sites with a read depth above 10
@@ -51,6 +51,12 @@ data:
     path: out/merged_indel/jurkat_chr1/final.tsv.gz
     merged: out/merged_indel/jurkat_chr1/merge.tsv.gz
     filter: *filter # use the same filtering expression as the SRR891269 data
+  # # uncomment the lines below if you want to reproduce our results
+  # SRR891269_evens:
+  #   path: out/merged_indel/SRR891269/evens.tsv.gz
+  #   merged: out/merged_indel/SRR891269/merge.tsv.gz
+  #   truth: *truth # use the same truth caller ID as the SRR891269 data
+  #   filter: *filter # use the same filtering expression as the SRR891269 data
 
 
 # The unique ID (from "data" above) of the dataset you'd like to train the
@@ -83,6 +89,7 @@ tune: false
 # serve as test data (see "truth" above).
 # This config entry is required!
 predict: [molt4_chr1, jurkat_chr1]
+# predict: [molt4_chr1, jurkat_chr1, SRR891269_evens] # uncomment this line if you want to reproduce our results
 
 # Callers to use when creating a VCF from the merged .tsv.gz file.
 # Supply a list of caller names in the order in which they should be considered

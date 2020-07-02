@@ -5,7 +5,7 @@ However, you can use most of these scripts on their own, too. Some may even be h
 All python scripts implement the `--help` argument. For bash, R, and awk scripts, you can run `head <script>` to read about their usage.
 
 ### [2vcf.py](2vcf.py)
-A python script that uses files from the `prepare` and `classify` pipelines to create a VCF with the final, predicted variants.
+A python script that uses files from the `prepare` and `classify` pipelines to create a VCF with the final, predicted variants. This script also has a special internal mode, which can be used for recalibrating the QUAL scores output in the VCF.
 
 ### [cgrep.bash](cgrep.bash)
 A bash script for extracting columns from TSVs via `grep`. Every argument besides the first is passed directly to `grep`.
@@ -27,6 +27,9 @@ A python script for creating plots of the importance of each variable (ie featur
 
 ### [metrics.py](metrics.py)
 A python script for calculating evaluation metrics on a two column TSV of binary labels: truth and predictions.
+
+### [metrics_table.py](metrics_table.py)
+A python script for summarizing multiple metrics files output by `metrics.py` in a nicely formatted table.
 
 ### [norm_nums.awk](norm_nums.awk)
 A fast awk script for ensuring that unusual numerical values in a large TSV can be read by R.

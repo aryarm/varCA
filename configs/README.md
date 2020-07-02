@@ -53,7 +53,7 @@ You can choose which variant callers are used by providing their "caller IDs" in
 4. Create new, trained classification models using the training data (see the [rules README](/rules#creating-your-own-trained-model) for instructions)
 
 ### [callers.yaml](callers.yaml)
-The `prepare` subworkflow (and, by extension, the master pipeline) read parameters specific to each variant caller from the `callers.yaml` config file. These parameters change the data that is output by the `prepare` subworkflow. As a general rule, changing any of the config options in the `callers.yaml` file will require that you [retrain the classification models](/rules#creating-your-own-trained-model) to recognize the new data that you are providing to the `classify` subworkflow.
+The `prepare` subworkflow (and, by extension, the master pipeline) read parameters specific to each variant caller from the `callers.yaml` config file. These parameters change the data that is output by the `prepare` subworkflow. As a general rule, changing any of the config options in the `callers.yaml` file will require that you [retrain the classification models](/rules#training-and-testing-varca) to recognize the new data that you are providing to the `classify` subworkflow.
 
 For [each caller script in the callers directory](/callers) you can specify:
 

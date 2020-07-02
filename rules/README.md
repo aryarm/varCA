@@ -1,8 +1,8 @@
 # The varCA pipeline
-![Pipeline Skeleton](https://drive.google.com/uc?export=view&id=1u1KGkAPXmQ1ez5I1XKN6veTTSni0qJe8)
+![Pipeline Skeleton](https://drive.google.com/uc?export=view&id=10a8wgPMPojUR5o15_Ik9TOsAvVg63HK2)
 
-The pipeline consists of the `prepare` (red) and `classify` (green) subworkflows. The prepare subworkflow runs a set of variant callers on the provided ATAC-seq data and prepares their output for use by the classify subworkflow, which uses a trained ensemble classifier to predict the existence of variants.
-The prepare subworkflow can use FASTQ or BAM/BED files as input. The classify subworkflow can predict variants from the prepared datasets or use them for training/testing.
+The pipeline consists of the `prepare` (red) and `classify` (green) subworkflows. The prepare subworkflow runs a set of variant callers on the provided ATAC-seq data and prepares their output for use by the `classify` subworkflow, which uses a trained ensemble classifier to predict the existence of variants.
+The `prepare` subworkflow can use FASTQ or BAM/BED files as input. The `classify` subworkflow can predict variants from the prepared datasets or use them for training/testing.
 If a pre-trained model is available (orange), the two subworkflows can be executed together automatically via the master pipeline. However the subworkflows must be executed separately for training and testing (see [below](#training-and-testing-varca)).
 
 ## The `prepare` subworkflow
@@ -20,10 +20,10 @@ Then, just call Snakemake with `-s rules/prepare.smk`:
 ### output
 The primary outputs of the `prepare` pipeline will be in `<output_directory>/merged_<variant_type>/<sample_ID>/final.tsv.gz`. However, several intermediary directories and files are also generated:
 
-- align/ - output from the BWA FASTQ alignment step and samtools PCR duplicate removal steps
-- peaks/ - output from MACS 2 and other files required for calling peaks
-- callers/ - output from each [caller script](/callers) in the ensemble (see the [callers README](/callers/README.md) for more information) and the variant normalization and feature extraction steps
-- merged_<variant_type>/ - all other output in the `prepare` subworkflow, including the merged and final datasets for each variant type (ie SNV or indels)
+- `align/` - output from the BWA FASTQ alignment step and samtools PCR duplicate removal steps
+- `peaks/` - output from MACS 2 and other files required for calling peaks
+- `callers/` - output from each [caller script](/callers) in the ensemble (see the [callers README](/callers/README.md) for more information) and the variant normalization and feature extraction steps
+- `merged_<variant_type>/` - all other output in the `prepare` subworkflow, including the merged and final datasets for each variant type (ie SNV or indels)
 
 ## The `classify` subworkflow
 The [`classify` subworkflow](classify.smk) is a [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for training and testing the classifier. It uses the TSV output from the `prepare` subworkflow. Its final output is a VCF containing predicted variants.
@@ -42,27 +42,27 @@ The primary output of the `classify` subworkflow will be in `<output_directory>/
 
 #### for all datasets
 
-- subset.tsv.gz - the result of subsetting some callers from the input (only if requested)
-- filter.tsv.gz - the result of filtering rows from the input (only if requested)
-- prepared.tsv.gz - datasets that are ready to be interpreted by the ensemble classifier
+- `subset.tsv.gz` - the result of subsetting some callers from the input (only if requested)
+- `filter.tsv.gz` - the result of filtering rows from the input (only if requested)
+- `prepared.tsv.gz` - datasets that are ready to be interpreted by the ensemble classifier
 
 #### for prediction datasets
 
-- results.tsv.gz - the predicted variants in TSV format
-- results.vcf.gz - the predicted variants in VCF format with recalibrated QUAL scores
+- `results.tsv.gz` - the predicted variants in TSV format
+- `results.vcf.gz` - the predicted variants in VCF format with recalibrated QUAL scores
 
 #### for training datasets
 
-- model.rda - the trained classifier
-- variable_importance.tsv - a table containing importance values for every feature in the RF classifier; visualize this with [`importance_plot.py`](/scripts/importance_plot.py)
-- tune_matrix.tsv - the results from hyperparameter tuning (only if requested)
-- tune.pdf - a visualization of the results in tune_matrix.tsv
+- `model.rda` - the trained classifier
+- `variable_importance.tsv` - a table containing importance values for every feature in the RF classifier; visualize this with [`importance_plot.py`](/scripts/importance_plot.py)
+- `tune_matrix.tsv` - the results from hyperparameter tuning (only if requested)
+- `tune.pdf` - a visualization of the results in tune_matrix.tsv
 
 #### for test datasets
 
-- prc/results.pdf - precision-recall plot for evaluating the performance of varCA and comparing it to other variant callers
-- prc/curves - data used to create the precision-recall plot
-- prc/pts - single point metrics evaluating the performance of varCA and comparing it to other callers; you may aggregate these with [`metrics_table.py`](/scripts/metrics_table.py)
+- `prc/results.pdf` - precision-recall plot for evaluating the performance of varCA and comparing it to other variant callers
+- `prc/curves` - data used to create the precision-recall plot
+- `prc/pts` - single point metrics evaluating the performance of varCA and comparing it to other callers; you may aggregate these with [`metrics_table.py`](/scripts/metrics_table.py)
 
 # Training and Testing varCA
 ## Motivation

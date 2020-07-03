@@ -40,14 +40,14 @@ We highly recommend you install [Snakemake via conda](https://snakemake.readthed
     ./run.bash --sge-cluster &
     ```
 
-#### executing the pipeline on your own data
+#### Executing the pipeline on your own data
 You must first provide [required input in the config.yaml file](configs#configyaml). The config file is currently configured to run the pipeline on the example data provided.
 
-#### executing each portion of the pipeline separately
+#### Executing each portion of the pipeline separately
 The pipeline is made up of [two subworkflows](rules). These are usually executed together automatically by the master pipeline, but they can also be executed on their own for more advanced usage. See the [rules README](rules/README.md) for execution instructions and a description of the outputs. You will need to execute the subworkflows separately [if you ever want to create your own trained models](rules#training-and-testing-varca).
 
-#### reproducing our results
-Execution on the example data should take approximately 1 hour (excluding dependency installation). This only partially reproduces our results, but those with more time can follow [these steps](#testing-your-model--reproducing-our-results) to create all of the plots and tables in our paper.
+#### Reproducing our results
+Execution on the example data should take approximately 1 hour (excluding dependency installation). This only partially reproduces our results, but those with more time can follow [these steps](rules#testing-your-model--reproducing-our-results) to create all of the plots and tables in our paper.
 
 ### If this is your first time using Snakemake
 We highly recommend that you run `snakemake --help` to learn about all of the options available to you. You might discover, for example, that calling Snakemake with the `-n -p -r` flags can be a helpful way to check that the pipeline will be executed correctly before you run it. This can also be a good way to familiarize yourself with the steps of the pipeline and their inputs and outputs (the latter of which are inputs to the first rule in each workflow -- ie the `all` rule).

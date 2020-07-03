@@ -36,8 +36,8 @@ genome: /iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sap
 data:
   # We include this sample here if you ever want to create your own trained model:
   SRR891269:
-    # this is our platinum genomes training data! but you can replace it with whatever data you create
-    path: data/indel.tsv.gz # if you are trying to reproduce our results, you'll probably want to replace this with something like out/merged_indel/SRR891269/odds.tsv.gz
+    # this is our GM12878 truth dataset! but you can replace it with whatever data you create
+    path: data/indel.tsv.gz # if you are trying to reproduce our results, you'll probably want to replace this with something like data/indel-odds.tsv.gz
     truth: &truth pg-indel
     filter: &filter
       - 'gatk-indel~DP>10' # we only train on sites with a read depth above 10
@@ -53,8 +53,7 @@ data:
     filter: *filter # use the same filtering expression as the SRR891269 data
   # # uncomment the lines below if you want to reproduce our results
   # SRR891269_evens:
-  #   path: out/merged_indel/SRR891269/evens.tsv.gz
-  #   merged: out/merged_indel/SRR891269/merge.tsv.gz
+  #   path: data/indel-evens.tsv.gz
   #   truth: *truth # use the same truth caller ID as the SRR891269 data
   #   filter: *filter # use the same filtering expression as the SRR891269 data
 

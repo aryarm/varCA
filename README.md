@@ -59,7 +59,7 @@ By default, the pipeline will automatically delete some files it deems unnecessa
 # files and directories
 
 ### [Snakefile](Snakefile)
-A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for calling variants from a set of ATAC-seq reads. This pipeline is made up of two subworkflows:
+A [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for calling variants from a set of ATAC-seq reads. This pipeline automatically executes two subworkflows:
 
 1. the [`prepare` subworkflow](rules/prepare.smk), which prepares the reads for classification and
 2. the [`classify` subworkflow](rules/classify.smk), which creates a VCF containing predicted variants

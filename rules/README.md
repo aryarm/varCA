@@ -6,7 +6,7 @@ The `prepare` subworkflow can use FASTQ or BAM/BED files as input. The `classify
 If a pre-trained model is available (orange), the two subworkflows can be executed together automatically via the master pipeline. However the subworkflows must be executed separately for training and testing (see [below](#training-and-testing-varca)).
 
 ## The `prepare` subworkflow
-The [`prepare` subworkflow](prepare.smk) is a [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for preparing data for the classifier. It generates a tab-delimited table containing variant caller output for every site in open chromatin regions of the genome. The `prepare` subworkflow uses the scripts in the [callers directory](callers) to run every variant caller in the ensemble.
+The [`prepare` subworkflow](prepare.smk) is a [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow for preparing data for the classifier. It generates a tab-delimited table containing variant caller output for every site in open chromatin regions of the genome. The `prepare` subworkflow uses the scripts in the [callers directory](callers) to run every variant caller in the ensemble.
 
 ### execution
 The `prepare` subworkflow is included within the [master pipeline](/Snakefile) automatically. However, you can also execute the `prepare` subworkflow on its own, as a separate Snakefile.
@@ -18,7 +18,7 @@ Then, just call Snakemake with `-s rules/prepare.smk`:
 	snakemake -s rules/prepare.smk --use-conda -j
 
 ### output
-The primary outputs of the `prepare` pipeline will be in `<output_directory>/merged_<variant_type>/<sample_ID>/final.tsv.gz`. However, several intermediary directories and files are also generated:
+The primary outputs of the `prepare` subworkflow will be in `<output_directory>/merged_<variant_type>/<sample_ID>/final.tsv.gz`. However, several intermediary directories and files are also generated:
 
 - `align/` - output from the BWA FASTQ alignment step and samtools PCR duplicate removal steps
 - `peaks/` - output from MACS 2 and other files required for calling peaks
@@ -26,7 +26,7 @@ The primary outputs of the `prepare` pipeline will be in `<output_directory>/mer
 - `merged_<variant_type>/` - all other output in the `prepare` subworkflow, including the merged and final datasets for each variant type (ie SNV or indels)
 
 ## The `classify` subworkflow
-The [`classify` subworkflow](classify.smk) is a [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline for training and testing the classifier. It uses the TSV output from the `prepare` subworkflow. Its final output is a VCF containing predicted variants.
+The [`classify` subworkflow](classify.smk) is a [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow for training and testing the classifier. It uses the TSV output from the `prepare` subworkflow. Its final output is a VCF containing predicted variants.
 
 ### execution
 The `classify` subworkflow is included within the [master pipeline](/Snakefile) automatically. However, you can also execute the `classify` subworkflow on its own, as a separate Snakefile.
@@ -83,7 +83,7 @@ You may want to test a trained model if:
 3. You'd like to reproduce our results (since the training and testing steps are usually skipped by the master pipeline)
 
 ## Creating your own trained model
-For the sake of this example, let's say you'd like to include a new indel variant caller (ie #3 above). You've also already followed the directions in the [callers README](/callers/README.md) to create your own caller script, and you've modified the `prepare.yaml` and `callers.yaml` config files to include your new indel caller. However, before you can predict variants using the indel caller, you must create a new trained classification model that knows how to interpret your new input.
+For the sake of this example, let's say you'd like to include a new indel variant caller (ie [#3 above](#training)). You've also already followed the directions in the [callers README](/callers/README.md) to create your own caller script, and you've modified the `prepare.yaml` and `callers.yaml` config files to include your new indel caller. However, before you can predict variants using the indel caller, you must create a new trained classification model that knows how to interpret your new input.
 
 To do this, we recommend downloading the truth set we used to create our model. First, download the [GM12878 FASTQ files from Buenrostro et al](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE47753). Specify the path to these files in `data/samples.tsv`, the samples file within the example data. Then, download the corresponding [Platinum Genomes VCF for that sample](https://www.illumina.com/platinumgenomes.html).
 
@@ -93,7 +93,7 @@ After the `prepare` subworkflow has finished running, add the sample (specficall
 
 The `classify` subworkflow can only create one trained model at a time, so you will need to repeat these steps if you'd also like to create a trained model for SNVs. Just replace every mention of "indel" in `classify.yaml` with "snp". Also remember to use only the SNV callers (ie GATK, VarScan 2, and VarDict).
 
-## Testing your model / Reproducing our Results
+## Testing your model / Reproducing our results
 For this example, we will demonstrate how you can reproduce the results in our paper using the `indel.tsv.gz` truth dataset we provided in the example data. This data was generated by running the `prepare` subworkflow on the GM12878 data as described [above](#creating-your-own-trained-model). If you [ran the `prepare` subworkflow to create your own trained model](#creating-your-own-trained-model), just use your truth dataset instead of the one we provided in the example data.
 
 First, split the truth dataset by chromosome parity using `awk` commands like this:

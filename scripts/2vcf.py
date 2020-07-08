@@ -41,7 +41,7 @@ def plot_line(lst, show_discards=False):
         plt.xlabel("Reverse Arcsin of RF Probability")
     else:
         plt.xlabel("Phred-Scaled RF Probability")
-    plt.ylabel("Phred-Scaled Accuracy (QUAL)")
+    plt.ylabel("Phred-Scaled Precision (QUAL)")
     plt.plot(
         roc[0],
         p(roc[0]),

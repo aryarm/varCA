@@ -101,7 +101,9 @@ First, split the truth dataset by chromosome parity using `awk` commands like th
 	zcat data/indel.tsv.gz | { read -r head && echo "$head" && awk -F $"\t" -v 'OFS=\t' '$1 ~ /^[0-9]+$/ && $1%2'; } | gzip > data/indel-odds.tsv.gz
 	zcat data/indel.tsv.gz | { read -r head && echo "$head" && awk -F $"\t" -v 'OFS=\t' '$1 ~ /^[0-9]+$/ && !($1%2)'; } | gzip > data/indel-evens.tsv.gz
 
-Then, specify in `classify.yaml` the path to the `indel-odds.tsv.gz` file as your training set and the path to the `indel-evens.tsv.gz` file as your test set. Make sure that both your training and test sets have a truth caller ID and that you've specified the test set ID in the list of `predict` datasets. To truly reproduce our results, we also recommend predicting variants for the ATAC-seq cell lines we tested (Jurkat, Molt-4, K-562, etc) under GEO accession GSE129086, as the example data only includes chromosome 1 from the Jurkat and Molt-4 cell lines, thereby artificially lowering their VarCA scores. Once you've finished, execute the `classify` subworkflow on its own (see [above](#execution-1)).
+Then, specify in `classify.yaml` the path to the `indel-odds.tsv.gz` file as your training set and the path to the `indel-evens.tsv.gz` file as your test set. Make sure that both your training and test sets have a truth caller ID and that you've specified the test set ID in the list of `predict` datasets. Once you've finished, execute the `classify` subworkflow on its own (see [above](#execution-1)).
+
+To truly reproduce our results, we also recommend predicting variants for the ATAC-seq cell lines we tested (Jurkat, Molt-4, K-562, etc) by downloading them from GEO accession GSE129086. Although the example data includes the Jurkat and Molt-4 samples, it only includes chromosome 1 from those cell lines, thereby artificially lowering the VarCA scores of the variants in those samples.
 
 The `classify` subworkflow can only work with one trained model at a time, so you will need to repeat these steps for SNVs. Just replace every mention of "indel" in `classify.yaml` with "snp". Also remember to use only the SNV callers (ie GATK, VarScan 2, and VarDict).
 

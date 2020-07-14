@@ -83,7 +83,7 @@ keep_na: false
 #   - one of awk's comparison operators (the following are currently supported: >, <, ==)
 #   - a value to filter on
 # Comment out these lines to disable filtering
-# Note that your filters may have unattended consequences if 'fillna' (above) is not set to true
+# Note that your filters may have unattended consequences if 'keep_na' (above) is set to true
 snp_filter: ['gatk-snp~DP>10']
 indel_filter: ['gatk-indel~DP>10']
 

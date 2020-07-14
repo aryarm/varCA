@@ -2,9 +2,9 @@
 [![License](https://img.shields.io/apm/l/vim-mode.svg)](LICENSE)
 
 # varCA
-A pipeline for running an ensemble of variant callers to predict variants in ATAC-seq reads.
+A pipeline for running an ensemble of variant callers to predict variants from ATAC-seq reads.
 
-The entire pipeline is made up of two smaller subworkflows. The `prepare` subworkflow calls each variant caller and prepares the resulting data for use by the `classify` subworkflow, which runs the ensemble classifier to predict the existence of variants at each site.
+The entire pipeline is made up of two smaller subworkflows. The `prepare` subworkflow calls each variant caller and prepares the resulting data for use by the `classify` subworkflow, which uses an ensemble classifier to predict the existence of variants at each site.
 
 # download
 Execute the following command or download the [latest release](https://github.com/aryam7/varCA/releases/latest) manually.
@@ -18,7 +18,7 @@ wget -O- -q https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz
 ```
 
 # setup
-The pipeline is written as a Snakefile, so it must be executed via [Snakemake](https://snakemake.readthedocs.io). We recommend installing version 5.18.0:
+The pipeline is written as a Snakefile which can be executed via [Snakemake](https://snakemake.readthedocs.io). We recommend installing version 5.18.0:
 ```
 conda create -n snakemake -c bioconda -c conda-forge 'snakemake==5.18.0'
 ```
@@ -41,7 +41,7 @@ We highly recommend you install [Snakemake via conda](https://snakemake.readthed
     ```
 
 #### Executing the pipeline on your own data
-You must first provide [required input in the config.yaml file](configs#configyaml). The config file is currently configured to run the pipeline on the example data provided.
+You must modify [the config.yaml file](configs#configyaml) to specify paths to your data. The config file is currently configured to run the pipeline on the example data provided.
 
 #### Executing each portion of the pipeline separately
 The pipeline is made up of [two subworkflows](rules). These are usually executed together automatically by the master pipeline, but they can also be executed on their own for more advanced usage. See the [rules README](rules/README.md) for execution instructions and a description of the outputs. You will need to execute the subworkflows separately [if you ever want to create your own trained models](rules#training-and-testing-varca).
@@ -50,9 +50,9 @@ The pipeline is made up of [two subworkflows](rules). These are usually executed
 Execution on the example data should take approximately 1 hour (excluding dependency installation). This only partially reproduces our results, but those with more time can follow [these steps](rules#testing-your-model--reproducing-our-results) to create all of the plots and tables in our paper.
 
 ### If this is your first time using Snakemake
-We highly recommend that you run `snakemake --help` to learn about all of the options available to you. You might discover, for example, that calling Snakemake with the `-n -p -r` flags can be a helpful way to check that the pipeline will be executed correctly before you run it. This can also be a good way to familiarize yourself with the steps of the pipeline and their inputs and outputs (the latter of which are inputs to the first rule in each workflow -- ie the `all` rule).
+We recommend that you run `snakemake --help` to learn about Snakemake's options. For example, to check that the pipeline will be executed correctly before you run it, you can call Snakemake with the `-n -p -r` flags. This is also a good way to familiarize yourself with the steps of the pipeline and their inputs and outputs (the latter of which are inputs to the first rule in each workflow -- ie the `all` rule).
 
-Another important thing to know is that Snakemake will not recreate output that it has already generated, unless you request it. If a job fails or is interrupted, subsequent executions of Snakemake will just pick up where it left off. This can also apply to files that *you* create and provide in place of the files it would have generated.
+Note that Snakemake will not recreate output that it has already generated, unless you request it. If a job fails or is interrupted, subsequent executions of Snakemake will just pick up where it left off. This can also apply to files that *you* create and provide in place of the files it would have generated.
 
 By default, the pipeline will automatically delete some files it deems unnecessary (ex: unsorted copies of a BAM). You can opt to keep these files instead by providing the `--notemp` flag to Snakemake when executing the pipeline.
 

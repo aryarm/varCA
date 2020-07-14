@@ -11,7 +11,7 @@
 #   2) params - any extra parameters that should be passed to the caller script
 #   3) ext - whether your caller outputs a VCF (assumed if not specified) or a TSV
 #   4) na - replacement values to use (instead of the default value of 0) when filling NA's
-#      (note that this is ignored if 'fillna' is not set to true in config.yaml or prepare.yaml)
+#      (note that this is ignored if 'keep_na' is set to true in config.yaml or prepare.yaml)
 # Each key should be the <caller_id> and each value can be a dictionary containing any of the attributes listed above
 # "cols" should be a dictionary of lists for each category of columns in the VCF (where categories can be 'info', 'format', and 'other' for all others)
 # "params" can be a single string or a list of strings

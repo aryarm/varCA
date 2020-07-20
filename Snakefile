@@ -1,3 +1,4 @@
+import warnings
 from snakemake.utils import min_version
 
 ##### set minimum snakemake version #####

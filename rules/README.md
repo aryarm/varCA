@@ -49,7 +49,7 @@ The primary output of the `classify` subworkflow will be in `<output_directory>/
 #### for prediction datasets
 
 - `results.tsv.gz` - the predicted variants in TSV format
-- `results.vcf.gz` - the predicted variants in VCF format with recalibrated QUAL scores
+- `final.vcf.gz` - the predicted variants in VCF format with recalibrated QUAL scores
 
 #### for training datasets
 

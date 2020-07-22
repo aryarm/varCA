@@ -7,7 +7,7 @@ A pipeline for running an ensemble of variant callers to predict variants from A
 The entire pipeline is made up of two smaller subworkflows. The `prepare` subworkflow calls each variant caller and prepares the resulting data for use by the `classify` subworkflow, which uses an ensemble classifier to predict the existence of variants at each site.
 
 ### [Code Ocean](https://codeocean.com/capsule/6980349/tree/v1)
-You can execute [VarCA v0.2.1](https://github.com/aryam7/varCA/releases/tag/v0.2.2) on example data without downloading or setting up the project using [our Code Ocean compute capsule](https://codeocean.com/capsule/6980349/tree/v1).
+You can execute [VarCA v0.2.1](https://github.com/aryam7/varCA/releases/tag/v0.2.1) on example data without downloading or setting up the project using [our Code Ocean compute capsule](https://codeocean.com/capsule/6980349/tree/v1).
 
 # download
 Execute the following command or download the [latest release](https://github.com/aryam7/varCA/releases/latest) manually.

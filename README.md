@@ -23,7 +23,7 @@ wget -O- -q https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz
 # setup
 The pipeline is written as a Snakefile which can be executed via [Snakemake](https://snakemake.readthedocs.io). We recommend installing version 5.18.0:
 ```
-conda create -n snakemake -c bioconda -c conda-forge 'snakemake==5.18.0'
+conda create -n snakemake -c bioconda -c conda-forge --no-channel-priority 'snakemake==5.18.0'
 ```
 We highly recommend you install [Snakemake via conda](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) like this so that you can use the `--use-conda` flag when calling `snakemake` to let it [automatically handle all dependencies](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#integrated-package-management) of the pipeline. Otherwise, you must manually install the dependencies listed in the [env files](envs).
 

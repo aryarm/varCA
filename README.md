@@ -42,6 +42,8 @@ We highly recommend you install [Snakemake via conda](https://snakemake.readthed
     ```
     ./run.bash --sge-cluster &
     ```
+#### Output
+VarCA will place all of its output in a new directory (`out/`, by default). Log files describing the progress of the pipeline will also be created there: the `log` file contains a basic description of the progress of each step, while the `qlog` file is more detailed and will contain any errors or warnings. You can read more about the pipeline's output in the [rules README](rules/README.md).
 
 #### Executing the pipeline on your own data
 You must modify [the config.yaml file](configs#configyaml) to specify paths to your data. The config file is currently configured to run the pipeline on the example data provided.

@@ -12,12 +12,12 @@ Using [our Code Ocean compute capsule](https://codeocean.com/capsule/6980349/tre
 # download
 Execute the following command or download the [latest release](https://github.com/aryarm/varCA/releases/latest) manually.
 ```
-git clone https://github.com/aryam7/varCA.git
+git clone https://github.com/aryarm/varCA.git
 ```
 Also consider downloading the [example data](https://github.com/aryarm/varCA/releases/latest/download/data.tar.gz).
 ```
 cd varCA
-wget -O- -q https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz | tar xvzf -
+wget -O- -q https://github.com/aryarm/varCA/releases/latest/download/data.tar.gz | tar xvzf -
 ```
 
 # setup

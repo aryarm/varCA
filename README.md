@@ -7,14 +7,14 @@ A pipeline for running an ensemble of variant callers to predict variants from A
 The entire pipeline is made up of two smaller subworkflows. The `prepare` subworkflow calls each variant caller and prepares the resulting data for use by the `classify` subworkflow, which uses an ensemble classifier to predict the existence of variants at each site.
 
 ### [Code Ocean](https://codeocean.com/capsule/6980349/tree/v1)
-Using [our Code Ocean compute capsule](https://codeocean.com/capsule/6980349/tree/v1), you can execute [VarCA v0.2.1](https://github.com/aryam7/varCA/releases/tag/v0.2.1) on example data without downloading or setting up the project. To interpret the output of VarCA, see the output sections of the [`prepare` subworkflow](rules#output) and the [`classify` subworkflow](rules#output-1) in the [rules README](rules/README.md).
+Using [our Code Ocean compute capsule](https://codeocean.com/capsule/6980349/tree/v1), you can execute [VarCA v0.2.1](https://github.com/aryarm/varCA/releases/tag/v0.2.1) on example data without downloading or setting up the project. To interpret the output of VarCA, see the output sections of the [`prepare` subworkflow](rules#output) and the [`classify` subworkflow](rules#output-1) in the [rules README](rules/README.md).
 
 # download
-Execute the following command or download the [latest release](https://github.com/aryam7/varCA/releases/latest) manually.
+Execute the following command or download the [latest release](https://github.com/aryarm/varCA/releases/latest) manually.
 ```
 git clone https://github.com/aryam7/varCA.git
 ```
-Also consider downloading the [example data](https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz).
+Also consider downloading the [example data](https://github.com/aryarm/varCA/releases/latest/download/data.tar.gz).
 ```
 cd varCA
 wget -O- -q https://github.com/aryam7/varCA/releases/latest/download/data.tar.gz | tar xvzf -

@@ -49,8 +49,8 @@ else:
 
 
 rule all:
-	input:
-		expand(
+    input:
+        expand(
             config['out']+"/classify/{sample}_{type}/final.vcf.gz",
             sample=config['SAMP_NAMES'],
             type=[i for i in ["snp", "indel"] if check_config(i+"_callers")]
@@ -64,15 +64,15 @@ include: "rules/prepare.smk"
 config['predict'] = []
 config['data'] = {}
 for samp in config['SAMP_NAMES']:
-	for i in ['snp', 'indel']:
-		if check_config(i+"_callers"):
-			sample_name = samp + "_" + i
-			config['predict'].append(sample_name)
-			config['data'][sample_name] = {
-				'path': config['out']+"/merged_"+i+"/"+samp+"/final.tsv.gz",
-				'merged': config['out']+"/merged_"+i+"/"+samp+"/merge.tsv.gz",
-				'model': config[i+"_model"]
-			}
+    for i in ['snp', 'indel']:
+        if check_config(i+"_callers"):
+            sample_name = samp + "_" + i
+            config['predict'].append(sample_name)
+            config['data'][sample_name] = {
+                'path': config['out']+"/merged_"+i+"/"+samp+"/final.tsv.gz",
+                'merged': config['out']+"/merged_"+i+"/"+samp+"/merge.tsv.gz",
+                'model': config[i+"_model"]
+            }
 config['out'] += "/classify"
 
 include: "rules/classify.smk"

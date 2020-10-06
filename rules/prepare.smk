@@ -89,7 +89,7 @@ rule add_mate_info:
     our data is pair-ended. We need the MC tags (included because we used the
     -m flag) that it creates for markdup"""
     input:
-        lambda wildcards: SAMP[wildcards.sample] if SAMP[wildcards.sample][0].endswith('.bam') else rules.align.output
+        lambda wildcards: SAMP[wildcards.sample][0] if SAMP[wildcards.sample][0].endswith('.bam') else rules.align.output
     output:
         config['out'] + "/align/{sample}/sorted.mated.bam"
     conda: "../envs/prepare.yml"

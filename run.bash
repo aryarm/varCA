@@ -17,7 +17,9 @@
 # fastq (or bam) files for each of your samples.
 # Make sure that this script is executed from the directory that it lives in!
 
-out_path="out" # you can specify a dir for all output here (or in the configs)
+# you should specify a directory for all output here, rather than in the config
+# this will override whichever output directory appears in the config
+out_path="out"
 mkdir -p "$out_path"
 
 # clear leftover log files

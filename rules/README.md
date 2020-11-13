@@ -89,7 +89,7 @@ To do this, we recommend downloading the truth set we used to create our model. 
 
 Fill out the `prepare.yaml` config file with the necessary information to run it on the GM12878 sample. Add `pg-indel` as the last caller under the `indel_callers` list, so that the `prepare` subworkflow will know to include the Platinum Genomes VCF in its output. Also, include the path to your Platinum Genomes VCF in the `callers.yaml` config file under `pg`, `pg-snp`, and `pg-indel`. Next, execute the `prepare` subworkflow on its own (see [above](#execution)).
 
-After the `prepare` subworkflow has finished running, add the sample (specfically, the path to its `final.tsv.gz` file) as a dataset in the `classify.yaml` file and specify its attributes. Most of the yaml for this has already been written for you. Specifically, make sure you've specified `pg-indel` (for the Platinum Genomes VCF) as the truth caller ID. Next, execute the `classify` subworkflow on its own (see [above](#execution-1)).
+After the `prepare` subworkflow has finished running, add the sample (specfically, the path to its `final.tsv.gz` file) as a dataset in the `classify.yaml` file and specify [its attributes](/configs/classify.yaml#L15). Most of the yaml for this has already been written for you. Specifically, make sure you've specified `pg-indel` (for the Platinum Genomes VCF) as the truth caller ID. Next, execute the `classify` subworkflow on its own (see [above](#execution-1)).
 
 The `classify` subworkflow can only create one trained model at a time, so you will need to repeat these steps if you'd also like to create a trained model for SNVs. Just replace every mention of "indel" in `classify.yaml` with "snp". Also remember to use only the SNV callers (ie GATK, VarScan 2, and VarDict).
 
@@ -101,7 +101,7 @@ First, split the truth dataset by chromosome parity using `awk` commands like th
 	zcat data/indel.tsv.gz | { read -r head && echo "$head" && awk -F $"\t" -v 'OFS=\t' '$1 ~ /^[0-9]+$/ && $1%2'; } | gzip > data/indel-odds.tsv.gz
 	zcat data/indel.tsv.gz | { read -r head && echo "$head" && awk -F $"\t" -v 'OFS=\t' '$1 ~ /^[0-9]+$/ && !($1%2)'; } | gzip > data/indel-evens.tsv.gz
 
-Then, specify in `classify.yaml` the path to the `indel-odds.tsv.gz` file as your training set and the path to the `indel-evens.tsv.gz` file as your test set. Make sure that both your training and test sets have a truth caller ID and that you've specified the test set ID in the list of `predict` datasets. Once you've finished, execute the `classify` subworkflow on its own (see [above](#execution-1)).
+Then, specify in `classify.yaml` the path to the `indel-odds.tsv.gz` file as your training set and the path to the `indel-evens.tsv.gz` file as your test set. Make sure that both your training and test sets have a [truth caller ID](/configs/classify.yaml#L26) and that you've specified the test set ID in the list of `predict` datasets. Once you've finished, execute the `classify` subworkflow on its own (see [above](#execution-1)).
 
 To truly reproduce our results, we also recommend predicting variants for the ATAC-seq cell lines we tested (Jurkat, Molt-4, K-562, etc) by downloading them from GEO accession GSE129086. Although the example data includes the Jurkat and Molt-4 samples, it only includes chromosome 1 from those cell lines, thereby artificially lowering the VarCA scores of the variants in those samples.
 

@@ -44,4 +44,5 @@ By providing multiple dashes in your caller identifiers using this scheme, you m
 ### Caller script dependencies
 If you caller script requires specific dependencies, just add them to the [prepare.yml](/envs/prepare.yml) [conda environment file](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#create-env-file-manually).
 Any packages listed in this file will be available to your caller script when it is executed.
+
 If you would like to use a newer version of an existing variant caller, just change the version specified in the [prepare.yml](/envs/prepare.yml) file. Snakemake will automatically update the package upon your next execution of the pipeline.

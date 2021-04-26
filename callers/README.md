@@ -40,3 +40,9 @@ By providing a dash character `-` in the caller identifier, the caller script (e
 The pipeline will run this separate script first but with the same parameters as the caller script, and the directory containing its output will be passed as an argument to the original caller script. (For example, the directory containing the output of the `gatk` special script will be passed as a parameter to the `gatk-snp` caller script.)
 
 By providing multiple dashes in your caller identifiers using this scheme, you may design complicated caller script heirarchies involving multiple levels of nesting. In a sense, you can create small pipelines within the pipeline.
+
+### Caller script dependencies
+If you caller script requires specific dependencies, just add them to the [prepare.yml](/envs/prepare.yml) [conda environment file](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#create-env-file-manually).
+Any packages listed in this file will be available to your caller script when it is executed.
+
+If you would like to use a newer version of an existing variant caller, just change the version specified in the [prepare.yml](/envs/prepare.yml) file. Snakemake will automatically update the package upon your next execution of the pipeline.

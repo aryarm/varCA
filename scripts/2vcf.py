@@ -14,8 +14,12 @@ from sklearn.metrics import roc_curve
 
 def phred(vals):
     """ apply the phred scale to the vals provided """
-    return -10*np.log10(1-vals)
-    return -10*np.ma.log10(1-vals).filled(-3) # fill all infinite values with a phred scale of 30
+    with np.errstate(divide='raise'):
+        try:
+            return -10*np.log10(1-vals)
+        except FloatingPointError:
+            return np.float64(30)
+            return -10*np.ma.log10(1-vals).filled(-3) # fill all infinite values with a phred scale of 30
 
 def plot_line(lst, show_discards=False):
     plt.clf()

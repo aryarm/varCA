@@ -7,6 +7,9 @@ All python scripts implement the `--help` argument. For bash, R, and awk scripts
 ### [2vcf.py](2vcf.py)
 A python script that uses files from the `prepare` and `classify` pipelines to create a VCF with the final, predicted variants. This script also has a special internal mode, which can be used for recalibrating the QUAL scores output in the VCF.
 
+### [allele_conflicts.bash](allele_conflicts.bash)
+A bash script for identifying sites at which the variant callers in our ensemble outputted conflicting alleles.
+
 ### [cgrep.bash](cgrep.bash)
 A bash script for extracting columns from TSVs via `grep`. Every argument besides the first is passed directly to `grep`.
 

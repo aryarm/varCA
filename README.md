@@ -23,9 +23,9 @@ wget -O- -q https://github.com/aryarm/varCA/releases/latest/download/data.tar.gz
 # setup
 The pipeline is written as a Snakefile which can be executed via [Snakemake](https://snakemake.readthedocs.io). For most users, we recommend installing Snakemake via mamba as [described in their documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda-mamba).
 
-However, if your aim is complete reproducbility, we recommend installing version 5.18.0 via this command:
+However, if your aim is complete reproducbility, we recommend installing version 5.24.2 via this command:
 ```
-conda create -n snakemake -c bioconda -c conda-forge --no-channel-priority 'snakemake==5.18.0'
+conda create -n snakemake -c bioconda -c conda-forge --no-channel-priority 'snakemake==5.24.2'
 ```
 
 # execution

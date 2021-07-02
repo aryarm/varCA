@@ -242,7 +242,7 @@ rule tsv2vcf:
     output: temp(config['out']+"/{sample}/results.vcf.gz")
     conda: "../envs/prc.yml"
     shell:
-        "zcat {input.merge} | scripts/cgrep.bash - -E '^(CHROM|POS|REF)$|.*~(REF|ALT)$' | scripts/2vcf.py -o {output} {params.callers} {input.results} || true"
+        "scripts/2vcf.py -o {output} {params.callers} {input.results} {input.merge}"
 
 rule fix_vcf_header:
     """ add contigs to the header of the vcf """

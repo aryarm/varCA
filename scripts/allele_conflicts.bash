@@ -10,6 +10,7 @@
 # Ex: scripts/allele_conflicts.bash out/merged_indel/SRR891269/merge.tsv.gz out/new-classify/classify-indel/SRR891269_even_test/results.tsv.gz indel
 
 if [ "$3" = 'indel' ]; then
+#    echo -e "CHROM\tPOS\tgatk\tvarscan\tvardict\tpindel\tstrelka\tpg\tmajority\tmajority_idx\tgatk\tvarscan\tvardict\tpindel\tstrelka\tpg\tpg\tprob0\tprob1\tvarca"
     zcat "$1" | \
     scripts/cgrep.bash - -E '^(CHROM|POS)$|(gatk|varscan|vardict|pindel|illumina-strelka|pg-indel).*~(ALT)$' | \
     awk -F $'\t' -v 'OFS=\t' '$3 != $4 || $4 != $5 || $5 != $6 || $6 != $7 || $7 != $3' | \
@@ -24,6 +25,7 @@ if [ "$3" = 'indel' ]; then
         LC_ALL=C sort -t $'\t' -k1,1
     )
 else
+#    echo -e "CHROM\tPOS\tgatk\tvarscan\tvardict\tpg\tmajority\tmajority_idx\tgatk\tvarscan\tvardict\tpg\tpg\tprob0\tprob1\tvarca"
     zcat "$1" | \
     scripts/cgrep.bash - -E '^(CHROM|POS)$|(gatk|varscan|vardict|pg-snp).*~(ALT)$' | \
     awk -F $'\t' -v 'OFS=\t' '$3 != $4 || $4 != $5 || $5 != $3' | \
@@ -42,8 +44,8 @@ sed 's/,/\t/' | \
 LC_ALL=C sort -t $'\t' -k1,1V -k2,2n
 
 # To make a table containing alternative alleles for the following rules (as columns)
-# 1) variant caller priority
+# 1) caller priority rule
 # 2) majority rule
 # 3) platinum genomes
-# bcftools query -f '%CHROM\t%POS\t%INFO/CALLER\n' out/new-classify/classify-indel/SRR891269_even_test/final.vcf.gz | sed 's/gatk-indel/1/; s/varscan-indel/2/; s/vardict-indel/3/; s/pindel/4/; s/illumina-strelka/5/' | sed 's/\t/,/' | LC_ALL=C sort -t $'\t' -k1,1 | LC_ALL=C join -t $'\t' -e '' -j1 -o auto --nocheck-order <(zcat out/new-classify/classify-indel/SRR891269_even_test/allele_conflicts.tsv.gz | sed 's/\t/,/' | sort -t $'\t' -k1,1) - | cut -f2- | awk -F $'\t' -v 'OFS=\t' '{print $$NF, $7, $6;}' | less
-# bcftools query -f '%CHROM\t%POS\t%INFO/CALLER\n' out/new-classify/classify-snp/SRR891269_even_test/final.vcf.gz | sed 's/gatk-snp/1/; s/varscan-snp/2/; s/vardict-snp/3/' | sed 's/\t/,/' | LC_ALL=C sort -t $'\t' -k1,1 | LC_ALL=C join -t $'\t' -e '' -j1 -o auto --nocheck-order <(zcat out/new-classify/classify-snp/SRR891269_even_test/allele_conflicts.tsv.gz | sed 's/\t/,/' | sort -t $'\t' -k1,1) - | cut -f2- | awk -F $'\t' -v 'OFS=\t' '{print $$NF, $5, $4;}' | less
+# bcftools query -f '%CHROM\t%POS\t%INFO/CALLER\n' out-original/new-classify/classify-indel/SRR891269_even_test/final.vcf.gz | sed 's/gatk-indel/1/; s/varscan-indel/2/; s/vardict-indel/3/; s/pindel/4/; s/illumina-strelka/5/' | sed 's/\t/,/' | LC_ALL=C sort -t $'\t' -k1,1 | LC_ALL=C join -t $'\t' -e '' -j1 -o auto --nocheck-order <(zcat out-original/new-classify/classify-indel/SRR891269_even_test/allele_conflicts.tsv.gz | sed 's/\t/,/' | LC_ALL=C sort -t $'\t' -k1,1) - | cut -f2- | awk -F $'\t' -v 'OFS=\t' '{print $$NF, $7, $6;}' | less
+# bcftools query -f '%CHROM\t%POS\t%INFO/CALLER\n' out-original/new-classify/classify-snp/SRR891269_even_test/final.vcf.gz | sed 's/gatk-snp/1/; s/varscan-snp/2/; s/vardict-snp/3/' | sed 's/\t/,/' | LC_ALL=C sort -t $'\t' -k1,1 | LC_ALL=C join -t $'\t' -e '' -j1 -o auto --nocheck-order <(zcat out-original/new-classify/classify-snp/SRR891269_even_test/allele_conflicts.tsv.gz | sed 's/\t/,/' | LC_ALL=C sort -t $'\t' -k1,1) - | cut -f2- | awk -F $'\t' -v 'OFS=\t' '{print $$NF, $5, $4;}' | less

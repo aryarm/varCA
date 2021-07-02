@@ -1,5 +1,6 @@
 channels:
-  - defaults
+  - conda-forge
+  - nodefaults
 dependencies:
   - r-dplyr==0.8.5
   - r-r.devices==2.16.1

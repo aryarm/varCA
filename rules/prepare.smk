@@ -144,7 +144,7 @@ rule bed_peaks:
         # to convert to BED, we must extract the first three columns (chr, start, stop)
         "cut -f -3 \"{input.peaks}\" | "
         "bedtools getfasta -fi {input.ref} -bedOut -bed stdin | "
-        "sort -t $'\t' -k1,1V -k2,2n > \"{output}\" && "
+        "sort -t $'\\t' -k1,1V -k2,2n > \"{output}\" && "
         "test -s \"{output}\""
 
 

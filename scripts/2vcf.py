@@ -14,8 +14,12 @@ from sklearn.metrics import roc_curve
 
 def phred(vals):
     """ apply the phred scale to the vals provided """
-    return -10*np.log10(1-vals)
-    return -10*np.ma.log10(1-vals).filled(-3) # fill all infinite values with a phred scale of 30
+    with np.errstate(divide='raise'):
+        try:
+            return -10*np.log10(1-vals)
+        except FloatingPointError:
+            return np.float64(30)
+            return -10*np.ma.log10(1-vals).filled(-3) # fill all infinite values with a phred scale of 30
 
 def plot_line(lst, show_discards=False):
     plt.clf()
@@ -214,7 +218,8 @@ def main(prepared, classified, callers=None, cs=1000, all_sites=False, pretty=Fa
     prepared = get_calls(
         pd.read_csv(
             prepared, sep="\t", header=0, index_col=["CHROM", "POS"],
-            dtype=str, chunksize=cs, na_values="."
+            dtype=str, chunksize=cs, na_values=".",
+            usecols=lambda col: col in ['CHROM', 'POS', 'REF'] or col.endswith('~REF') or col.endswith('~ALT')
         ), callers, pretty
     )
     # flush out the first item in the generator: the vartype
@@ -334,6 +339,8 @@ if __name__ == "__main__":
         callers = args.callers.split(",")
 
     if not args.internal:
+        import matplotlib
+        matplotlib.use('Agg')
         vcf = write_vcf(args.out, main(args.prepared, args.classified, callers, args.chunksize, args.all, args.pretty, args.type))
     else:
         if not sys.flags.interactive:

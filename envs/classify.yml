@@ -1,15 +1,20 @@
 channels:
-  - defaults
+  - conda-forge
+  - nodefaults
 dependencies:
   - r-dplyr==0.8.5
   - r-r.devices==2.16.1
   - r-ranger==0.11.2
   - r-earth==5.1.2
-  - conda-forge::coreutils==8.31
+  - coreutils==8.31
   - r-mlr==2.17.1
   - r-parallelmap==1.5.0
   - r==3.5.1
   - r-readr==1.1.1
   - r-data.table==1.12.8
   - r-plyr==1.8.4
-  - conda-forge::gawk==5.1.0
+  - gawk==5.1.0
+  - conda-forge::coreutils==8.31
+  - conda-forge::sed==4.8
+  - conda-forge::bash==5.0.018
+  - conda-forge::gzip==1.10

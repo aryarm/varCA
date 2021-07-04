@@ -33,3 +33,6 @@ dependencies:
   - bioconda::varscan==2.4.4
   - bioconda::bioconductor-rtracklayer==1.42.1
   - conda-forge::coreutils==8.31
+  - conda-forge::sed==4.8
+  - conda-forge::bash==5.0.018
+  - conda-forge::gzip==1.10

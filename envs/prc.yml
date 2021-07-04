@@ -10,3 +10,7 @@ dependencies:
   - bioconda::pysam==0.15.3
   - bioconda::bcftools==1.10.2
   - conda-forge::gawk==5.1.0
+  - conda-forge::coreutils==8.31
+  - conda-forge::sed==4.8
+  - conda-forge::bash==5.0.018
+  - conda-forge::gzip==1.10

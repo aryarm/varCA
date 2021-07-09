@@ -32,12 +32,24 @@ To create a pull request you need to do these steps:
 5. Create a new branch with `git checkout -b <descriptive_branch_name>`
 6. Make your changes to the code.
 7. Test that they work. And test your code with any existing tests in the repository to ensure you haven't broken anything. See "Testing" below.
-8. Commit your changes. Please use informative commit messages and do your best to ensure the commit history is clean and easy to interpret.
-9. Now you can push your changes to your Github copy of varCA by running `git push origin <descriptive_branch_name>`
-10. Go to your Github copy of varCA in your browser and create a pull request. Be sure to change the pull request target branch to `master` on this original repository!
-11. Please write an informative pull request detailing the changes you have made and why you made them. Tag any related issues by referring to them by a hashtag followed by their ID.
+8. If needed, please add any comments to the documentation that would help users understand how to use your new code.
+9. Commit your changes. Please use informative commit messages and do your best to ensure the commit history is clean and easy to interpret.
+10. Now you can push your changes to your Github copy of varCA by running `git push origin <descriptive_branch_name>`
+11. Go to your Github copy of varCA in your browser and create a pull request. Be sure to change the pull request target branch to `master` on this original repository!
+12. Please write an informative pull request detailing the changes you have made and why you made them. Tag any related issues by referring to them by a hashtag followed by their ID.
 
 ### Testing
 It's critical that you test your new code to make sure that you're not inadvertantly introducing any new bugs.
 If you are fixing a bug or implementing a new feature, please add at least one test to cover your new code.
 In addition, please also test the entire pipeline with the example dataset to ensure existing code hasn't broken.
+
+## Style
+### Code
+- Please use 4 spaces instead of tabs
+- Please adhere to PEP8 whenever possible
+- Try not to exceed 88 characters per line
+- Do not duplicate strings within Snakefiles. Please refer to them as `rules.rulename.output.outputname` whenever possible.
+### Git Commit Messages
+- Use the present tense ("Add feature" not "Added feature")
+- Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
+- Reference issues and pull requests liberally after the first line

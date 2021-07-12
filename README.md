@@ -1,4 +1,4 @@
-[![Snakemake](https://img.shields.io/badge/snakemake-5.18.0-brightgreen.svg?style=flat-square)](https://snakemake.readthedocs.io/)
+[![Snakemake](https://img.shields.io/badge/snakemake-5.24.2-brightgreen.svg?style=flat-square)](https://snakemake.readthedocs.io/)
 [![License](https://img.shields.io/apm/l/vim-mode.svg)](LICENSE)
 
 # varCA

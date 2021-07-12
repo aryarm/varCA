@@ -30,7 +30,8 @@ sample_file: data/samples.tsv
 SAMP_NAMES: [SRR891269]
 
 # The path to a reference genome
-# The BWA index files, samtools index file (.fa.fai), and samtools dictionary file (.dict) must be stored in the same directory
+# The BWA index files, samtools index file (.fai), and GATK dictionary file (.dict) must be stored in the same directory
+# Note: your fasta file cannot be gzipped!
 # required!
 genome: /iblm/netapp/data1/external/GRC37/combined/bwa_index_assembly19/Homo_sapiens_assembly19.fasta # replace this with the path to your own reference genome
 

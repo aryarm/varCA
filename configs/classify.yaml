@@ -43,13 +43,13 @@ data:
       - 'gatk-indel~DP>10' # we only train on sites with a read depth above 10
   # here are some example test samples, but you can replace these with whichever
   # samples for which you'd like to predict variants
-  molt4_chr1:
-    path: out/merged_indel/molt4_chr1/final.tsv.gz
-    merged: out/merged_indel/molt4_chr1/merge.tsv.gz
+  molt4_mini:
+    path: out/merged_indel/molt4_mini/final.tsv.gz
+    merged: out/merged_indel/molt4_mini/merge.tsv.gz
     filter: *filter # use the same filtering expression as the SRR891269 data
-  jurkat_chr1:
-    path: out/merged_indel/jurkat_chr1/final.tsv.gz
-    merged: out/merged_indel/jurkat_chr1/merge.tsv.gz
+  jurkat_mini:
+    path: out/merged_indel/jurkat_mini/final.tsv.gz
+    merged: out/merged_indel/jurkat_mini/merge.tsv.gz
     filter: *filter # use the same filtering expression as the SRR891269 data
   # # uncomment the lines below if you want to reproduce our results
   # SRR891269_evens:
@@ -87,8 +87,8 @@ tune: false
 # You may optionally specify a truth set for each dataset if you want it to
 # serve as test data (see "truth" above).
 # This config entry is required!
-predict: [molt4_chr1, jurkat_chr1]
-# predict: [molt4_chr1, jurkat_chr1, SRR891269_evens] # uncomment this line if you want to reproduce our results
+predict: [molt4_mini, jurkat_mini]
+# predict: [SRR891269_evens] # uncomment this line if you want to reproduce our results
 
 # Callers to use when creating a VCF from the merged .tsv.gz file.
 # Supply a list of caller names in the order in which they should be considered

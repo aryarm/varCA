@@ -53,7 +53,7 @@ You must modify [the config.yaml file](configs#configyaml) to specify paths to y
 The pipeline is made up of [two subworkflows](rules). These are usually executed together automatically by the master pipeline, but they can also be executed on their own for more advanced usage. See the [rules README](rules/README.md) for execution instructions and a description of the outputs. You will need to execute the subworkflows separately [if you ever want to create your own trained models](rules#training-and-testing-varca).
 
 #### Reproducing our results
-We provide the example data so that you may quickly (in ~1 hr, excluding dependency installation) verify that the pipeline can be executed on your machine. This process does not reproduce our results. Those with more time can follow [these steps](rules#testing-your-model--reproducing-our-results) to create all of the plots and tables in our paper.
+We provide the example data so that you may quickly (in ~15 mins, excluding dependency installation) verify that the pipeline can be executed on your machine. This process does not reproduce our results. Those with more time can follow [these steps](rules#testing-your-model--reproducing-our-results) to create all of the plots and tables in our paper.
 
 ### If this is your first time using Snakemake
 We recommend that you run `snakemake --help` to learn about Snakemake's options. For example, to check that the pipeline will be executed correctly before you run it, you can call Snakemake with the `-n -p -r` flags. This is also a good way to familiarize yourself with the steps of the pipeline and their inputs and outputs (the latter of which are inputs to the first rule in each workflow -- ie the `all` rule).

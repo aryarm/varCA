@@ -63,20 +63,6 @@ indel_callers: [gatk-indel, varscan-indel, vardict-indel, pindel, illumina-strel
 # If this value is not provided, it will default to "."
 label: "."
 
-# Whether to "normalize" the VCF output of every caller script
-# This option is not recommended if you plan to feed the data to a random forest
-# Normalization usually involves left-alignment and trimming of variants
-# See https://genome.sph.umich.edu/wiki/Variant_Normalization for more info
-# In our pipeline, the normalization step also reduces counts of variants that appear at the same position to 1
-# If this value is not provided, it will default to false
-no_normalize: false
-
-# Whether to replace NA values in the dataset before outputting the final TSV
-# This option is not recommended if you plan to feed the data to a random forest
-# Unless otherwise specified in the Caller Specific Parameters below, NA values will be replaced with 0
-# If this value is not provided, it will default to false
-keep_na: false
-
 # A list of filtering expressions for filtering the sites before outputting the final TSV
 # A filtering expression consists of the following concatenated together:
 #   - the caller id
@@ -88,9 +74,3 @@ keep_na: false
 snp_filter: ['gatk-snp~DP>10']
 indel_filter: ['gatk-indel~DP>10']
 
-# Whether to normalize weird numerical columns before outputting the final TSV
-# (ex: scientific notation or numbers followed by a percent sign)
-# We recommended setting this to false in order to allow normalization if you
-# plan to feed the data to a random forest
-# If this option is commented out, it will default to false
-pure_numerics: false

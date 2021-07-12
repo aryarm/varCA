@@ -7,11 +7,6 @@
 create_seq() {
     # arg1 (string): either "jurkat" or "molt4"
 
-    num_peaks=2
-    if [ "$1" == "molt4" ]; then
-        num_peaks=3
-    fi
-
     comm -12 <(
         bedtools intersect -c -bed -a out/peaks/"$1"_chr1/"$1"_chr1_peaks.narrowPeak -b <(
             zcat out/merged_indel/"$1"_chr1/merge.tsv.gz | \
@@ -30,7 +25,7 @@ create_seq() {
            awk -F $'\t' -v 'OFS=\t' '{print $1, $2, $2+length($3);}'
         ) | \
         grep -vE '0$' | cut -f-3 | sort
-    ) | sort -t $'\t' -k1,1 -k2,2n | head -"$num_peaks" > data/"$1".mini.bed
+    ) | sort -t $'\t' -k1,1 -k2,2n | head -3 > data/"$1".mini.bed
 
     samtools sort -n out/align/"$1"_chr1/rmdup.bam | \
     bedtools pairtobed -abam - -b data/"$1".mini.bed 2>/dev/null | \

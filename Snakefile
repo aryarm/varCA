@@ -2,7 +2,7 @@ import warnings
 from snakemake.utils import min_version
 
 ##### set minimum snakemake version #####
-min_version("5.18.0")
+min_version("5.24.2")
 
 configfile: "configs/config.yaml"
 configfile: "configs/callers.yaml"

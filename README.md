@@ -25,7 +25,7 @@ The pipeline is written as a Snakefile which can be executed via [Snakemake](htt
 
 However, if your aim is complete reproducbility, we recommend installing version 5.24.2 via this command:
 ```
-conda create -n snakemake -c bioconda -c conda-forge --no-channel-priority 'snakemake==5.24.2'
+conda create -n snakemake -c conda-forge --no-channel-priority 'bioconda::snakemake==5.24.2'
 ```
 
 # execution

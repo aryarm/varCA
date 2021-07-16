@@ -359,7 +359,7 @@ rule join_all_sites:
         tsv = caller_tsv,
         prepared_tsv = rules.prepare_merge.output
     output:
-        pipe(config['out'] + "/merged_{type}/{sample}/{caller}.tsv")
+        temp(config['out'] + "/merged_{type}/{sample}/{caller}.tsv")
     conda: "../envs/prepare.yml"
     shell:
         "LC_ALL=C join -t $'\\t' -e. -a1 -j1 -o auto --nocheck-order "

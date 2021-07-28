@@ -49,4 +49,5 @@ license: MIT
 message: "If you use this software, please cite it using these metadata."
 repository-code: "https://github.com/aryarm/varCA"
 title: "Discovering single nucleotide variants and indels from bulk and single-cell ATAC-seq"
+version: "v0.3.1"
 ...

@@ -86,3 +86,7 @@ Various scripts used by the pipeline. See the [script README](scripts/README.md)
 
 ### [run.bash](run.bash)
 An example bash script for executing the pipeline using `snakemake` and `conda`. Any arguments to this script are passed directly to `snakemake`.
+
+# citation
+There is an option to _"Cite this repository"_ on the right sidebar of [the repository homepage](https://github.com/aryarm/varCA).
+> Massarat, A. R., Sen, A., Jaureguy, J., Tyndale, S. T., Fu, Y., Erikson, G., & McVicker, G. (2021). Discovering single nucleotide variants and indels from bulk and single-cell ATAC-seq. Nucleic Acids Research, gkab621. https://doi.org/10.1093/nar/gkab621

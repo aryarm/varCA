@@ -1,0 +1,53 @@
+# YAML 1.2
+---
+abstract: "Genetic variants and de novo mutations in regulatory regions of the genome are typically discovered by whole-genome sequencing (WGS), however WGS is expensive and most WGS reads come from non-regulatory regions. The Assay for Transposase-Accessible Chromatin (ATAC-seq) generates reads from regulatory sequences and could potentially be used as a low-cost ‘capture’ method for regulatory variant discovery, but its use for this purpose has not been systematically evaluated. Here we apply seven variant callers to bulk and single-cell ATAC-seq data and evaluate their ability to identify single nucleotide variants (SNVs) and insertions/deletions (indels). In addition, we develop an ensemble classifier, VarCA, which combines features from individual variant callers to predict variants. The Genome Analysis Toolkit (GATK) is the best-performing individual caller with precision/recall on a bulk ATAC test dataset of 0.92/0.97 for SNVs and 0.87/0.82 for indels within ATAC-seq peak regions with at least 10 reads. On bulk ATAC-seq reads, VarCA achieves superior performance with precision/recall of 0.99/0.95 for SNVs and 0.93/0.80 for indels. On single-cell ATAC-seq reads, VarCA attains precision/recall of 0.98/0.94 for SNVs and 0.82/0.82 for indels. In summary, ATAC-seq reads can be used to accurately discover non-coding regulatory variants in the absence of whole-genome sequencing data and our ensemble method, VarCA, has the best overall performance."
+authors: 
+  -
+    affiliation: "Bioinformatics and Systems Biology Graduate Program, University of California San Diego, 9500 Gilman Drive, La Jolla, CA, 92093, USA"
+    family-names: Massarat
+    given-names: Arya
+    orcid: "https://orcid.org/0000-0002-3679-0345"
+  -
+    affiliation: "Integrative Biology Laboratory, Salk Institute for Biological Studies, 10010 N. Torrey Pines Road, La Jolla, CA 92037, USA"
+    family-names: Sen
+    given-names: Arko
+    orcid: "https://orcid.org/0000-0001-9876-281X"
+  -
+    affiliation: "Bioinformatics and Systems Biology Graduate Program, University of California San Diego, 9500 Gilman Drive, La Jolla, CA, 92093, USA"
+    family-names: Jaureguy
+    given-names: Jeff
+    orcid: "https://orcid.org/0000-0002-6303-422X"
+  -
+    affiliation: "Integrative Biology Laboratory, Salk Institute for Biological Studies, 10010 N. Torrey Pines Road, La Jolla, CA 92037, USA"
+    family-names: Tyndale
+    given-names: "Sélène"
+    orcid: "https://orcid.org/0000-0001-9805-1049"
+  -
+    affiliation: "Razavi Newman Integrative Genomics and Bioinformatics Core, Salk Institute for Biological Studies, 10010 N. Torrey Pines Road, La Jolla, CA 92037, USA"
+    family-names: Fu
+    given-names: Yi
+  -
+    affiliation: "Razavi Newman Integrative Genomics and Bioinformatics Core, Salk Institute for Biological Studies, 10010 N. Torrey Pines Road, La Jolla, CA 92037, USA"
+    family-names: Erikson
+    given-names: Galina
+  -
+    affiliation: "Integrative Biology Laboratory, Salk Institute for Biological Studies, 10010 N. Torrey Pines Road, La Jolla, CA 92037, USA"
+    family-names: McVicker
+    given-names: Graham
+    orcid: "https://orcid.org/0000-0003-0991-0951"
+cff-version: "1.1.0"
+date-released: 2021-07-21
+doi: "10.1093/nar/gkab621"
+identifiers: 
+  - 
+    type: doi
+    value: "10.1093/nar/gkab621"
+  - 
+    type: url
+    value: "https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab621/6329114"
+license: MIT
+message: "If you use this software, please cite it using these metadata."
+repository-code: "https://github.com/aryarm/varCA"
+title: "Discovering single nucleotide variants and indels from bulk and single-cell ATAC-seq"
+version: "v0.3.1"
+...

@@ -23,6 +23,8 @@ If you provide BAM files instead of FASTQs, the pipeline will assume that you ha
 3. They must have '.bam' file extensions
 4. There must be an index ('.bam.bai' file) in the same directory
 
+The reference genome must be properly indexed. The pipeline needs [BWA index files](https://hcc.unl.edu/docs/applications/app_specific/bioinformatics_tools/alignment_tools/bwa/running_bwa_commands/#bwa-index), a [GATK `.dict` file](https://gatk.broadinstitute.org/hc/en-us/articles/360037068312-CreateSequenceDictionary-Picard-), and [a samtools index file](http://www.htslib.org/doc/samtools-faidx.html).
+
 You may also provide any other configuration options from the `prepare.yaml` config file.
 
 Once you have finished filling out the `config.yaml` file, you should be ready to execute the master pipeline on your own data. Just execute [the `run.bash` script](/run.bash).

@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Ask a question about VarCA or get support
+  - name: Ask a question about varCA or get support
     url: https://github.com/aryarm/varCA/discussions/new?category=Q-A
-    about: Ask a question or request support for using VarCA
+    about: Ask a question or request support for using varCA

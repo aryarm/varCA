@@ -15,6 +15,6 @@ samp="$5"
 
 vardict-java -G "$genome" -N "$samp" -b "$bam" -v -c 1 -S 2 -E 3 "$peaks" -VS SILENT | \
 teststrandbias.R | var2vcf_valid.pl | \
-awk -F $"\t" -v 'OFS=\t' '/^#/ || $5 !~ /<dup/' | \
+awk -F $"\t" -v 'OFS=\t' '/^#/ || $4 !~ /^(R|Y|M|W|S|K|V|H|D|B|N)$/ && $5 !~ /<dup/' | \
 bgzip > "$output_dir/vardict.vcf.gz" && \
 tabix -p vcf -f "$output_dir/vardict.vcf.gz"

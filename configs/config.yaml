@@ -8,6 +8,9 @@
 # Note: this file is written in the YAML syntax (https://learnxinyminutes.com/docs/yaml/)
 
 
+#---------------------------------------- REQUIRED INPUT -----------------------------------------------#
+# If you are executing the pipeline on your own data, you MUST edit these config values
+
 # The path to a text file specifying where to find read information for each sample
 # Each row in the sample file should represent a different sample.
 # The sample file should have 3 columns (each separated by a single tab):
@@ -26,7 +29,7 @@
 # this is a required input!
 sample_file: data/samples.tsv
 
-# Which samples from the samples_file should we execute the pipeline on?
+# Which samples from the sample_file should we execute the pipeline on?
 # Comment out this line or set it to a falsey value if you want to run all samples in the sample file
 SAMP_NAMES: [molt4_mini, jurkat_mini]
 
@@ -35,6 +38,18 @@ SAMP_NAMES: [molt4_mini, jurkat_mini]
 # Note: your fasta file cannot be gzipped!
 # required!
 genome: data/hg38.mini.fa
+
+# The path to trained, ensemble classifiers, which can be used for calling SNVs and
+# indels
+# Unless you have created your own models, you should just use the ones packaged in the
+# example dataset and leave these paths unchanged.
+# required!
+snp_model: data/snp.rda
+indel_model: data/indel.rda
+
+
+#------------------------------------------- OPTIONS ---------------------------------------------------#
+# If you are executing the pipeline on your own data, you can usually just leave these unchanged.
 
 # The path to the directory in which to place all of the output files
 # Defined relative to whatever directory you execute the snakemake command in
@@ -75,10 +90,3 @@ indel_callers: [gatk-indel, varscan-indel, vardict-indel, pindel, illumina-strel
 snp_filter: ['gatk-snp~DP>10']
 indel_filter: ['gatk-indel~DP>10']
 
-# The path to a trained, ensemble classifier, which can be used for calling SNVs
-# required!
-snp_model: data/snp.rda
-
-# The path to a trained, ensemble classifier, which can be used for calling indels
-# required!
-indel_model: data/indel.rda

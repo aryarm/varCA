@@ -1,4 +1,4 @@
-[![Snakemake](https://img.shields.io/badge/snakemake-5.18.0-brightgreen.svg?style=flat-square)](https://snakemake.readthedocs.io/)
+[![Snakemake](https://img.shields.io/badge/snakemake-5.24.2-brightgreen.svg?style=flat-square)](https://snakemake.readthedocs.io/)
 [![License](https://img.shields.io/apm/l/vim-mode.svg)](LICENSE)
 
 # varCA
@@ -21,11 +21,12 @@ wget -O- -q https://github.com/aryarm/varCA/releases/latest/download/data.tar.gz
 ```
 
 # setup
-The pipeline is written as a Snakefile which can be executed via [Snakemake](https://snakemake.readthedocs.io). We recommend installing version 5.18.0:
+The pipeline is written as a Snakefile which can be executed via [Snakemake](https://snakemake.readthedocs.io). For most users, we recommend installing Snakemake via mamba as [described in their documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda-mamba).
+
+However, if your aim is complete reproducbility, we recommend installing version 5.24.2 via this command:
 ```
-conda create -n snakemake -c bioconda -c conda-forge --no-channel-priority 'snakemake==5.18.0'
+conda create -n snakemake -c conda-forge --no-channel-priority 'bioconda::snakemake==5.24.2'
 ```
-We highly recommend you install [Snakemake via conda](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html#installation-via-conda) like this so that you can use the `--use-conda` flag when calling `snakemake` to let it [automatically handle all dependencies](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#integrated-package-management) of the pipeline. Otherwise, you must manually install the dependencies listed in the [env files](envs).
 
 # execution
 1. Activate snakemake via `conda`:
@@ -52,7 +53,7 @@ You must modify [the config.yaml file](configs#configyaml) to specify paths to y
 The pipeline is made up of [two subworkflows](rules). These are usually executed together automatically by the master pipeline, but they can also be executed on their own for more advanced usage. See the [rules README](rules/README.md) for execution instructions and a description of the outputs. You will need to execute the subworkflows separately [if you ever want to create your own trained models](rules#training-and-testing-varca).
 
 #### Reproducing our results
-We provide the example data so that you may quickly (in ~1 hr, excluding dependency installation) verify that the pipeline can be executed on your machine. This process does not reproduce our results. Those with more time can follow [these steps](rules#testing-your-model--reproducing-our-results) to create all of the plots and tables in our paper.
+We provide the example data so that you may quickly (in ~15 mins, excluding dependency installation) verify that the pipeline can be executed on your machine. This process does not reproduce our results. Those with more time can follow [these steps](rules#testing-your-model--reproducing-our-results) to create all of the plots and tables in our paper.
 
 ### If this is your first time using Snakemake
 We recommend that you run `snakemake --help` to learn about Snakemake's options. For example, to check that the pipeline will be executed correctly before you run it, you can call Snakemake with the `-n -p -r` flags. This is also a good way to familiarize yourself with the steps of the pipeline and their inputs and outputs (the latter of which are inputs to the first rule in each workflow -- ie the `all` rule).

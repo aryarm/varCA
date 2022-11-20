@@ -19,6 +19,9 @@ A fast awk script for classifying each site in a VCF as DEL, INS, SNP, etc. It a
 ### [classify.bash](classify.bash)
 A bash script for converting all REF/ALT columns in a TSV to binary positive/negative labels using `classify.awk`.
 
+### [create_test_data.bash](create_test_data.bash)
+A bash script for creating a small test dataset for the pipeline from existing data.
+
 ### [fillna.bash](fillna.bash)
 A bash script for replacing NA values in a large TSV.
 
@@ -50,7 +53,7 @@ A python script for creating ROC plots. It takes as input the output of `statist
 A python script for generating points to use in a precision-recall or ROC curve. It takes as input a two column TSV: true labels and prediction p-values.
 
 ### [train_RF.R](train_RF.R)
-An R script for creating a trained classifier. We recommend using the `Snakefile-classify` pipeline to run this script.
+An R script for creating a trained classifier. We recommend using the _classify_ subworkflow to run this script.
 
 ### [tune_plot.R](tune_plot.R)
 An R script for visualizing the results of hyperparameter tuning from the `train_RF.R` script.

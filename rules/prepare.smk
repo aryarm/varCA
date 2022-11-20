@@ -5,7 +5,7 @@ import warnings
 from snakemake.utils import min_version
 
 ##### set minimum snakemake version #####
-min_version("5.18.0")
+min_version("5.24.2")
 
 if 'imported' not in config:
     configfile: "configs/prepare.yaml"
@@ -359,7 +359,7 @@ rule join_all_sites:
         tsv = caller_tsv,
         prepared_tsv = rules.prepare_merge.output
     output:
-        pipe(config['out'] + "/merged_{type}/{sample}/{caller}.tsv")
+        temp(config['out'] + "/merged_{type}/{sample}/{caller}.tsv")
     conda: "../envs/prepare.yml"
     shell:
         "LC_ALL=C join -t $'\\t' -e. -a1 -j1 -o auto --nocheck-order "
@@ -385,16 +385,6 @@ rule merge_callers:
         "{input.all_sites}) {input.caller_output} | "
         "(read -r head; echo \"$head\"; sort -t $'\\t' -k1,1V -k2,2n) | gzip > {output}"
 
-rule binarize:
-    """convert REF/ALT columns to binary labels"""
-    input: rules.merge_callers.output
-    params:
-        label = config['label'] if 'label' in config else "."
-    output: config['out']+"/merged_{type}/{sample}/binary.tsv.gz"
-    conda: "../envs/prepare.yml"
-    shell:
-        "paste <(zcat {input} | scripts/cgrep.bash - -Ev '~(REF|ALT)$') <(scripts/classify.bash {input} '{params.label:q}') | gzip >{output}"
-
 
 def na_vals(wildcards):
     """ retrieve all of the NA parameters """
@@ -412,27 +402,29 @@ def na_vals(wildcards):
 rule fillna:
     """
         prepare the caller for use by the classifier by
-        1) extracting the columns desired by the user
-        2) filling NA values with the defaults provided
+        1) converting REF/ALT columns to binary labels
+        2) extracting the columns desired by the user
+        3) filling NA values with the defaults provided
     """
-    input: rules.binarize.output
+    input: rules.merge_callers.output
     params:
         na_vals = na_vals,
-    output: config['out']+"/merged_{type}/{sample}/fillna.tsv.gz"
+        label = config['label'] if 'label' in config else "."
+    output: temp(config['out']+"/merged_{type}/{sample}/fillna.tsv.gz")
     conda: "../envs/prepare.yml"
     shell:
-        "scripts/fillna.bash {input} {params.na_vals:q} | "
+        "paste <(zcat {input} | scripts/cgrep.bash - -Ev '~(REF|ALT)$') <(scripts/classify.bash {input} '{params.label:q}') | "
+        "scripts/fillna.bash {params.na_vals:q} | "
         "awk -F $'\\t' -v 'OFS=\\t' '{{for (i=1;i<=NF;i++) if ($i==\".\") $i=0}}1' | "
         "gzip >{output}"
 
 
 rule apply_filters:
     """ apply filtering on the data according to the filtering expressions """
-    input: rules.fillna.input if check_config('keep_na') \
-        else rules.fillna.output
+    input: rules.fillna.output
     params:
         expr = lambda wildcards: config[wildcards.type+"_filter"]
-    output: config['out']+"/merged_{type}/{sample}/filter.tsv.gz"
+    output: temp(config['out']+"/merged_{type}/{sample}/filter.tsv.gz")
     conda: "../envs/prepare.yml"
     shell:
         "zcat {input} | scripts/filter.bash {params.expr:q} | gzip > {output}"
@@ -452,7 +444,7 @@ rule norm_nums:
 
 rule result:
     """ symlink the result so the user knows what the final output is """
-    input: rules.norm_nums.input if check_config('pure_numerics') else rules.norm_nums.output
+    input: rules.norm_nums.output
     output: config['out']+"/merged_{type}/{sample}/final.tsv.gz"
     conda: "../envs/prepare.yml"
     shell:

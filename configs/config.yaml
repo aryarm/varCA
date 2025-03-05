@@ -71,13 +71,19 @@ indel_callers: [gatk-indel, varscan-indel, vardict-indel, pindel, illumina-strel
 #   - one of awk's comparison operators (the following are currently supported: >, <, ==)
 #   - a value to filter on
 # Comment out these lines to disable filtering
+# Note that we recommend keeping these settings, which filter sites with read depth (DP)
+# greater than 10, since the results are likely to be inaccurate otherwise.
 snp_filter: ['gatk-snp~DP>10']
 indel_filter: ['gatk-indel~DP>10']
 
 # The path to a trained, ensemble classifier, which can be used for calling SNVs
+# Unless you have created your own, we recommend using the pre-trained models provided
+# in the example data.
 # required!
 snp_model: data/snp.rda
 
 # The path to a trained, ensemble classifier, which can be used for calling indels
+# Unless you have created your own, we recommend using the pre-trained models provided
+# in the example data.
 # required!
 indel_model: data/indel.rda

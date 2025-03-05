@@ -14,7 +14,7 @@ You must provide the main inputs in this config file:
     - Each caller must be referred to by its caller ID (see the [caller README](/callers/README.md) for more information)
     - You should provide these callers in a specific order, such that the callers that are more likely to make an accurate call are listed first
 4. Trained, classification models (as .rda files) that can be used for predicting a) SNVs and b) indels from the VCF output of each variant caller
-    - Currently, the trained models provided with the example data are used. These have been trained on Platinum Genomes from GM12878 (a high quality truth set), but you can also [create your own trained models](/rules#creating-your-own-trained-model).
+    - Currently, the trained models provided with the example data are used, and we recommend that you keep those. These have been trained on Platinum Genomes from GM12878 (a high quality truth set), but you can also [create your own trained models](/rules#creating-your-own-trained-model) if you would like.
 
 If you provide BAM files instead of FASTQs, the pipeline will assume that you have already removed PCR duplicates, so it will skip the duplicate removal step. If you would like to skip the peak calling step as well, you will also need to provide a BED file (with a .bed extension) containing the peaks that should be used. Note also that there are many requirements that your BAM files must adhere to:
 
